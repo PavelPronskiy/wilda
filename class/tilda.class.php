@@ -45,19 +45,19 @@ class Controller
 		curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($this->curl, CURLOPT_HTTPHEADER, $this->config->headers);
-		curl_setopt($this->curl, CURLOPT_HEADER, true);
+		curl_setopt($this->curl, CURLOPT_HEADER, false);
 		curl_setopt($this->curl, CURLOPT_ENCODING, "gzip");
 
 		$response = curl_exec($this->curl);
-		$header_size = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
+		//$header_size = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
 		$http_code = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
 
 		if ($this->curlErrorHandler($http_code)) {
-			$header = substr($response, 0, $header_size);
-			$body = substr($response, $header_size);
-			$this->etag = $this->headersPrepare($header, 'ETag');
-			return $body;
+			//$header = substr($response, 0, $header_size);
+			//$body = substr($response, $header_size);
+			return $response;
 		} else {
+			//var_dump($this->curlErrorHandler($http_code));
 			return false;
 		}
 	}
@@ -129,7 +129,7 @@ class Controller
 				case 'stylesheet':
 					switch ($this->config->styles) {
 						case 'relative':
-							$relative = '/?css=' . $this->encrypt_url($link->getAttribute('href'));
+							$relative = '/?css=' . $this->encrypt->encode($link->getAttribute('href'));
 							$link->setAttribute('href', $relative);
 						break;
 					}
@@ -148,7 +148,7 @@ class Controller
 				case 'relative':
 					$src = $script->getAttribute('src');
 					if (!empty($src)) {
-						$relative = '/?js=' . $this->encrypt_url($src);
+						$relative = '/?js=' . $this->encrypt->encode($src);
 						$script->setAttribute('src', $relative);
 					}
 				break;
@@ -163,7 +163,7 @@ class Controller
 						case 'relative':
 							$content = $meta->getAttribute('content');
 							if (!empty($content)) {
-								$relative = '/?img=' . $this->encrypt_url($content);
+								$relative = '/?img=' . $this->encrypt->encode($content);
 								$meta->setAttribute('content', $relative);
 							}
 						break;
@@ -187,7 +187,7 @@ class Controller
 						case 'relative':
 							$content = $meta->getAttribute('content');
 							if (!empty($content)) {
-								$relative = '/?img=' . $this->encrypt_url($content);
+								$relative = '/?img=' . $this->encrypt->encode($content);
 								$meta->setAttribute('content', $relative);
 							}
 						break;
@@ -202,7 +202,7 @@ class Controller
 				case 'relative':
 					$src = $img->getAttribute('src');
 					if (!empty($src)) {
-						$relative = '/?img=' . $this->encrypt_url($src);
+						$relative = '/?img=' . $this->encrypt->encode($src);
 						$img->setAttribute('src', $relative);
 					}
 				break;
@@ -311,8 +311,8 @@ class Controller
 		} else {
 			$cache = false;
 		}
-		
-		if ($cache) {
+
+		if (!empty($cache)) {
 			die($cache);
 		} else {
 			$body = $this->get($tilda);
@@ -320,9 +320,9 @@ class Controller
 				$body = $this->removeTags($body);
 				if ($this->config->cache->enabled) {
 					$this->cache->set($body);
-				} else {
-					die($body);
 				}
+				
+				die($body);
 			} else {
 				die('Host: ' . $host->tilda . ' unavailable');
 			}

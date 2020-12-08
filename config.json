@@ -15,7 +15,7 @@
 	},
 	"cache": {
 		"enabled": true,
-		"expire": 30
+		"expire": 1
 	},
 	"headers": [
 		"pragma: no-cache",
