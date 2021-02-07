@@ -7,8 +7,6 @@ class Controller
 	function __construct()
 	{
 		$this->curl = \curl_init();
-		//$this->dom = new \DOMDocument;
-		//$this->dom->validateOnParse = false;
 		\libxml_use_internal_errors(true);
 		$this->config = Config::getConfig();
 		$this->cache = new \Cache\Controller;
@@ -88,20 +86,33 @@ class Controller
 		return $this->dom->saveHTML();
 	}
 	
-	private function encrypt_url($string)
+	private function encryptUrl($string)
 	{
 		return $this->encrypt->encode($string);
 	}
 
-	private function decrypt_url($string)
+	private function decryptUrl($string)
 	{
 		return $this->encrypt->decode($string);
 	}
 
+	private function parseURL($src)
+	{
+		$url = parse_url($src);
+		// $results = '';
+
+		return isset($url['host'])
+			? $src
+			: 'http://' . $this->tilda . $src;
+
+	}
+
 	private function removeTags($body)
 	{
-		$dom = new \DOMDocument;
-		$dom->loadHTML($body);
+		// var_dump($body);
+		$dom = new \DOMDocument();
+		$dom->formatOutput = false;
+		$dom->loadHTML($body, LIBXML_NOWARNING|LIBXML_NOERROR);
 		$tildacopy = $dom->getElementById('tildacopy');
 		$metatags = $dom->getElementsByTagName('meta');
 		$scripts = $dom->getElementsByTagName('script');
@@ -129,8 +140,12 @@ class Controller
 				case 'stylesheet':
 					switch ($this->config->styles) {
 						case 'relative':
-							$relative = '/?css=' . $this->encrypt->encode($link->getAttribute('href'));
-							$link->setAttribute('href', $relative);
+							$src = $link->getAttribute('href');
+							if (!empty($src)) {
+								$parse_src = $this->parseURL($src);
+								// $relative = '/?css=' . $this->encrypt->encode($link->getAttribute('href'));
+								$link->setAttribute('href', '/?css=' . $this->encrypt->encode($parse_src));
+							}
 						break;
 					}
 
@@ -147,9 +162,12 @@ class Controller
 			switch ($this->config->scripts) {
 				case 'relative':
 					$src = $script->getAttribute('src');
+
 					if (!empty($src)) {
-						$relative = '/?js=' . $this->encrypt->encode($src);
-						$script->setAttribute('src', $relative);
+						$parse_src = $this->parseURL($src);
+						// var_dump($parse_src);
+						// $relative = '/?js=' . $this->encrypt->encode($src);
+						$script->setAttribute('src', '/?js=' . $this->encrypt->encode($parse_src));
 					}
 				break;
 			}
@@ -163,8 +181,8 @@ class Controller
 						case 'relative':
 							$content = $meta->getAttribute('content');
 							if (!empty($content)) {
-								$relative = '/?img=' . $this->encrypt->encode($content);
-								$meta->setAttribute('content', $relative);
+								// $relative = '/?img=' . $this->encrypt->encode($content);
+								$meta->setAttribute('content', '/?img=' . $this->encrypt->encode($content));
 							}
 						break;
 					}
@@ -187,8 +205,8 @@ class Controller
 						case 'relative':
 							$content = $meta->getAttribute('content');
 							if (!empty($content)) {
-								$relative = '/?img=' . $this->encrypt->encode($content);
-								$meta->setAttribute('content', $relative);
+								// $relative = '/?img=' . $this->encrypt->encode($content);
+								$meta->setAttribute('content', '/?img=' . $this->encrypt->encode($content));
 							}
 						break;
 					}
@@ -202,8 +220,9 @@ class Controller
 				case 'relative':
 					$src = $img->getAttribute('src');
 					if (!empty($src)) {
-						$relative = '/?img=' . $this->encrypt->encode($src);
-						$img->setAttribute('src', $relative);
+						$parse_src = $this->parseURL($src);
+						// $relative = '/?img=' . $this->encrypt->encode($src);
+						$img->setAttribute('src', '/?img=' . $this->encrypt->encode($parse_src));
 					}
 				break;
 			}
@@ -215,19 +234,10 @@ class Controller
 
 	private function getImageContentType($img)
 	{
-		if(@end(explode(".", $img)) == "svg") {
-			return 'image/svg+xml';
-		}
-		
-		if(@end(explode(".",$img)) == "png") {
-			return 'image/png';
-		}
-
-		if(@end(explode(".",$img)) == "jpg") {
-			return 'image/jpeg';
-		}
-		if(@end(explode(".",$img)) == "gif") {
-			return 'image/gif';
+		foreach (['svg', 'png', 'jpg', 'gif'] as $type) {
+			if(@end(explode(".", $img)) == $type) {
+				return 'image/svg+xml';
+			}
 		}
 	}
 
@@ -239,6 +249,11 @@ class Controller
 		if (isset($request_uri->query)) {
 			parse_str($request_uri->query, $query);
 			$query = (object)$query;
+
+			if (isset($query->cache)) {
+				$this->cache->flush($query->cache);
+			}
+
 			if (isset($query->css)) {
 				$hash = $_SERVER['HTTP_HOST'] . ':' . $query->css;
 				header("Content-type: text/css", true);
@@ -247,13 +262,13 @@ class Controller
 					if (!empty($cache)) {
 						die($cache);
 					} else {
-						$data = $this->get($this->decrypt_url($query->css));
+						$data = $this->get($this->decryptUrl($query->css));
 						$this->cache->set($data, $hash, $expire_files);
 						die($data);
 					}
 				}
 				
-				die($this->get($this->decrypt_url($query->css)));
+				die($this->get($this->decryptUrl($query->css)));
 			}
 			if (isset($query->js)) {
 				$hash = $_SERVER['HTTP_HOST'] . ':' . $query->js;
@@ -263,31 +278,31 @@ class Controller
 					if (!empty($cache)) {
 						die($cache);
 					} else {
-						$data = $this->get($this->decrypt_url($query->js));
+						$data = $this->get($this->decryptUrl($query->js));
 						$this->cache->set($data, $hash, $expire_files);
 						die($data);
 					}
 				}
 				
-				die($this->get($this->decrypt_url($query->js)));
+				die($this->get($this->decryptUrl($query->js)));
 			}
 			if (isset($query->img)) {
 				$hash = $_SERVER['HTTP_HOST'] . ':' . $query->img;
-				$content_type = $this->getImageContentType($this->decrypt_url($query->img));
+				$content_type = $this->getImageContentType($this->decryptUrl($query->img));
 				header("Content-type: " . $content_type);
 				if ($this->config->cache->enabled) {
 					$cache = $this->cache->get($hash);
 					if (!empty($cache)) {
 						die($cache);
 					} else {
-						$data = $this->get($this->decrypt_url($query->img));
-						//var_dump($this->decrypt_url($query->js));
+						$data = $this->get($this->decryptUrl($query->img));
+						//var_dump($this->decryptUrl($query->js));
 						$this->cache->set($data, $hash, $expire_files);
 						die($data);
 					}
 				}
 				
-				die($this->get($this->decrypt_url($query->img)));
+				die($this->get($this->decryptUrl($query->img)));
 			}
 		} else {
 			$this->tildaInstance();
@@ -304,6 +319,7 @@ class Controller
 		
 		$this->site = $host->proto . '://' . $host->site;
 		$this->cache->hash = $host->site;
+		$this->tilda = $host->tilda;
 		$tilda = 'http://' . $host->tilda;
 		
 		if ($this->config->cache->enabled) {
@@ -312,7 +328,7 @@ class Controller
 			$cache = false;
 		}
 
-		if (!empty($cache)) {
+		if ($this->config->cache->enabled && !empty($cache)) {
 			die($cache);
 		} else {
 			$body = $this->get($tilda);
