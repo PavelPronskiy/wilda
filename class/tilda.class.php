@@ -2,6 +2,8 @@
 
 namespace Tilda;
 
+use Masterminds\HTML5;
+
 class Controller
 {
 	function __construct()
@@ -47,11 +49,12 @@ class Controller
 		curl_setopt($this->curl, CURLOPT_ENCODING, "gzip");
 
 		$response = curl_exec($this->curl);
-		//$header_size = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
+		$header_size = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
 		$http_code = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
 
 		if ($this->curlErrorHandler($http_code)) {
-			//$header = substr($response, 0, $header_size);
+			$header = substr($response, 0, $header_size);
+			// var_dump($header);
 			//$body = substr($response, $header_size);
 			return $response;
 		} else {
@@ -78,9 +81,9 @@ class Controller
 		}
 	}
 
-	private function removeCopyrights($body)
+	private function removeCopyrights($html)
 	{
-		$this->dom->loadHTML($body);
+		$this->dom->loadHTML($html);
 		$tildacopy = $this->dom->getElementById('tildacopy');
 		$tildacopy->parentNode->removeChild($tildacopy);
 		return $this->dom->saveHTML();
@@ -107,12 +110,14 @@ class Controller
 
 	}
 
-	private function removeTags($body)
+	private function removeTags($html)
 	{
-		// var_dump($body);
-		$dom = new \DOMDocument();
-		$dom->formatOutput = false;
-		$dom->loadHTML($body, LIBXML_NOWARNING|LIBXML_NOERROR);
+		$dom_html5 = new \Masterminds\HTML5([
+			'disable_html_ns' => true
+		]);
+
+		$dom = $dom_html5->loadHTML($html);
+
 		$tildacopy = $dom->getElementById('tildacopy');
 		$metatags = $dom->getElementsByTagName('meta');
 		$scripts = $dom->getElementsByTagName('script');
@@ -143,7 +148,6 @@ class Controller
 							$src = $link->getAttribute('href');
 							if (!empty($src)) {
 								$parse_src = $this->parseURL($src);
-								// $relative = '/?css=' . $this->encrypt->encode($link->getAttribute('href'));
 								$link->setAttribute('href', '/?css=' . $this->encrypt->encode($parse_src));
 							}
 						break;
@@ -165,8 +169,6 @@ class Controller
 
 					if (!empty($src)) {
 						$parse_src = $this->parseURL($src);
-						// var_dump($parse_src);
-						// $relative = '/?js=' . $this->encrypt->encode($src);
 						$script->setAttribute('src', '/?js=' . $this->encrypt->encode($parse_src));
 					}
 				break;
@@ -181,7 +183,6 @@ class Controller
 						case 'relative':
 							$content = $meta->getAttribute('content');
 							if (!empty($content)) {
-								// $relative = '/?img=' . $this->encrypt->encode($content);
 								$meta->setAttribute('content', '/?img=' . $this->encrypt->encode($content));
 							}
 						break;
@@ -234,9 +235,10 @@ class Controller
 
 	private function getImageContentType($img)
 	{
+		$mimes = new \Mimey\MimeTypes;
 		foreach (['svg', 'png', 'jpg', 'gif'] as $type) {
 			if(@end(explode(".", $img)) == $type) {
-				return 'image/svg+xml';
+				return $mimes->getMimeType($type);
 			}
 		}
 	}
@@ -245,64 +247,65 @@ class Controller
 	{
 		$expire_files = 1440;
 		$request_uri = (object)parse_url($_SERVER['REQUEST_URI']);
-		//var_dump(parse_url($_SERVER['REQUEST_URI']));
+		$hash_key = $_SERVER['HTTP_HOST'] . ':';
+
 		if (isset($request_uri->query)) {
 			parse_str($request_uri->query, $query);
 			$query = (object)$query;
 
 			if (isset($query->cache)) {
-				$this->cache->flush($query->cache);
+				return $this->cache->flush($query->cache);
 			}
 
 			if (isset($query->css)) {
-				$hash = $_SERVER['HTTP_HOST'] . ':' . $query->css;
-				header("Content-type: text/css", true);
+				$hash = $hash_key . $query->css;
 				if ($this->config->cache->enabled) {
-					$cache = $this->cache->get($hash);
-					if (!empty($cache)) {
-						die($cache);
-					} else {
+					$data = $this->cache->get($hash);
+					if (empty($data)) {
 						$data = $this->get($this->decryptUrl($query->css));
 						$this->cache->set($data, $hash, $expire_files);
-						die($data);
 					}
+				} else {
+					$data = $this->get($this->decryptUrl($query->css));
 				}
 				
-				die($this->get($this->decryptUrl($query->css)));
+				header("Content-type: text/css", true);
+				die($data);
 			}
+
 			if (isset($query->js)) {
-				$hash = $_SERVER['HTTP_HOST'] . ':' . $query->js;
-				header("Content-type: application/javascript", true);
+				$hash = $hash_key . $query->js;
 				if ($this->config->cache->enabled) {
 					$cache = $this->cache->get($hash);
-					if (!empty($cache)) {
-						die($cache);
-					} else {
+					if (empty($cache)) {
 						$data = $this->get($this->decryptUrl($query->js));
 						$this->cache->set($data, $hash, $expire_files);
-						die($data);
 					}
+				} else {
+					$data = $this->get($this->decryptUrl($query->js));
 				}
 				
-				die($this->get($this->decryptUrl($query->js)));
+				header("Content-type: application/javascript", true);
+				die($data);
 			}
+
 			if (isset($query->img)) {
-				$hash = $_SERVER['HTTP_HOST'] . ':' . $query->img;
+				$hash = $hash_key . $query->img;
 				$content_type = $this->getImageContentType($this->decryptUrl($query->img));
-				header("Content-type: " . $content_type);
+				$decrypted_url = $this->decryptUrl($query->img);
+
 				if ($this->config->cache->enabled) {
 					$cache = $this->cache->get($hash);
-					if (!empty($cache)) {
-						die($cache);
-					} else {
+					if (empty($cache)) {
 						$data = $this->get($this->decryptUrl($query->img));
-						//var_dump($this->decryptUrl($query->js));
 						$this->cache->set($data, $hash, $expire_files);
-						die($data);
 					}
+				} else {
+					$data = $this->get($this->decryptUrl($query->img));
 				}
 				
-				die($this->get($this->decryptUrl($query->img)));
+				header("Content-type: " . $content_type);
+				die($data);
 			}
 		} else {
 			$this->tildaInstance();

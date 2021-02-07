@@ -1,2 +1,6 @@
 {
+    "require": {
+        "masterminds/html5": "^2.7",
+        "ralouphie/mimey": "^2.1"
+    }
 }
