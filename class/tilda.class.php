@@ -138,7 +138,15 @@ class Controller
 		{
 			switch (strtolower($link->getAttribute('rel'))) {
 				case 'canonical': $link->setAttribute('href', $this->site); break;
-				case 'shortcut icon': $link->setAttribute('href', $this->site . '/favicon.ico'); break;
+				case 'shortcut icon':
+					// $link->setAttribute('href', $this->site . '/favicon.ico');
+					$src = $link->getAttribute('href');
+					if (!empty($src)) {
+						$parse_src = $this->parseURL($src);
+						$link->setAttribute('href', '/?ico=' . $this->encrypt->encode($parse_src));
+					}
+					break;
+
 				case 'dns-prefetch':
 					$link->setAttribute('href', $this->site);
 				break;
@@ -247,7 +255,6 @@ class Controller
 	{
 		$expire_files = 1440;
 		$request_uri = (object)parse_url($_SERVER['REQUEST_URI']);
-		$hash_key = $_SERVER['HTTP_HOST'] . ':';
 
 		if (isset($request_uri->query)) {
 			parse_str($request_uri->query, $query);
@@ -258,6 +265,23 @@ class Controller
 			}
 
 			if (isset($query->css)) {
+				$this->getItem($query->css, 'text/css');
+			}
+
+			if (isset($query->js)) {
+				$this->getItem($query->js, 'application/javascript');
+			}
+
+			if (isset($query->img)) {
+				$this->getItem($query->img);
+			}
+
+			if (isset($query->ico)) {
+				$this->getItem($query->ico);
+			}
+
+
+/*			if (isset($query->css)) {
 				$hash = $hash_key . $query->css;
 				if ($this->config->cache->enabled) {
 					$data = $this->cache->get($hash);
@@ -271,9 +295,25 @@ class Controller
 				
 				header("Content-type: text/css", true);
 				die($data);
-			}
+			}*/
 
-			if (isset($query->js)) {
+/*			if (isset($query->ico)) {
+				$hash = $hash_key . $query->ico;
+				if ($this->config->cache->enabled) {
+					$data = $this->cache->get($hash);
+					if (empty($data)) {
+						$data = $this->get($this->decryptUrl($query->css));
+						$this->cache->set($data, $hash, $expire_files);
+					}
+				} else {
+					$data = $this->get($this->decryptUrl($query->css));
+				}
+				
+				header("Content-type: text/css", true);
+				die($data);
+			}
+*/
+/*			if (isset($query->js)) {
 				$hash = $hash_key . $query->js;
 				if ($this->config->cache->enabled) {
 					$data = $this->cache->get($hash);
@@ -288,8 +328,8 @@ class Controller
 				header("Content-type: application/javascript", true);
 				die($data);
 			}
-
-			if (isset($query->img)) {
+*/
+/*			if (isset($query->img)) {
 				$hash = $hash_key . $query->img;
 				$content_type = $this->getImageContentType($this->decryptUrl($query->img));
 				$decrypted_url = $this->decryptUrl($query->img);
@@ -304,17 +344,37 @@ class Controller
 				}
 				
 				$this->render($data, $content_type);
-			}
+			}*/
 		} else {
 			$this->tildaInstance();
 		}
 	}
 
-	private function render($data, $mime_type)
+	private function getItem($query, $type = '')
 	{
-		header("Content-type: " . $mime_type);
-		die($data);
+		$hash = $_SERVER['HTTP_HOST'] . ':' . $query;
 
+		$type = !empty($type)
+			? $type
+			: $this->getImageContentType($this->decryptUrl($query));
+
+		if ($this->config->cache->enabled) {
+			$data = $this->cache->get($hash);
+			if (empty($data)) {
+				$data = $this->get($this->decryptUrl($query));
+				$this->cache->set($data, $hash, $expire_files);
+			}
+		} else {
+			$data = $this->get($this->decryptUrl($query));
+		}
+		
+		$this->render($data, $type);
+	}
+
+	private function render($data, $mime)
+	{
+		header("Content-type: " . $mime);
+		die($data);
 	}
 
 	private function tildaInstance()
