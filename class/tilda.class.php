@@ -259,7 +259,6 @@ class Controller
 
 			if (isset($query->css)) {
 				$hash = $hash_key . $query->css;
-				$data = '';
 				if ($this->config->cache->enabled) {
 					$data = $this->cache->get($hash);
 					if (empty($data)) {
@@ -276,10 +275,9 @@ class Controller
 
 			if (isset($query->js)) {
 				$hash = $hash_key . $query->js;
-				$data = '';
 				if ($this->config->cache->enabled) {
-					$cache = $this->cache->get($hash);
-					if (empty($cache)) {
+					$data = $this->cache->get($hash);
+					if (empty($data)) {
 						$data = $this->get($this->decryptUrl($query->js));
 						$this->cache->set($data, $hash, $expire_files);
 					}
@@ -295,10 +293,9 @@ class Controller
 				$hash = $hash_key . $query->img;
 				$content_type = $this->getImageContentType($this->decryptUrl($query->img));
 				$decrypted_url = $this->decryptUrl($query->img);
-				$data = '';
 				if ($this->config->cache->enabled) {
-					$cache = $this->cache->get($hash);
-					if (empty($cache)) {
+					$data = $this->cache->get($hash);
+					if (empty($data)) {
 						$data = $this->get($this->decryptUrl($query->img));
 						$this->cache->set($data, $hash, $expire_files);
 					}
@@ -306,12 +303,18 @@ class Controller
 					$data = $this->get($this->decryptUrl($query->img));
 				}
 				
-				header("Content-type: " . $content_type);
-				die($data);
+				$this->render($data, $content_type);
 			}
 		} else {
 			$this->tildaInstance();
 		}
+	}
+
+	private function render($data, $mime_type)
+	{
+		header("Content-type: " . $mime_type);
+		die($data);
+
 	}
 
 	private function tildaInstance()
