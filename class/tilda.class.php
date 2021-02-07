@@ -264,11 +264,18 @@ class Controller
 				return $this->cache->flush($query->cache);
 			}
 
-			if (isset($query->css)) {
-				$this->getItem($query->css, 'text/css');
+
+			foreach (['css', 'js', 'img', 'ico'] as $type) {
+				if (isset($query->{$type})) {
+					switch ($type) {
+						case 'css': $this->getItem($query->{$type}, 'text/css'); break;
+						case 'js': $this->getItem($query->{$type}, 'application/javascript'); break;
+						default: $this->getItem($query->{$type}); break;
+					}
+				}
 			}
 
-			if (isset($query->js)) {
+	/*		if (isset($query->js)) {
 				$this->getItem($query->js, 'application/javascript');
 			}
 
@@ -278,7 +285,7 @@ class Controller
 
 			if (isset($query->ico)) {
 				$this->getItem($query->ico);
-			}
+			}*/
 
 
 /*			if (isset($query->css)) {
@@ -362,7 +369,7 @@ class Controller
 			$data = $this->cache->get($hash);
 			if (empty($data)) {
 				$data = $this->get($this->decryptUrl($query));
-				$this->cache->set($data, $hash, $expire_files);
+				$this->cache->set($data, $hash);
 			}
 		} else {
 			$data = $this->get($this->decryptUrl($query));
