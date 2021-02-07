@@ -259,6 +259,7 @@ class Controller
 
 			if (isset($query->css)) {
 				$hash = $hash_key . $query->css;
+				$data = '';
 				if ($this->config->cache->enabled) {
 					$data = $this->cache->get($hash);
 					if (empty($data)) {
@@ -275,6 +276,7 @@ class Controller
 
 			if (isset($query->js)) {
 				$hash = $hash_key . $query->js;
+				$data = '';
 				if ($this->config->cache->enabled) {
 					$cache = $this->cache->get($hash);
 					if (empty($cache)) {
@@ -293,7 +295,7 @@ class Controller
 				$hash = $hash_key . $query->img;
 				$content_type = $this->getImageContentType($this->decryptUrl($query->img));
 				$decrypted_url = $this->decryptUrl($query->img);
-
+				$data = '';
 				if ($this->config->cache->enabled) {
 					$cache = $this->cache->get($hash);
 					if (empty($cache)) {
