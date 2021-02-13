@@ -78,14 +78,6 @@ class Controller
 		}
 	}
 
-	private function removeCopyrights($html)
-	{
-		$this->dom->loadHTML($html);
-		$tildacopy = $this->dom->getElementById('tildacopy');
-		$tildacopy->parentNode->removeChild($tildacopy);
-		return $this->dom->saveHTML();
-	}
-	
 	private function encryptUrl($string)
 	{
 		return $this->encrypt->encode($string);
