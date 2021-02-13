@@ -54,11 +54,8 @@ class Controller
 
 		if ($this->curlErrorHandler($http_code)) {
 			$header = substr($response, 0, $header_size);
-			// var_dump($header);
-			//$body = substr($response, $header_size);
 			return $response;
 		} else {
-			//var_dump($this->curlErrorHandler($http_code));
 			return false;
 		}
 	}
@@ -253,7 +250,6 @@ class Controller
 
 	private function route()
 	{
-		$expire_files = 1440;
 		$request_uri = (object)parse_url($_SERVER['REQUEST_URI']);
 
 		if (isset($request_uri->query)) {
@@ -263,7 +259,6 @@ class Controller
 			if (isset($query->cache)) {
 				return $this->cache->flush($query->cache);
 			}
-
 
 			foreach (['css', 'js', 'img', 'ico'] as $type) {
 				if (isset($query->{$type})) {
@@ -275,85 +270,8 @@ class Controller
 				}
 			}
 
-	/*		if (isset($query->js)) {
-				$this->getItem($query->js, 'application/javascript');
-			}
-
-			if (isset($query->img)) {
-				$this->getItem($query->img);
-			}
-
-			if (isset($query->ico)) {
-				$this->getItem($query->ico);
-			}*/
-
-
-/*			if (isset($query->css)) {
-				$hash = $hash_key . $query->css;
-				if ($this->config->cache->enabled) {
-					$data = $this->cache->get($hash);
-					if (empty($data)) {
-						$data = $this->get($this->decryptUrl($query->css));
-						$this->cache->set($data, $hash, $expire_files);
-					}
-				} else {
-					$data = $this->get($this->decryptUrl($query->css));
-				}
-				
-				header("Content-type: text/css", true);
-				die($data);
-			}*/
-
-/*			if (isset($query->ico)) {
-				$hash = $hash_key . $query->ico;
-				if ($this->config->cache->enabled) {
-					$data = $this->cache->get($hash);
-					if (empty($data)) {
-						$data = $this->get($this->decryptUrl($query->css));
-						$this->cache->set($data, $hash, $expire_files);
-					}
-				} else {
-					$data = $this->get($this->decryptUrl($query->css));
-				}
-				
-				header("Content-type: text/css", true);
-				die($data);
-			}
-*/
-/*			if (isset($query->js)) {
-				$hash = $hash_key . $query->js;
-				if ($this->config->cache->enabled) {
-					$data = $this->cache->get($hash);
-					if (empty($data)) {
-						$data = $this->get($this->decryptUrl($query->js));
-						$this->cache->set($data, $hash, $expire_files);
-					}
-				} else {
-					$data = $this->get($this->decryptUrl($query->js));
-				}
-				
-				header("Content-type: application/javascript", true);
-				die($data);
-			}
-*/
-/*			if (isset($query->img)) {
-				$hash = $hash_key . $query->img;
-				$content_type = $this->getImageContentType($this->decryptUrl($query->img));
-				$decrypted_url = $this->decryptUrl($query->img);
-				if ($this->config->cache->enabled) {
-					$data = $this->cache->get($hash);
-					if (empty($data)) {
-						$data = $this->get($this->decryptUrl($query->img));
-						$this->cache->set($data, $hash, $expire_files);
-					}
-				} else {
-					$data = $this->get($this->decryptUrl($query->img));
-				}
-				
-				$this->render($data, $content_type);
-			}*/
 		} else {
-			$this->tildaInstance();
+			$this->tildaInstance($request_uri);
 		}
 	}
 
@@ -384,19 +302,23 @@ class Controller
 		die($data);
 	}
 
-	private function tildaInstance()
+	private function tildaInstance($request_uri)
 	{
 		$host = $this->getTildaHost();
 		
 		if (!isset($host->site)) {
 			die('Hosts not defined');
 		}
+
 		
-		$this->site = $host->proto . '://' . $host->site;
-		$this->cache->hash = $host->site;
+		$req_path = isset($request_uri->path) ? $request_uri->path : '';
+		
+		$this->site = $host->proto . '://' . $host->site . $req_path;
+		$this->cache->hash = $host->site . $req_path;
 		$this->tilda = $host->tilda;
-		$tilda = 'http://' . $host->tilda;
-		
+		$tilda = 'http://' . $host->tilda . $req_path;
+
+
 		if ($this->config->cache->enabled) {
 			$cache = $this->cache->get();
 		} else {
