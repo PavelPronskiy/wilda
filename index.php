@@ -1,6 +1,6 @@
 <?php
 
-define("PATH", '/home/tilda/www');
+define("PATH", __DIR__);
 define("CLASS_PATH", PATH . '/class/');
 define("CONFIG", PATH . '/config.json');
 define("CONFIG_USER", PATH . '/.config.json');
