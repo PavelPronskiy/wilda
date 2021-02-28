@@ -303,7 +303,11 @@ class Wix extends Controller
 			$dec->siteFeaturesConfigs->seo->context->siteUrl = \Config\Controller::$route->url;
 			$dec->siteFeaturesConfigs->seo->context->defaultUrl = \Config\Controller::$route->url;
 			$dec->requestUrl = \Config\Controller::$route->url;
-			$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = \Config\Controller::$route->url;
+			
+			if (isset($dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl))
+				$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = \Config\Controller::$route->url;
+
+			
 			$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = \Config\Controller::$route->url;
 			$dec->siteFeaturesConfigs->tpaCommons->requestUrl = \Config\Controller::$route->url;
 			// $dec->siteFeaturesConfigs = '';
