@@ -303,7 +303,7 @@ class Wix extends Controller
 			// $dec->siteFeaturesConfigs = '';
 			$dec->siteAssets->modulesParams->features->externalBaseUrl = \Config\Controller::$route->url;
 			$dec->siteAssets->modulesParams->platform->externalBaseUrl = \Config\Controller::$route->url;
-			var_dump($dec);
+			// var_dump($dec);
 			$node->nodeValue = '';
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
 		}

@@ -30,10 +30,11 @@ class Controller
 				'domain' => $_SERVER['HTTP_HOST'],
 				'path' => $_SERVER['REQUEST_URI'],
 				'site' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-					? $_SERVER['HTTP_X_FORWARDED_PROTO']
+					? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST']
 					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
+
 				'url' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-					? $_SERVER['HTTP_X_FORWARDED_PROTO']
+					? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
 					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
 			];
 
@@ -41,7 +42,6 @@ class Controller
 				parse_str($request_uri['query'], $query);
 				self::$route->query = (object) $query;
 			}
-
 		}
 
 		if (file_exists(CONFIG)) {
@@ -63,7 +63,6 @@ class Controller
 		$array = (object)array_merge((array)$config_json, (array)$config_user_json);
 
 		self::$config = $array;
-
 		if (RUN_METHOD == 'web') {
 			self::$domain = self::getDomainConfig($array);
 			self::$hash = isset($query)
