@@ -4,6 +4,7 @@ namespace Curl;
 
 class Controller
 {
+	public static $uri_params = ['ico', 'img', 'js', 'css'];
 	public static $curl;
 
 	public static function get($url)
@@ -34,7 +35,7 @@ class Controller
 		$content_type = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
 		// $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
 		$http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
+		
 		curl_close($curl);
 		
 		if (self::curlErrorHandler($http_code)) {
@@ -43,8 +44,6 @@ class Controller
 				'content_type' => $content_type
 			];
 		} else {
-			// var_dump($http_code);
-			// exit;
 			return \Config\Controller::render( (object) [
 				'body' => 'Error: ' . $http_code,
 				'content_type' => 'text/html'
@@ -60,10 +59,9 @@ class Controller
 		{
 			// get cache results
 			$results = $cacheController->get(\Config\Controller::$hash);
-
 			if (count( (array) $results) == 0)
 			{
-				if (isset(\Config\Controller::$route->query))
+				if (isset(\Config\Controller::$route->query) && in_array(key(\Config\Controller::$route->query), self::$uri_params))
 				{
 					$results = self::get(
 						\Encrypt\Controller::decode(
@@ -98,7 +96,8 @@ class Controller
 		}
 		else
 		{
-			if (isset(\Config\Controller::$route->query))
+			
+			if (isset(\Config\Controller::$route->query) && in_array(key(\Config\Controller::$route->query), self::$uri_params))
 			{
 				$results = self::get(
 					\Encrypt\Controller::decode(\Config\Controller::$route
