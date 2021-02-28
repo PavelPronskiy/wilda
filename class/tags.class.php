@@ -290,8 +290,12 @@ class Wix extends Controller
 
 		foreach ($nodes as $key => $node) {
 			$dec = json_decode($node->nodeValue);
-			$dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = \Config\Controller::$route->domain;
-			$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = \Config\Controller::$route->url;
+
+			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData)) {
+				$dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = \Config\Controller::$route->domain;
+				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = \Config\Controller::$route->url;
+				
+			}
 			$dec->site->externalBaseUrl = \Config\Controller::$route->url;
 			$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = \Config\Controller::$route->url;
 			$dec->siteFeaturesConfigs->router->baseUrl = \Config\Controller::$route->url;
