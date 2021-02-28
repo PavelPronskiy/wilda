@@ -22,11 +22,16 @@ class Controller
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-		// curl_setopt($curl, CURLOPT_HTTPHEADER, \Config\Controller::$config->headers);
-		// curl_setopt($curl, CURLOPT_HEADER, false);
 		curl_setopt($curl, CURLOPT_USERAGENT, \Config\Controller::$config->headers->ua);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_REFERER, (RUN_METHOD === 'web') ? \Config\Controller::$domain->project : '');
+		curl_setopt(
+			$curl,
+			CURLOPT_REFERER,
+			(RUN_METHOD === 'web')
+				? \Config\Controller::$domain->project
+				: ''
+		);
+		
 		// curl_setopt($curl, CURLOPT_VERBOSE, true);
 		curl_setopt($curl, CURLOPT_ENCODING, "gzip");
 
