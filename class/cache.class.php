@@ -45,7 +45,7 @@ class Controller
 			
 			case 'flush':
 				$pages = $this->redis->keys($keys);
-				$this->redis->delete($pages);
+				$this->redis->del($pages);
 				$this->notice('deleted cache pages: ' . count($pages));
 				break;
 			
