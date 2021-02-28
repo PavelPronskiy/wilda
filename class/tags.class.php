@@ -292,11 +292,11 @@ class Wix extends Controller
 		foreach ($nodes as $key => $node) {
 			$dec = json_decode($node->nodeValue);
 
-			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData)) {
+			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->domain))
 				$dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = \Config\Controller::$route->domain;
-				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = \Config\Controller::$route->url;
 
-			}
+			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl))
+				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = \Config\Controller::$route->url;
 			
 			if (isset($dec->site->externalBaseUrl))
 				$dec->site->externalBaseUrl = \Config\Controller::$route->url;
@@ -305,7 +305,7 @@ class Wix extends Controller
 				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = \Config\Controller::$route->url;
 			if (isset($dec->siteFeaturesConfigs->router->baseUrl))
 				$dec->siteFeaturesConfigs->router->baseUrl = \Config\Controller::$route->url;
-			
+
 			if (isset($dec->siteFeaturesConfigs->seo->context->siteUrl))
 				$dec->siteFeaturesConfigs->seo->context->siteUrl = \Config\Controller::$route->url;
 
@@ -324,14 +324,15 @@ class Wix extends Controller
 			if (isset($dec->siteFeaturesConfigs->tpaCommons->requestUrl))
 				$dec->siteFeaturesConfigs->tpaCommons->requestUrl = \Config\Controller::$route->url;
 			
-			// $dec->siteFeaturesConfigs = '';
 			if (isset($dec->siteAssets->modulesParams->features->externalBaseUrl))
 				$dec->siteAssets->modulesParams->features->externalBaseUrl = \Config\Controller::$route->url;
+
 			if (isset($dec->siteAssets->modulesParams->platform->externalBaseUrl))
 				$dec->siteAssets->modulesParams->platform->externalBaseUrl = \Config\Controller::$route->url;
-			// var_dump($dec);
+
 			$node->nodeValue = '';
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
+			// $dec->siteFeaturesConfigs = '';
 		}
 
 		$nodes = $xpath->query('//script[@id="wix-fedops"]');
