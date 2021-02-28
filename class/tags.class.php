@@ -108,7 +108,8 @@ abstract class Controller
 	{
 		$xpath = new \DOMXPath(self::$dom);
 		$nodes = $xpath->query('//style');
-		foreach ($nodes as $node) {
+		foreach ($nodes as $node)
+		{
 			$attr = $node->getAttribute('data-url');
 			if (!empty($attr)) {
 				$node->setAttribute(
@@ -116,11 +117,53 @@ abstract class Controller
 					'/?css=' . \Encrypt\Controller::encode(self::parseURL($attr))
 				);
 			}
+
+			$attr = $node->getAttribute('data-href');
+			if (!empty($attr)) {
+				$node->setAttribute(
+					'data-href',
+					'/?css=' . \Encrypt\Controller::encode(self::parseURL($attr))
+				);
+			}
+
+			if (preg_match_all('@url\(\"?//[^/]+[^.]+\.[^.]+?\)@i', $node->nodeValue, $match))
+			{
+				if (count($match[0]) > 0)
+				{
+					$nodeValue = $node->nodeValue;
+
+					foreach ($match[0] as $str)
+					{
+						// $str = str_replace('url("', '', $str);
+						$str = str_replace('url(', '', $str);
+						$str = str_replace(')', '', $str);
+						$str = str_replace('"', '', $str);
+						// var_dump($str);
+						$nodeValue = str_replace($str, '/?font=' . \Encrypt\Controller::encode('https:' . $str), $nodeValue);
+					}
+
+					$node->nodeValue = '';
+					$node->appendChild(self::$dom->createTextNode($nodeValue));
+
+					// var_dump($nodeValue);
+				}
+			}
 		}
 
 		foreach (self::$dom->getElementsByTagName('link') as $link)
 		{
 			switch (strtolower($link->getAttribute('rel'))) {
+				case 'preload':
+					$src = $link->getAttribute('href');
+					if (!empty($src)) {
+						$link->setAttribute(
+							'href',
+							'/?js=' . \Encrypt\Controller::encode(self::parseURL($src))
+						);
+					}
+						
+					break;
+		
 				case 'canonical':
 					$link->setAttribute(
 						'href',

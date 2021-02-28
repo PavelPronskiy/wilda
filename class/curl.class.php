@@ -4,7 +4,7 @@ namespace Curl;
 
 class Controller
 {
-	public static $uri_params = ['ico', 'img', 'js', 'css'];
+	public static $uri_params = ['ico', 'img', 'js', 'css', 'font'];
 	public static $curl;
 
 	public static function get($url)
