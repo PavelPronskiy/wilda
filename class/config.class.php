@@ -22,22 +22,26 @@ class Controller
 		$config_json = [];
 		$config_user_json = [];
 
-		$request_uri = parse_url($_SERVER['REQUEST_URI']);
+		if (RUN_METHOD == 'web') {
+	
+			$request_uri = parse_url($_SERVER['REQUEST_URI']);
 
-		self::$route = (object) [
-			'domain' => $_SERVER['HTTP_HOST'],
-			'path' => $_SERVER['REQUEST_URI'],
-			'site' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-				? $_SERVER['HTTP_X_FORWARDED_PROTO']
-				: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
-			'url' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-				? $_SERVER['HTTP_X_FORWARDED_PROTO']
-				: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
-		];
+			self::$route = (object) [
+				'domain' => $_SERVER['HTTP_HOST'],
+				'path' => $_SERVER['REQUEST_URI'],
+				'site' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+					? $_SERVER['HTTP_X_FORWARDED_PROTO']
+					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
+				'url' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+					? $_SERVER['HTTP_X_FORWARDED_PROTO']
+					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
+			];
 
-		if (isset($request_uri['query'])) {
-			parse_str($request_uri['query'], $query);
-			self::$route->query = (object) $query;
+			if (isset($request_uri['query'])) {
+				parse_str($request_uri['query'], $query);
+				self::$route->query = (object) $query;
+			}
+
 		}
 
 		if (file_exists(CONFIG)) {
@@ -59,19 +63,26 @@ class Controller
 		$array = (object)array_merge((array)$config_json, (array)$config_user_json);
 
 		self::$config = $array;
-		self::$domain = self::getDomainConfig($array);
-		self::$hash = isset($query)
-			? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . ':' . key($query) . ':' . $query[key($query)]
-			: $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
-		//var_dump(self::$config);
-		// return $array;
+		if (RUN_METHOD == 'web') {
+			self::$domain = self::getDomainConfig($array);
+			self::$hash = isset($query)
+				? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . ':' . key($query) . ':' . $query[key($query)]
+				: $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		}
 	}
 	
 	public static function render($response) : void
 	{
-		header("Content-type: " . $response->content_type);
-		die($response->body);
+		if (RUN_METHOD == 'web')
+		{
+			header("Content-type: " . $response->content_type);
+			die($response->body);
+		}
+		else
+		{
+			echo $response->body;
+		}
 	}
 
 	public static function getDomainConfig($array)

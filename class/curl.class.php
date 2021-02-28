@@ -6,7 +6,7 @@ class Controller
 {
 	public static $curl;
 
-	public static function get($url) : object
+	public static function get($url)
 	{
 		$curl = \curl_init();
 
@@ -25,8 +25,8 @@ class Controller
 		// curl_setopt($curl, CURLOPT_HEADER, false);
 		curl_setopt($curl, CURLOPT_USERAGENT, \Config\Controller::$config->headers->ua);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_REFERER, \Config\Controller::$domain->project);
-		curl_setopt($curl, CURLOPT_VERBOSE, true);
+		curl_setopt($curl, CURLOPT_REFERER, (RUN_METHOD === 'web') ? \Config\Controller::$domain->project : '');
+		// curl_setopt($curl, CURLOPT_VERBOSE, true);
 		curl_setopt($curl, CURLOPT_ENCODING, "gzip");
 
 		$response = curl_exec($curl);
@@ -43,6 +43,8 @@ class Controller
 				'content_type' => $content_type
 			];
 		} else {
+			// var_dump($http_code);
+			// exit;
 			return \Config\Controller::render( (object) [
 				'body' => 'Error: ' . $http_code,
 				'content_type' => 'text/html'
@@ -54,10 +56,8 @@ class Controller
 	{
 		$cacheController = new \Cache\Controller;
 		$results = [];
-		// $crypt = new \Encryption();
 		if (\Config\Controller::$config->cache->enabled)
 		{
-
 			// get cache results
 			$results = $cacheController->get(\Config\Controller::$hash);
 
@@ -128,10 +128,14 @@ class Controller
 		switch($http_code)
 		{
 			case 404:
-				header("HTTP/1.0 404 Not Found");
+				if (RUN_METHOD == 'web')
+					header("HTTP/1.0 404 Not Found");
+
 				return false;
 			case 503:
-				header("HTTP/1.0 503 Error");
+				if (RUN_METHOD == 'web')
+					header("HTTP/1.0 503 Error");
+	
 				return false;
 			break;
 			
@@ -139,6 +143,8 @@ class Controller
 				return true;
 			break;
 			
+
+			case 0:
 			default:
 				return false;
 			break;
