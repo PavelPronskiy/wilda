@@ -8,33 +8,36 @@ class Controller
 
 	function __construct()
 	{
-		$this->config = \Tilda\Config::getConfig();
 		$this->redisInstance();
 	}
 
 	function __destruct() {}
 
-	private function redisInstance() {
+	private function redisInstance() : void
+	{
 		$this->redis = new \Redis();
-		$this->redis->connect($this->config->redis->host, $this->config->redis->port);
+		$this->redis->connect(\Config\Controller::$config->redis->host, \Config\Controller::$config->redis->port);
 	}
 
-	public function notice($message)
+	public function notice($message) : void
 	{
 		$host_str = 'Host: ' . $_SERVER['HTTP_HOST'];
 		die('<pre>' . $host_str . ', ' . $message . '</pre>');
 	}
 
-	public function flush($cache)
+	public function flush($cache) : void
 	{
 		$keys = $_SERVER['HTTP_HOST'] . '*';
 
 		switch ($cache) {
 			case 'keys':
 				$pages = $this->redis->keys($keys);
-				if (count($pages) > 0) {
+				if (count($pages) > 0)
+				{
 					$this->notice('pages cached: ' . count($pages));
-				} else {
+				}
+				else
+				{
 					$this->notice('cache is empty');
 				}
 
@@ -54,17 +57,28 @@ class Controller
 
 	}
 	
-	public function get($hash = '')
+	public function get($hash) : object
 	{
-		$hash = !empty($hash) ? $hash : $this->hash;
-		return base64_decode($this->redis->get($hash));
+		$res = $this->redis->get(
+			\Config\Controller::$domain->type . ':' . $hash
+		);
+
+		return $res
+			? json_decode($res)
+			: (object) [];
 	}
 
-	public function set($body, $hash = '', $expire = '')
+	public function set($body, $hash) : void
 	{
-		$expire = !empty($expire) ? $expire : $this->config->cache->expire;
-		$hash = !empty($hash) ? $hash : $this->hash;
-		$this->redis->set($hash, base64_encode($body));
-		$this->redis->expire($this->hash, $expire * 60);
+		// $expire = \Config\Controller::$config->cache->expire;
+		$this->redis->set(
+			(string) \Config\Controller::$domain->type . ':' . $hash,
+			(string) json_encode($body)
+		);
+
+		$this->redis->expire(
+			(string) \Config\Controller::$domain->type . ':' . $hash,
+			(int) \Config\Controller::$config->cache->expire * 60
+		);
 	}
 }

@@ -1,23 +1,17 @@
 <?php
 
-namespace Tilda;
+namespace Encrypt;
 
-class Encryption
+class Controller
 {
-	function __construct()
-	{
-		$this->config = Config::getConfig();
-		$this->skey = $this->config->salt;
-	}
-
-	public  function safe_b64encode($string)
+	public static function safeB64encode($string) : string
 	{
 		$data = base64_encode($string);
 		$data = str_replace(array('+','/','='),array('-','_',''),$data);
 		return $data;
 	}
 
-	public function safe_b64decode($string)
+	public static function safeB64decode($string) : string
 	{
 		$data = str_replace(array('-','_'),array('+','/'),$string);
 		$mod4 = strlen($data) % 4;
@@ -27,29 +21,41 @@ class Encryption
 		return base64_decode($data);
 	}
 	
-	public function encode($value)
+	public static function encode($value) : string
 	{
-		if(!$value) {
-			return false;
-		}
-		
-		$text = $value;
-		$iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
-		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-		$crypttext = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $this->skey, $text, MCRYPT_MODE_ECB, $iv);
-		return trim($this->safe_b64encode($crypttext));
+		return \trim(self::safeB64encode(
+			\mcrypt_encrypt(
+				MCRYPT_RIJNDAEL_256,
+				\Config\Controller::$config->salt,
+				$value,
+				MCRYPT_MODE_ECB,
+				\mcrypt_create_iv(
+					\mcrypt_get_iv_size(
+						MCRYPT_RIJNDAEL_256,
+						MCRYPT_MODE_ECB
+					),
+					MCRYPT_RAND)
+				)
+			)
+		);
 	}
 
-	public function decode($value)
+	public static function decode($value) : string
 	{
-		if (!$value) {
-			return false;
-		}
-		
-		$crypttext = $this->safe_b64decode($value);
-		$iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
-		$iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-		$decrypttext = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $this->skey, $crypttext, MCRYPT_MODE_ECB, $iv);
-		return trim($decrypttext);
+		return \trim(
+			\mcrypt_decrypt(
+				MCRYPT_RIJNDAEL_256,
+				\Config\Controller::$config->salt,
+				self::safeB64decode($value),
+				MCRYPT_MODE_ECB,
+				\mcrypt_create_iv(
+					\mcrypt_get_iv_size(
+						MCRYPT_RIJNDAEL_256,
+						MCRYPT_MODE_ECB
+					),
+					MCRYPT_RAND
+				)
+			)
+		);
 	}
 }

@@ -1,15 +1,41 @@
 <?php
 
-namespace Tilda;
+namespace Config;
 
-class Config
+class Controller
 {
-	public static function getConfig()
+	public static $domain;
+	public static $config;
+	public static $route;
+	public static $hash;
+	public static $crypt;
+	// public static $req_site;
+
+	function __construct()
+	{
+		\Config\Controller::getConfig();
+	}
+
+	public static function getConfig() : void
 	{
 		$array = [];
 		$config_json = [];
 		$config_user_json = [];
-		
+
+		$request_uri = parse_url($_SERVER['REQUEST_URI']);
+
+		self::$route = (object) [
+			'domain' => $_SERVER['HTTP_HOST'],
+			'path' => $_SERVER['REQUEST_URI'],
+			'site' => $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'],
+			'url' => $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
+		];
+
+		if (isset($request_uri['query'])) {
+			parse_str($request_uri['query'], $query);
+			self::$route->query = (object) $query;
+		}
+
 		if (file_exists(CONFIG)) {
 			$config_json = json_decode(file_get_contents(CONFIG));
 			if (json_last_error() > 0) {
@@ -27,7 +53,28 @@ class Config
 		}
 
 		$array = (object)array_merge((array)$config_json, (array)$config_user_json);
-		return $array;
+
+		self::$config = $array;
+		self::$domain = self::getDomainConfig($array);
+		self::$hash = isset($query)
+			? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . ':' . key($query) . ':' . $query[key($query)]
+			: $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+		// return $array;
+	}
+	
+	public static function render($response) : void
+	{
+		header("Content-type: " . $response->content_type);
+		die($response->body);
 	}
 
+	public static function getDomainConfig($array) : object
+	{
+		foreach ($array->hosts as $host) {
+			if (self::$route->site == $host->site) {
+				return $host;
+			}
+		}
+	}
 }

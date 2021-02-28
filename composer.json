@@ -1,6 +1,7 @@
 {
     "require": {
         "masterminds/html5": "^2.7",
-        "ralouphie/mimey": "^2.1"
+        "ralouphie/mimey": "^2.1",
+        "wyrihaximus/html-compress": "^3.0"
     }
 }
