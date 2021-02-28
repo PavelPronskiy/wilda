@@ -8,8 +8,9 @@ abstract class Controller
 
 	public static function compressHTML($html) : string
 	{
-		$parser = \WyriHaximus\HtmlCompress\Factory::constructSmallest();
-		return $parser->compress($html);
+		return $html;
+		// $parser = \WyriHaximus\HtmlCompress\Factory::constructSmallest();
+		// return $parser->compress($html);
 	}
 
 	public static function changeAHrefLinks() : void
@@ -294,7 +295,7 @@ class Wix extends Controller
 			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData)) {
 				$dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = \Config\Controller::$route->domain;
 				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = \Config\Controller::$route->url;
-				
+
 			}
 			$dec->site->externalBaseUrl = \Config\Controller::$route->url;
 			$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = \Config\Controller::$route->url;
