@@ -253,6 +253,7 @@ abstract class Controller
 
 	public static function stripHTML($html) : string
 	{
+
 		$dom_html5 = new \Masterminds\HTML5(['disable_html_ns' => true]);
 		$html = self::compressHTML($html);
 		self::$dom = $dom_html5->loadHTML($html);
