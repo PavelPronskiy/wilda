@@ -297,22 +297,38 @@ class Wix extends Controller
 				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = \Config\Controller::$route->url;
 
 			}
-			$dec->site->externalBaseUrl = \Config\Controller::$route->url;
-			$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = \Config\Controller::$route->url;
-			$dec->siteFeaturesConfigs->router->baseUrl = \Config\Controller::$route->url;
-			$dec->siteFeaturesConfigs->seo->context->siteUrl = \Config\Controller::$route->url;
-			$dec->siteFeaturesConfigs->seo->context->defaultUrl = \Config\Controller::$route->url;
-			$dec->requestUrl = \Config\Controller::$route->url;
+			
+			if (isset($dec->site->externalBaseUrl))
+				$dec->site->externalBaseUrl = \Config\Controller::$route->url;
+
+			if (isset($dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl))
+				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = \Config\Controller::$route->url;
+			if (isset($dec->siteFeaturesConfigs->router->baseUrl))
+				$dec->siteFeaturesConfigs->router->baseUrl = \Config\Controller::$route->url;
+			
+			if (isset($dec->siteFeaturesConfigs->seo->context->siteUrl))
+				$dec->siteFeaturesConfigs->seo->context->siteUrl = \Config\Controller::$route->url;
+
+			if (isset($dec->siteFeaturesConfigs->seo->context->defaultUrl))
+				$dec->siteFeaturesConfigs->seo->context->defaultUrl = \Config\Controller::$route->url;
+			
+			if (isset($dec->requestUrl))
+				$dec->requestUrl = \Config\Controller::$route->url;
 			
 			if (isset($dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl))
 				$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = \Config\Controller::$route->url;
 
+			if (isset($dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl))
+				$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = \Config\Controller::$route->url;
 			
-			$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = \Config\Controller::$route->url;
-			$dec->siteFeaturesConfigs->tpaCommons->requestUrl = \Config\Controller::$route->url;
+			if (isset($dec->siteFeaturesConfigs->tpaCommons->requestUrl))
+				$dec->siteFeaturesConfigs->tpaCommons->requestUrl = \Config\Controller::$route->url;
+			
 			// $dec->siteFeaturesConfigs = '';
-			$dec->siteAssets->modulesParams->features->externalBaseUrl = \Config\Controller::$route->url;
-			$dec->siteAssets->modulesParams->platform->externalBaseUrl = \Config\Controller::$route->url;
+			if (isset($dec->siteAssets->modulesParams->features->externalBaseUrl))
+				$dec->siteAssets->modulesParams->features->externalBaseUrl = \Config\Controller::$route->url;
+			if (isset($dec->siteAssets->modulesParams->platform->externalBaseUrl))
+				$dec->siteAssets->modulesParams->platform->externalBaseUrl = \Config\Controller::$route->url;
 			// var_dump($dec);
 			$node->nodeValue = '';
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
