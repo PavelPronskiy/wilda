@@ -55,7 +55,6 @@ class Controller
 		$cacheController = new \Cache\Controller;
 		$results = [];
 		// $crypt = new \Encryption();
-
 		if (\Config\Controller::$config->cache->enabled)
 		{
 
@@ -119,14 +118,12 @@ class Controller
 			if ($results->content_type == 'text/html; charset=UTF-8') {
 				$results->body = \Tags\Controller::stripHTML($results->body);
 			}
-
 		}
-
 
 		return $results;
 	}
 
-	private function curlErrorHandler($http_code) : bool
+	private static function curlErrorHandler($http_code) : bool
 	{
 		switch($http_code)
 		{

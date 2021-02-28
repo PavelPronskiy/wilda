@@ -27,8 +27,12 @@ class Controller
 		self::$route = (object) [
 			'domain' => $_SERVER['HTTP_HOST'],
 			'path' => $_SERVER['REQUEST_URI'],
-			'site' => $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'],
-			'url' => $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
+			'site' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+				? $_SERVER['HTTP_X_FORWARDED_PROTO']
+				: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
+			'url' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+				? $_SERVER['HTTP_X_FORWARDED_PROTO']
+				: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
 		];
 
 		if (isset($request_uri['query'])) {
@@ -60,6 +64,7 @@ class Controller
 			? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . ':' . key($query) . ':' . $query[key($query)]
 			: $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
+		//var_dump(self::$config);
 		// return $array;
 	}
 	
@@ -69,8 +74,9 @@ class Controller
 		die($response->body);
 	}
 
-	public static function getDomainConfig($array) : object
+	public static function getDomainConfig($array)
 	{
+		//var_dump($_SERVER);
 		foreach ($array->hosts as $host) {
 			if (self::$route->site == $host->site) {
 				return $host;
