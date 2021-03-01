@@ -61,13 +61,18 @@ class Controller
 		}
 
 		$array = (object)array_merge((array)$config_json, (array)$config_user_json);
-
+		
 		self::$config = $array;
 		if (RUN_METHOD == 'web') {
 			self::$domain = self::getDomainConfig($array);
-			self::$hash = isset($query)
+			
+			self::$hash = self::$domain->type .
+				':' .
+				$_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+			/*self::$hash = isset($query)
 				? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . ':' . key($query) . ':' . $query[key($query)]
-				: $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				: $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];*/
 		}
 	}
 	

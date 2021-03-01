@@ -59,9 +59,7 @@ class Controller
 	
 	public function get($hash) : object
 	{
-		$res = $this->redis->get(
-			\Config\Controller::$domain->type . ':' . $hash
-		);
+		$res = $this->redis->get($hash);
 
 		return $res
 			? json_decode($res)
@@ -72,12 +70,12 @@ class Controller
 	{
 		// $expire = \Config\Controller::$config->cache->expire;
 		$this->redis->set(
-			(string) \Config\Controller::$domain->type . ':' . $hash,
+			(string) $hash,
 			(string) json_encode($body)
 		);
 
 		$this->redis->expire(
-			(string) \Config\Controller::$domain->type . ':' . $hash,
+			(string) $hash,
 			(int) \Config\Controller::$config->cache->expire * 60
 		);
 	}
