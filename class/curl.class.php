@@ -10,6 +10,9 @@ class Controller
 	public static function get($url)
 	{
 		$curl = \curl_init();
+		$ua = isset($_SERVER['HTTP_USER_AGENT'])
+			? $_SERVER['HTTP_USER_AGENT']
+			: \Config\Controller::$config->headers->ua;
 
 		if (\Config\Controller::$config->privoxy->enabled)
 		{
@@ -22,7 +25,7 @@ class Controller
 		curl_setopt($curl, CURLOPT_URL, $url);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($curl, CURLOPT_USERAGENT, \Config\Controller::$config->headers->ua);
+		curl_setopt($curl, CURLOPT_USERAGENT, $ua);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt(
 			$curl,
@@ -93,7 +96,6 @@ class Controller
 				{
 					if ($results->content_type == 'text/html; charset=UTF-8') {
 						$results->body = \Tags\Controller::stripHTML($results->body);
-						$results = \Tags\Controller::postParser($results);
 					}
 
 					$cacheController->set($results, \Config\Controller::$hash);
@@ -121,7 +123,6 @@ class Controller
 
 			if ($results->content_type == 'text/html; charset=UTF-8') {
 				$results->body = \Tags\Controller::stripHTML($results->body);
-				$results = \Tags\Controller::postParser($results);
 			}
 		}
 

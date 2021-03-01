@@ -64,15 +64,13 @@ class Controller
 		
 		self::$config = $array;
 		if (RUN_METHOD == 'web') {
-			self::$domain = self::getDomainConfig($array);
-			
-			self::$hash = self::$domain->type .
-				':' .
-				$_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			$device_type = self::isMobile() ? 'mobile' : 'desktop';
 
-			/*self::$hash = isset($query)
-				? $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . ':' . key($query) . ':' . $query[key($query)]
-				: $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];*/
+			self::$domain = self::getDomainConfig($array);
+
+			self::$hash = $device_type .
+				':' . self::$domain->type .
+				':' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 		}
 	}
 	
@@ -87,6 +85,20 @@ class Controller
 		{
 			echo $response->body;
 		}
+	}
+
+	public static function isMobile() : bool
+	{
+		if(isset($_SERVER['HTTP_USER_AGENT']) and !empty($_SERVER['HTTP_USER_AGENT']))
+		{
+			$bool = false;
+			if(preg_match('/(Mobile|Android|Tablet|GoBrowser|[0-9]x[0-9]*|uZardWeb\/|Mini|Doris\/|Skyfire\/|iPhone|Fennec\/|Maemo|Iris\/|CLDC\-|Mobi\/)/uis', $_SERVER['HTTP_USER_AGENT']))
+			{
+				$bool = true;
+			}
+		}
+
+		return $bool;
 	}
 
 	public static function getDomainConfig($array)
