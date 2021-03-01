@@ -93,6 +93,7 @@ class Controller
 				{
 					if ($results->content_type == 'text/html; charset=UTF-8') {
 						$results->body = \Tags\Controller::stripHTML($results->body);
+						$results = \Tags\Controller::postParser($results);
 					}
 
 					$cacheController->set($results, \Config\Controller::$hash);
@@ -101,7 +102,6 @@ class Controller
 		}
 		else
 		{
-			
 			if (isset(\Config\Controller::$route->query) && in_array(key(\Config\Controller::$route->query), self::$uri_params))
 			{
 				$results = self::get(
@@ -121,6 +121,7 @@ class Controller
 
 			if ($results->content_type == 'text/html; charset=UTF-8') {
 				$results->body = \Tags\Controller::stripHTML($results->body);
+				$results = \Tags\Controller::postParser($results);
 			}
 		}
 

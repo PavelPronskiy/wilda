@@ -6,11 +6,61 @@ abstract class Controller
 {
 	public static $dom;
 
+	public static function isMobileDev() : bool
+	{
+		if(isset($_SERVER['HTTP_USER_AGENT']) and !empty($_SERVER['HTTP_USER_AGENT']))
+		{
+			$bool = false;
+			if(preg_match('/(Mobile|Android|Tablet|GoBrowser|[0-9]x[0-9]*|uZardWeb\/|Mini|Doris\/|Skyfire\/|iPhone|Fennec\/|Maemo|Iris\/|CLDC\-|Mobi\/)/uis', $_SERVER['HTTP_USER_AGENT']))
+			{
+				$bool = true;
+			}
+		}
+
+		return $bool;
+	}
+
 	public static function compressHTML($html) : string
 	{
 		return $html;
 		// $parser = \WyriHaximus\HtmlCompress\Factory::constructSmallest();
 		// return $parser->compress($html);
+	}
+
+	public static function postParser($object) : object
+	{
+		// $isMobile = self::isMobileDev();
+		switch (\Config\Controller::$domain->type) {
+			case 'wix':
+	
+				if (self::isMobileDev()) {
+					$object->body = str_replace(
+						'"isMobileDevice":false',
+						'"isMobileDevice":true',
+						$object->body
+					);
+
+					$object->body = str_replace(
+						'"viewMode":"desktop"',
+						'"viewMode":"mobile"',
+						$object->body
+					);
+					$object->body = str_replace(
+						'"formFactor":"desktop"',
+						'"formFactor":"mobile"',
+						$object->body
+					);
+					
+					/* $object->body = str_replace(
+						'"deviceClass":"Desktop"',
+						'"deviceClass":"mobile"',
+						$object->body
+					);*/
+				}
+				break;
+		}
+
+		return $object;
 	}
 
 	public static function changeAHrefLinks() : void
