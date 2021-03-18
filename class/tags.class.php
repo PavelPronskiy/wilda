@@ -394,8 +394,13 @@ class Wix extends Controller
 	{
 		foreach (self::$dom->getElementsByTagName('div') as $tag)
 		{
+			// site-root
 			if ($tag->getAttribute('id') == 'WIX_ADS') {
 				$tag->setAttribute('style', 'display:none');
+			}
+
+			if ($tag->getAttribute('id') == 'site-root') {
+				$tag->setAttribute('style', 'top:0px');
 			}
 		}
 	}
