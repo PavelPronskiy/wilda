@@ -312,7 +312,7 @@ abstract class Controller
 		switch (\Config\Controller::$domain->type) {
 			case 'wix':
 				Wix::changeWixOptions();
-				// Wix::changeHtmlTags();
+				Wix::changeHtmlTags();
 			break;
 
 			case 'tilda':
