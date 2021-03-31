@@ -3,7 +3,7 @@
 
 define("PATH", __DIR__);
 define("CLASS_PATH", PATH . '/class/');
-define("CONFIG", PATH . '/config.json');
+define("CONFIG_GLOBAL", PATH . '/config.json');
 define("CONFIG_USER", PATH . '/.config.json');
 define("RUN_METHOD", 'web');
 

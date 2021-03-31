@@ -27,34 +27,31 @@ class Controller
 
 	public function flush($cache) : void
 	{
-		$keys = $_SERVER['HTTP_HOST'] . '*';
+		$pages = $this->redis->keys(\Config\Controller::$hash);
 
-		switch ($cache) {
-			case 'keys':
-				$pages = $this->redis->keys($keys);
-				if (count($pages) > 0)
-				{
-					$this->notice('pages cached: ' . count($pages));
-				}
-				else
-				{
-					$this->notice('cache is empty');
-				}
-
-				break;
-			
-			case 'flush':
-				$pages = $this->redis->keys($keys);
-				$this->redis->del($pages);
-				$this->notice('deleted cache pages: ' . count($pages));
-				break;
-			
-			default:
-				$this->notice('<pre>cache=keys - view all cached items' . PHP_EOL . 'cache=flush - delete all cached items</pre>');
-				# code...
-				break;
+		if (count($pages) > 0)
+		{
+			$this->redis->del($pages);
+			$this->notice('deleted cache pages: ' . count($pages));
 		}
+		else
+		{
+			$this->notice('cache is empty');
+		}
+	}
 
+	public function keys($cache) : void
+	{
+		$pages = $this->redis->keys(\Config\Controller::$hash);
+
+		if (count($pages) > 0)
+		{
+			$this->notice('pages cached: ' . count($pages));
+		}
+		else
+		{
+			$this->notice('cache is empty');
+		}
 	}
 	
 	public function get($hash) : object

@@ -6,9 +6,25 @@ class Controller
 {
 	function __construct()
 	{
-		$cacheController = new \Cache\Controller;
 
-		if (
+		if (isset(\Config\Controller::$route->query))
+		{
+			$cacheController = new \Cache\Controller;
+			$query = \Config\Controller::$route->query->{key(\Config\Controller::$route->query)};
+		
+			switch ($query)
+			{
+				case 'flush': return $cacheController->flush($query);
+				case 'keys': return $cacheController->keys($query);
+			}
+		}
+
+		return \Config\Controller::render(
+			\Curl\Controller::rget()
+		);
+
+	
+		/* if (
 			isset(\Config\Controller::$route->query) &&
 			\Config\Controller::$route
 				->query
@@ -16,11 +32,7 @@ class Controller
 		)
 			return $cacheController->flush(
 				\Config\Controller::$route->query->{key(\Config\Controller::$route->query)}
-			);
-	
+			);*/
 
-		return \Config\Controller::render(
-			\Curl\Controller::rget()
-		);
 	}
 }
