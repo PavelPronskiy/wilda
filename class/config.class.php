@@ -9,6 +9,8 @@ class Controller
 	public static $route;
 	public static $hash;
 	public static $crypt;
+	public static $hash_key;
+	public static $name = 'tilda';
 	// public static $req_site;
 
 	function __construct()
@@ -34,8 +36,8 @@ class Controller
 					? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST']
 					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
 				'url' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-					? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $request_uri['path']
-					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $request_uri['path']
+					? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
+					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
 			];
 
 			if (isset($request_uri['query']))
@@ -97,9 +99,12 @@ class Controller
 					self::$config->cache->expire = self::$domain->cache->expire;
 			}
 
-			self::$hash = 'tilda' .
+			self::$hash_key = self::$name .
+				':' . self::$route->domain .
+				':' . self::$domain->type;
+
+			self::$hash = self::$hash_key .
 				':' . $device_type .
-				':' . self::$domain->type .
 				':' . self::$route->url;
 		}
 	}

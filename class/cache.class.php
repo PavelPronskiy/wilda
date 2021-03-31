@@ -27,7 +27,7 @@ class Controller
 
 	public function flush($cache) : void
 	{
-		$pages = $this->redis->keys(\Config\Controller::$hash);
+		$pages = $this->redis->keys(\Config\Controller::$hash_key . ':*');
 
 		if (count($pages) > 0)
 		{
@@ -42,7 +42,7 @@ class Controller
 
 	public function keys($cache) : void
 	{
-		$pages = $this->redis->keys(\Config\Controller::$hash);
+		$pages = $this->redis->keys(\Config\Controller::$hash_key . ':*');
 
 		if (count($pages) > 0)
 		{
