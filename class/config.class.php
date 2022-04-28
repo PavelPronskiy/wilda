@@ -26,7 +26,6 @@ class Controller
 
 		if (RUN_METHOD == 'web')
 		{
-	
 			$request_uri = parse_url($_SERVER['REQUEST_URI']);
 
 			self::$route = (object) [
@@ -77,6 +76,15 @@ class Controller
 
 			if (!isset(self::$domain->type))
 				die('Error domain type');
+			
+			if (isset(self::$domain->styles))
+				self::$config->styles = self::$domain->styles;
+
+			if (isset(self::$domain->scripts))
+				self::$config->scripts = self::$domain->scripts;
+
+			if (isset(self::$domain->images))
+				self::$config->images = self::$domain->images;
 
 			if (isset(self::$domain->privoxy))
 			{
