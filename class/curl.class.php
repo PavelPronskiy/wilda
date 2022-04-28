@@ -53,7 +53,9 @@ class Controller
 			];
 		} else {
 			return \Config\Controller::render( (object) [
-				'body' => 'Error: ' . $http_code,
+				'code' => 502,
+				'error' => true,
+				'body' => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 502</h1>' . \Config\Controller::$lang[0] . '</body></html>',
 				'content_type' => 'text/html'
 			]);
 		}
@@ -135,15 +137,21 @@ class Controller
 		{
 			case 404:
 				if (RUN_METHOD == 'web')
-					header("HTTP/1.0 404 Not Found");
+					return \Config\Controller::render( (object) [
+					'code' => 404,
+					'error' => true,
+					'body' => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 404</h1>' . \Config\Controller::$lang[1] . '</body></html>',
+					'content_type' => 'text/html'
+				]);
 
-				return false;
 			case 503:
 				if (RUN_METHOD == 'web')
-					header("HTTP/1.0 503 Error");
-	
-				return false;
-			break;
+					return \Config\Controller::render( (object) [
+					'code' => 503,
+					'error' => true,
+					'body' => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . \Config\Controller::$lang[2] . '</body></html>',
+					'content_type' => 'text/html'
+				]);
 			
 			case 200:
 				return true;

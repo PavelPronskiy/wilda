@@ -48,6 +48,24 @@ abstract class Controller
 		}
 	}	
 
+	public static function getRelativePath($content, $type) : string
+	{
+		$path = $content;
+		switch (\Config\Controller::$config->{$type})
+		{
+			case 'relative':
+				$path = \Encrypt\Controller::encode($content);
+			break;
+
+			case 'absolute':
+			default:
+				$path = $content;
+			break;
+		}
+
+		return $path;
+	}
+
 	public static function changeMetaTags() : void
 	{
 		$metatags = self::$dom->getElementsByTagName('meta');
@@ -56,48 +74,40 @@ abstract class Controller
 			switch (strtolower($meta->getAttribute('itemprop')))
 			{
 				case 'image':
-					switch (\Config\Controller::$config->images)
-					{
-						case 'relative':
-							$content = $meta->getAttribute('content');
-							if (!empty($content)) {
-								$meta->setAttribute(
-									'content',
-									'/?img=' . \Encrypt\Controller::encode($content)
-								);
-							}
-						break;
+					$content = $meta->getAttribute('content');
+					if (!empty($content)) {
+						$meta->setAttribute(
+							'content',
+							'/?img=' . self::getRelativePath($content, 'images')
+						);
 					}
 				
 				break;
 			}
 
-			switch (strtolower($meta->getAttribute('http-equiv'))) {
+			switch (strtolower($meta->getAttribute('http-equiv')))
+			{
 				case 'x-dns-prefetch-control': break;
 			}
 			
-			switch (strtolower($meta->getAttribute('name'))) {
+			switch (strtolower($meta->getAttribute('name')))
+			{
 				case 'robots': $meta->parentNode->removeChild($meta); break;
 				case 'generator': $meta->parentNode->removeChild($meta); break;
 			}
 
-			switch (strtolower($meta->getAttribute('property'))) {
+			switch (strtolower($meta->getAttribute('property')))
+			{
 				case 'og:url':
-					$meta->setAttribute(
-						'content',
-						\Config\Controller::$route->url);
+					$meta->setAttribute('content', \Config\Controller::$route->url);
 				break;
 				case 'og:image':
-					switch (\Config\Controller::$config->images) {
-						case 'relative':
-							$content = $meta->getAttribute('content');
-							if (!empty($content)) {
-								$meta->setAttribute(
-									'content',
-									'/?img=' . \Encrypt\Controller::encode($content)
-								);
-							}
-						break;
+					$content = $meta->getAttribute('content');
+					if (!empty($content)) {
+						$meta->setAttribute(
+							'content',
+							'/?img=' . self::getRelativePath($content, 'images')
+						);
 					}
 				break;
 			}
@@ -114,7 +124,8 @@ abstract class Controller
 			if (!empty($attr)) {
 				$node->setAttribute(
 					'data-url',
-					'/?css=' . \Encrypt\Controller::encode(self::parseURL($attr))
+					'/?css=' . self::getRelativePath(self::parseURL($attr), 'styles')
+					// '/?css=' . \Encrypt\Controller::encode(self::parseURL($attr))
 				);
 			}
 
@@ -122,7 +133,7 @@ abstract class Controller
 			if (!empty($attr)) {
 				$node->setAttribute(
 					'data-href',
-					'/?css=' . \Encrypt\Controller::encode(self::parseURL($attr))
+					'/?css=' . self::getRelativePath(self::parseURL($attr), 'styles')
 				);
 			}
 
@@ -139,7 +150,8 @@ abstract class Controller
 						$str = str_replace(')', '', $str);
 						$str = str_replace('"', '', $str);
 						// var_dump($str);
-						$nodeValue = str_replace($str, '/?font=' . \Encrypt\Controller::encode('https:' . $str), $nodeValue);
+						$nodeValue = str_replace($str, '/?font=' . self::getRelativePath('https:' . $str, 'fonts'), $nodeValue);
+						// $nodeValue = str_replace($str, '/?font=' . \Encrypt\Controller::encode('https:' . $str), $nodeValue);
 					}
 
 					$node->nodeValue = '';
@@ -158,7 +170,8 @@ abstract class Controller
 					if (!empty($src)) {
 						$link->setAttribute(
 							'href',
-							'/?js=' . \Encrypt\Controller::encode(self::parseURL($src))
+							'/?js=' . self::getRelativePath(self::parseURL($src), 'scripts')
+							// '/?js=' . \Encrypt\Controller::encode(self::parseURL($src))
 						);
 					}
 						
@@ -178,7 +191,8 @@ abstract class Controller
 					if (!empty($src)) {
 						$link->setAttribute(
 							'href',
-							'/?ico=' . \Encrypt\Controller::encode(self::parseURL($src))
+							'/?ico=' . self::getRelativePath(self::parseURL($src), 'icons')
+							// '/?ico=' . \Encrypt\Controller::encode(self::parseURL($src))
 						);
 					}
 					break;
@@ -197,7 +211,8 @@ abstract class Controller
 							if (!empty($src)) {
 								$link->setAttribute(
 									'href',
-									'/?css=' . \Encrypt\Controller::encode(self::parseURL($src))
+									'/?css=' . self::getRelativePath(self::parseURL($src), 'styles')
+									// '/?css=' . \Encrypt\Controller::encode(self::parseURL($src))
 								);
 							}
 						break;
@@ -233,7 +248,8 @@ abstract class Controller
 					{
 						$script->setAttribute(
 							'src',
-							'/?js=' . \Encrypt\Controller::encode(self::parseURL($src))
+							'/?js=' . self::getRelativePath(self::parseURL($src), 'scripts')
+							// '/?js=' . \Encrypt\Controller::encode(self::parseURL($src))
 						);
 					}
 
@@ -242,7 +258,8 @@ abstract class Controller
 					{
 						$script->setAttribute(
 							'data-url',
-							'/?js=' . \Encrypt\Controller::encode(self::parseURL($data_url))
+							'/?js=' . self::getRelativePath(self::parseURL($data_url), 'scripts')
+							// '/?js=' . \Encrypt\Controller::encode(self::parseURL($data_url))
 						);
 					}
 
@@ -262,7 +279,8 @@ abstract class Controller
 					if (!empty($src)) {
 						$img->setAttribute(
 							'src',
-							'/?img=' . \Encrypt\Controller::encode(self::parseURL($src))
+							'/?img=' . self::getRelativePath(self::parseURL($src), 'images')
+							// '/?img=' . \Encrypt\Controller::encode(self::parseURL($src))
 						);
 					}
 				break;
@@ -278,7 +296,8 @@ abstract class Controller
 					if (!empty($src)) {
 						$img->setAttribute(
 							'xlink:href',
-							'/?img=' . \Encrypt\Controller::encode(self::parseURL($src))
+							'/?img=' . self::getRelativePath(self::parseURL($src), 'images')
+							// '/?img=' . \Encrypt\Controller::encode(self::parseURL($src))
 						);
 					}
 				break;

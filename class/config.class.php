@@ -11,6 +11,7 @@ class Controller
 	public static $crypt;
 	public static $hash_key;
 	public static $name = 'tilda';
+	public static $lang = [];
 	// public static $req_site;
 
 	function __construct()
@@ -71,12 +72,12 @@ class Controller
 
 		if (RUN_METHOD == 'web') {
 			$device_type = self::isMobile() ? 'mobile' : 'desktop';
-
 			self::$domain = self::getDomainConfig($array);
 
 			if (!isset(self::$domain->type))
 				die('Error domain type');
-			
+
+
 			if (isset(self::$domain->styles))
 				self::$config->styles = self::$domain->styles;
 
@@ -107,6 +108,9 @@ class Controller
 					self::$config->cache->expire = self::$domain->cache->expire;
 			}
 
+			self::$lang = isset(self::$domain->lang) ? self::$config->translations->{self::$domain->lang} : self::$config->translations->{self::$config->lang};
+
+
 			self::$hash_key = self::$name .
 				':' . self::$route->domain .
 				':' . self::$domain->type;
@@ -121,6 +125,9 @@ class Controller
 	{
 		if (RUN_METHOD == 'web')
 		{
+			if (isset($response->error) && isset($response->code))
+				http_response_code($response->code);
+
 			header("Content-type: " . $response->content_type);
 			die($response->body);
 		}
@@ -146,11 +153,11 @@ class Controller
 
 	public static function getDomainConfig($array)
 	{
-		//var_dump($_SERVER);
-		foreach ($array->hosts as $host) {
-			if (self::$route->site == $host->site) {
+		foreach ($array->hosts as $host)
+		{
+			$parse_host_site = (object) parse_url($host->site);
+			if (self::$route->domain === $parse_host_site->host)
 				return $host;
-			}
 		}
 	}
 }
