@@ -56,7 +56,7 @@ abstract class Controller
 				$project = str_replace($proto , '', \Config\Controller::$domain->project);
 				$site = str_replace($proto , '', \Config\Controller::$domain->site);
 
-
+				// change host
 				if (preg_match('/project/', $project))
 					$content->body = preg_replace(
 						'/Host:.*/',
@@ -69,6 +69,15 @@ abstract class Controller
 						$site,
 						$content->body
 					);
+
+				// change disallow directives
+				$content->body = str_replace(
+					'Disallow: /',
+					'',
+					$content->body
+				);
+				
+
 
 				break;
 			
