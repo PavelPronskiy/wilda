@@ -38,6 +38,31 @@ abstract class Controller
 		}
 	}
 
+	public static function changeRobotsHost($content) : object
+	{
+		switch (\Config\Controller::$domain->type)
+		{
+			case 'tilda':
+				$content->body = str_replace(
+					str_replace(
+						'http://project',
+						'',
+						\Config\Controller::$domain->project
+					),
+					\Config\Controller::$route->domain,
+					$content->body
+				);
+
+				break;
+			
+			default:
+				$content->body = preg_replace('/Host:.*/', 'Host: ', $content->body);
+				break;
+		}
+
+		return $content;
+	}
+
 	public static function removeComments() : void
 	{
 		$xpath = new \DOMXPath(self::$dom);

@@ -110,7 +110,6 @@ class Controller
 					\Encrypt\Controller::decode(\Config\Controller::$route
 						->query->{key(\Config\Controller::$route->query)})
 				);
-
 			}
 			else
 			{
