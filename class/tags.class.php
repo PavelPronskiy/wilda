@@ -40,23 +40,39 @@ abstract class Controller
 
 	public static function changeRobotsHost($content) : object
 	{
+		$proto = ['http://', 'https://'];
 		switch (\Config\Controller::$domain->type)
 		{
 			case 'tilda':
-				$content->body = str_replace(
-					str_replace(
-						'http://project',
-						'',
-						\Config\Controller::$domain->project
-					),
-					\Config\Controller::$route->domain,
-					$content->body
-				);
+				/*$exp_array = explode(PHP_EOL, $content->body);
+				foreach ($exp_array as $key => $line)
+				{
+					$exp_array[$key] = preg_replace('/^Sitemap:/', 'Sitemap: ', $line);
+					// var_dump($line);
+				}
+
+				var_dump($exp_array);*/
+
+				$project = str_replace($proto , '', \Config\Controller::$domain->project);
+				$site = str_replace($proto , '', \Config\Controller::$domain->site);
+
+
+				if (preg_match('/project/', $project))
+					$content->body = preg_replace(
+						'/Host:.*/',
+						'Host: ' . \Config\Controller::$route->domain,
+						$content->body
+					);
+				else
+					$content->body = str_replace(
+						$project,
+						$site,
+						$content->body
+					);
 
 				break;
 			
 			default:
-				$content->body = preg_replace('/Host:.*/', 'Host: ', $content->body);
 				break;
 		}
 
