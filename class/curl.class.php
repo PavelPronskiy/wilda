@@ -34,7 +34,6 @@ class Controller
 				? \Config\Controller::$domain->project
 				: ''
 		);
-		
 		// curl_setopt($curl, CURLOPT_VERBOSE, true);
 		curl_setopt($curl, CURLOPT_ENCODING, "gzip");
 
@@ -43,7 +42,6 @@ class Controller
 		$content_type = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
 		// $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
 		$http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-		
 		curl_close($curl);
 		
 		if (self::curlErrorHandler($http_code)) {
@@ -155,13 +153,11 @@ class Controller
 			
 			case 200:
 				return true;
-			break;
 			
 
 			case 0:
 			default:
 				return false;
-			break;
 		}
 	}
 

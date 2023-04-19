@@ -8,7 +8,7 @@
 	"salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
 	"lang": "ru",
 	"privoxy": {
-		"enabled": false,
+		"enabled": true,
 		"host": "127.0.0.1",
 		"port": 8118
 	},
