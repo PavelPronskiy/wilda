@@ -44,15 +44,6 @@ abstract class Controller
 		switch (\Config\Controller::$domain->type)
 		{
 			case 'tilda':
-				/*$exp_array = explode(PHP_EOL, $content->body);
-				foreach ($exp_array as $key => $line)
-				{
-					$exp_array[$key] = preg_replace('/^Sitemap:/', 'Sitemap: ', $line);
-					// var_dump($line);
-				}
-
-				var_dump($exp_array);*/
-
 				$project = str_replace($proto , '', \Config\Controller::$domain->project);
 				$site = str_replace($proto , '', \Config\Controller::$domain->site);
 
@@ -70,15 +61,13 @@ abstract class Controller
 						$content->body
 					);
 
-				// change disallow directives
+				// remove disallow directives
 				$content->body = str_replace(
 					'Disallow: /',
 					'',
 					$content->body
 				);
 				
-
-
 				break;
 			
 			default:
@@ -400,59 +389,61 @@ class Wix extends Controller
 	{
 		$xpath = new \DOMXPath(self::$dom);
 		$nodes = $xpath->query('//script[@id="wix-viewer-model"]');
+		$route_url = str_replace('http://', 'https://', \Config\Controller::$route->url);
 
 		foreach ($nodes as $key => $node) {
 			$dec = json_decode($node->nodeValue);
-
 			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->domain))
 				$dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = \Config\Controller::$route->domain;
 
 			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl))
-				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = $route_url;
 			
 			if (isset($dec->site->externalBaseUrl))
-				$dec->site->externalBaseUrl = \Config\Controller::$route->url;
+				$dec->site->externalBaseUrl = preg_replace('#/$#', '', $route_url);
 
 			if (isset($dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl))
-				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = $route_url;
 			if (isset($dec->siteFeaturesConfigs->router->baseUrl))
-				$dec->siteFeaturesConfigs->router->baseUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->router->baseUrl = $route_url;
 
 			if (isset($dec->siteFeaturesConfigs->seo->context->siteUrl))
-				$dec->siteFeaturesConfigs->seo->context->siteUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->seo->context->siteUrl = $route_url;
 
 			if (isset($dec->siteFeaturesConfigs->seo->context->defaultUrl))
-				$dec->siteFeaturesConfigs->seo->context->defaultUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->seo->context->defaultUrl = $route_url;
 			
 			if (isset($dec->requestUrl))
-				$dec->requestUrl = \Config\Controller::$route->url;
+				$dec->requestUrl = $route_url;
 			
 			if (isset($dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl))
-				$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = $route_url;
 
 			if (isset($dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl))
-				$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = $route_url;
 			
 			if (isset($dec->siteFeaturesConfigs->tpaCommons->requestUrl))
-				$dec->siteFeaturesConfigs->tpaCommons->requestUrl = \Config\Controller::$route->url;
+				$dec->siteFeaturesConfigs->tpaCommons->requestUrl = $route_url;
 			
 			if (isset($dec->siteAssets->modulesParams->features->externalBaseUrl))
-				$dec->siteAssets->modulesParams->features->externalBaseUrl = \Config\Controller::$route->url;
+				$dec->siteAssets->modulesParams->features->externalBaseUrl = $route_url;
 
 			if (isset($dec->siteAssets->modulesParams->platform->externalBaseUrl))
-				$dec->siteAssets->modulesParams->platform->externalBaseUrl = \Config\Controller::$route->url;
+				$dec->siteAssets->modulesParams->platform->externalBaseUrl = $route_url;
 
 			$node->nodeValue = '';
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
 			// $dec->siteFeaturesConfigs = '';
+			//var_dump(\Config\Controller::$route->url);
+
 		}
 
 		$nodes = $xpath->query('//script[@id="wix-fedops"]');
 
 		foreach ($nodes as $key => $node) {
 			$dec = json_decode($node->nodeValue);
-			$dec->data->site->externalBaseUrl = \Config\Controller::$route->url;
-			$dec->data->requestUrl = \Config\Controller::$route->url;
+			$dec->data->site->externalBaseUrl = $route_url;
+			$dec->data->requestUrl = $route_url;
 
 			$node->nodeValue = '';
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
