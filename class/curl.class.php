@@ -43,7 +43,6 @@ class Controller
 		// $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
 		$http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 		curl_close($curl);
-		
 		if (self::curlErrorHandler($http_code)) {
 			return (object) [
 				'body' => $response,
@@ -113,10 +112,13 @@ class Controller
 			}
 			else
 			{
+				$build_query = count((array) \Config\Controller::$route->query) > 0 ? '?' . http_build_query((array) \Config\Controller::$route->query) : '';
+
+				// var_dump($build_query);
 				// get remote results and cache
 				$results = self::get(
 					\Config\Controller::$domain->project .
-					\Config\Controller::$route->path
+					\Config\Controller::$route->path . $build_query
 				);
 			}
 

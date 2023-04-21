@@ -9,12 +9,17 @@ class Controller
 		if (isset(\Config\Controller::$route->query))
 		{
 			$cacheController = new \Cache\Controller;
-			$query = \Config\Controller::$route->query->{key(\Config\Controller::$route->query)};
+			// var_dump(key(\Config\Controller::$route->query));
+			// exit;
 		
-			switch ($query)
+			if (key(\Config\Controller::$route->query))
 			{
-				case 'flush': return $cacheController->flush($query);
-				case 'keys': return $cacheController->keys($query);
+				$query = \Config\Controller::$route->query->{key(\Config\Controller::$route->query)};
+				switch ($query)
+				{
+					case 'flush': return $cacheController->flush($query);
+					case 'keys': return $cacheController->keys($query);
+				}
 			}
 		}
 

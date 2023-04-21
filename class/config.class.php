@@ -27,7 +27,9 @@ class Controller
 
 		if (RUN_METHOD == 'web')
 		{
-			$request_uri = parse_url($_SERVER['REQUEST_URI']);
+			$request_uri = parse_url(
+				preg_replace('{^//}', '/', $_SERVER['REQUEST_URI'])
+			);
 
 			self::$route = (object) [
 				'domain' => $_SERVER['HTTP_HOST'],
@@ -44,6 +46,10 @@ class Controller
 			{
 				parse_str($request_uri['query'], $query);
 				self::$route->query = (object) $query;
+			}
+			else
+			{
+				self::$route->query = (object) [];	
 			}
 		}
 

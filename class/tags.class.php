@@ -2,6 +2,9 @@
 
 namespace Tags;
 
+/**
+ * Tags
+ */
 abstract class Controller
 {
 	public static $dom;
@@ -15,9 +18,11 @@ abstract class Controller
 
 	public static function changeAHrefLinks() : void
 	{
+		// var_dump(\Config\Controller::$route);
 		foreach (self::$dom->getElementsByTagName('a') as $tag)
 		{
 			$project_path = \Config\Controller::$domain->project . \Config\Controller::$route->path;
+			// var_dump($tag->getAttribute('href') . ' ' . $project_path);
 			if ($tag->getAttribute('href') == $project_path) {
 				$tag->setAttribute(
 					'href',
@@ -365,15 +370,16 @@ abstract class Controller
 		self::changeLinkTags();
 		self::changeMetaTags();
 		self::removeComments();
-		self::changeAHrefLinks();
 
 		switch (\Config\Controller::$domain->type) {
 			case 'wix':
 				Wix::changeWixOptions();
 				Wix::changeHtmlTags();
+				Wix::changeAHrefLinks();
 			break;
 
 			case 'tilda':
+				self::changeAHrefLinks();
 				Tilda::removeTildaCopy();
 			break;
 		}
@@ -383,6 +389,10 @@ abstract class Controller
 	}
 }
 
+
+/**
+ * Wix Controller
+ */
 class Wix extends Controller
 {
 	public static function changeWixOptions() : void
@@ -390,22 +400,28 @@ class Wix extends Controller
 		$xpath = new \DOMXPath(self::$dom);
 		$nodes = $xpath->query('//script[@id="wix-viewer-model"]');
 		$route_url = str_replace('http://', 'https://', \Config\Controller::$route->url);
-
+		$base_url = str_replace('http://', 'https://', \Config\Controller::$domain->site);
+		$features_exclude = [
+			// 'thunderboltInitializer',
+		];
 		foreach ($nodes as $key => $node) {
 			$dec = json_decode($node->nodeValue);
+			// var_dump($dec);
 			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->domain))
 				$dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = \Config\Controller::$route->domain;
 
 			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl))
-				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = $route_url;
+				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = $base_url;
 			
 			if (isset($dec->site->externalBaseUrl))
-				$dec->site->externalBaseUrl = preg_replace('#/$#', '', $route_url);
+				// $dec->site->externalBaseUrl = \Config\Controller::$domain->project;
+				$dec->site->externalBaseUrl = $base_url;
+				// $dec->site->externalBaseUrl = preg_replace('#/$#', '', $route_url);
 
 			if (isset($dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl))
-				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = $route_url;
+				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = $base_url;
 			if (isset($dec->siteFeaturesConfigs->router->baseUrl))
-				$dec->siteFeaturesConfigs->router->baseUrl = $route_url;
+				$dec->siteFeaturesConfigs->router->baseUrl = $base_url;
 
 			if (isset($dec->siteFeaturesConfigs->seo->context->siteUrl))
 				$dec->siteFeaturesConfigs->seo->context->siteUrl = $route_url;
@@ -417,19 +433,25 @@ class Wix extends Controller
 				$dec->requestUrl = $route_url;
 			
 			if (isset($dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl))
-				$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = $route_url;
+				$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = $base_url;
 
 			if (isset($dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl))
-				$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = $route_url;
+				$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = $base_url;
 			
 			if (isset($dec->siteFeaturesConfigs->tpaCommons->requestUrl))
 				$dec->siteFeaturesConfigs->tpaCommons->requestUrl = $route_url;
 			
 			if (isset($dec->siteAssets->modulesParams->features->externalBaseUrl))
-				$dec->siteAssets->modulesParams->features->externalBaseUrl = $route_url;
+				$dec->siteAssets->modulesParams->features->externalBaseUrl = $base_url;
 
 			if (isset($dec->siteAssets->modulesParams->platform->externalBaseUrl))
-				$dec->siteAssets->modulesParams->platform->externalBaseUrl = $route_url;
+				$dec->siteAssets->modulesParams->platform->externalBaseUrl = $base_url;
+
+/*			foreach ($dec->siteFeatures as $key => $feature)
+			{
+				if (in_array($feature, $features_exclude))
+					unset($dec->siteFeatures[$key]);
+			}*/
 
 			$node->nodeValue = '';
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
@@ -450,6 +472,27 @@ class Wix extends Controller
 		}
 	}
 
+	/**
+	 * [changeAHrefLinks description]
+	 * @return [type] [description]
+	 */
+	public static function changeAHrefLinks() : void
+	{
+		// var_dump(\Config\Controller::$route);
+		$project_parse_url = parse_url(\Config\Controller::$domain->project);
+		foreach (self::$dom->getElementsByTagName('a') as $tag)
+			if (isset($project_parse_url['host']))
+				$tag->setAttribute(
+					'href',
+					str_replace(\Config\Controller::$domain->project, '', $tag->getAttribute('href'))
+				);
+
+	}
+
+	/**
+	 * [changeHtmlTags description]
+	 * @return [type] [description]
+	 */
 	public static function changeHtmlTags() : void
 	{
 		foreach (self::$dom->getElementsByTagName('div') as $tag)
@@ -466,6 +509,9 @@ class Wix extends Controller
 	}
 } 
 
+/**
+ * Tilda Controller
+ */
 class Tilda extends Controller
 {
 	public static function removeTildaCopy() : void
