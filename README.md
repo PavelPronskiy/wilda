@@ -1,6 +1,6 @@
-# Wilda
 
-Репроксирование с модификацией страниц.
+# Wilda
+Репроксирование с модификацией страниц для конструкторов tilda, wix
 
 ## Зависимости
 `nginx` `redis` `php8-fpm` `php8-cli` `php8-ctype` `php8-dom` `php8-mcrypt`
@@ -145,7 +145,7 @@
 	}
 ```
 
-Счётчики **Google Analytics** & **Yandex Metrika**
+Счётчики Google Analytics & Yandex Metrika
 
 `ga` - идентификатор Google Analytics
 `ya` - идентификатор Yandex Metrika
@@ -201,3 +201,38 @@
 > Имя файла должно совпадать с именем основного домена sitename.tld-footer.html
 
 
+## Пример описания конфигурации для определённого сайта
+```json
+"hosts": [
+		{
+			"compress": true,
+			"type": "tilda",
+			"site": "https://sitename.tld",
+			"project": "https://project123-constructor.tld"
+			"privoxy": {
+				"enabled": false
+			},
+			"mail": {
+				"enabled": true,
+				"subject": "Заявка с сайта",
+				"from":"info@mail.tld",
+				"to": [
+					"test@mail.tld",
+					"another@mail.tld"
+				]
+			},
+			"favicon": {
+				"enabled": true
+			},
+			"metrics": {
+				"enabled": true,
+				"ga": "GTM-123123",
+				"ya": "123456789"
+			},
+			"inject": {
+				"enabled": true,
+				"header": true
+			}
+		}
+];
+```
