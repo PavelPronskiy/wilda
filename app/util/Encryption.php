@@ -3,62 +3,34 @@
 namespace app\util;
 
 use app\core\Config;
-
+use \Hashids\Hashids;
 
 class Encryption
 {
-	public static function safeB64encode($string) : string
-	{
-		$data = base64_encode($string);
-		$data = str_replace(array('+','/','='),array('-','_',''),$data);
-		return $data;
+	public static $hashids;
+
+	function __construct() {
+		self::$hashids = new Hashids(Config::$config->salt);
 	}
 
-	public static function safeB64decode($string) : string
-	{
-		$data = str_replace(array('-','_'),array('+','/'),$string);
-		$mod4 = strlen($data) % 4;
-		if ($mod4) {
-			$data .= substr('====', $mod4);
-		}
-		return base64_decode($data);
-	}
-	
+	/**
+	 * [encode description]
+	 * @param  [type] $value [description]
+	 * @return [type]        [description]
+	 */
 	public static function encode($value) : string
 	{
-		return \trim(self::safeB64encode(
-			\mcrypt_encrypt(
-				MCRYPT_RIJNDAEL_256,
-				Config::$config->salt,
-				$value,
-				MCRYPT_MODE_ECB,
-				\mcrypt_create_iv(
-					\mcrypt_get_iv_size(
-						MCRYPT_RIJNDAEL_256,
-						MCRYPT_MODE_ECB
-					),
-					MCRYPT_RAND)
-				)
-			)
-		);
+		return self::$hashids->encodeHex(unpack('H*', $value)[1]);
 	}
 
+	/**
+	 * [decode description]
+	 * @param  [type] $value [description]
+	 * @return [type]        [description]
+	 */
 	public static function decode($value) : string
 	{
-		return \trim(
-			\mcrypt_decrypt(
-				MCRYPT_RIJNDAEL_256,
-				Config::$config->salt,
-				self::safeB64decode($value),
-				MCRYPT_MODE_ECB,
-				\mcrypt_create_iv(
-					\mcrypt_get_iv_size(
-						MCRYPT_RIJNDAEL_256,
-						MCRYPT_MODE_ECB
-					),
-					MCRYPT_RAND
-				)
-			)
-		);
+		return pack('H*', self::$hashids->decodeHex($value));
 	}
+
 }

@@ -3,7 +3,7 @@
 Репроксирование с модификацией страниц для конструкторов tilda, wix
 
 ## Зависимости
-`nginx` `redis` `php8-fpm` `php8-cli` `php8-ctype` `php8-dom` `php8-mcrypt`
+`nginx` `redis` `php81-fpm` `php81-redis` `php81-cli` `php81-ctype` `php81-dom` `php81-bcmath`
 
 ## Конфигурация
 Вся конфигурация для сайтов описывается в файле `.config.json`
