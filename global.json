@@ -9,7 +9,7 @@
 	"icons": "relative",
 	"salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
 	"lang": "ru",
-	"compress": false,
+	"compress": true,
 	"inject": {
 		"enabled": false,
 		"path": "inject",
