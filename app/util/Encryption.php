@@ -1,8 +1,11 @@
 <?php
 
-namespace Encrypt;
+namespace app\util;
 
-class Controller
+use app\core\Config;
+
+
+class Encryption
 {
 	public static function safeB64encode($string) : string
 	{
@@ -26,7 +29,7 @@ class Controller
 		return \trim(self::safeB64encode(
 			\mcrypt_encrypt(
 				MCRYPT_RIJNDAEL_256,
-				\Config\Controller::$config->salt,
+				Config::$config->salt,
 				$value,
 				MCRYPT_MODE_ECB,
 				\mcrypt_create_iv(
@@ -45,7 +48,7 @@ class Controller
 		return \trim(
 			\mcrypt_decrypt(
 				MCRYPT_RIJNDAEL_256,
-				\Config\Controller::$config->salt,
+				Config::$config->salt,
 				self::safeB64decode($value),
 				MCRYPT_MODE_ECB,
 				\mcrypt_create_iv(

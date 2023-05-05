@@ -1,7 +1,16 @@
 {
+    "name": "app/wilda",
+    "authors": [
+        {
+            "name": "Pavel Pronskiy",
+            "email": "pp@sweetgroup.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "app\\": "app/" }
+    },
     "require": {
-        "masterminds/html5": "^2.7",
-        "ralouphie/mimey": "^2.1",
-        "wyrihaximus/html-compress": "^3.0"
+        "masterminds/html5": "^2.8",
+        "phpmailer/phpmailer": "^5.2"
     }
 }

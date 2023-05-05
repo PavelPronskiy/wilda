@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		.main {
+			padding: 30px;
+		}
+		.default-table {
+			border-collapse: collapse;
+			border: 1px solid #ccc;
+		}
+		.default-table td {
+			
+			border: 1px solid #ccc;
+		}
+
+		hr {
+			border-top: 2px solid #ccc;
+			background-color: none;
+			height: 2px;
+			font-size: 0px;
+		}
+
+	</style>
+</head>
+	<body>
+		<div class="main">
+			<table class="default-table" width="500">
+				{TABLEDATA}
+			</table>
+			<br />
+			<div>
+				<p style="text-align:right"><i style="font-size:12px;">{TIMESTAMP}</i></p>
+			</div>
+		</div>
+	</body>
+</html>
