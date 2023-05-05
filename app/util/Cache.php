@@ -40,7 +40,7 @@ class Cache
 				self::$instance->del($key);
 
 		return Config::render((object) [
-			'body' => '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="2; url=\'' . $_SERVER['HTTP_REFERER'] . '\'" /></head><body><h4>Перенаправление на главную...</h4><p>Очищено элементов: ' . count($pages) . '</p></body></html>',
+			'body' => '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="2; url=\'' . Config::$domain->site . '\'" /></head><body><h4>Перенаправление на главную...</h4><p>Очищено элементов: ' . count($pages) . '</p></body></html>',
 			'content_type' => 'text/html; charset=UTF-8'
 		]);
 
