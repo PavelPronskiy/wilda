@@ -85,6 +85,8 @@ class Mail
 			$PHPMailer->SMTPDebug = 1;
 			$PHPMailer->CharSet = 'utf-8';
 			$PHPMailer->isSendmail();
+
+			$PHPMailer->Sender = Config::$mail->from;
 			$PHPMailer->setFrom(Config::$mail->from, Config::$mail->name);
 			$PHPMailer->isHTML(true);
 			$PHPMailer->Subject = Config::$mail->subject . ' ' . Config::getSiteName();
