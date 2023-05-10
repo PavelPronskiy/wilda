@@ -87,7 +87,7 @@ class Mail
 			$PHPMailer->isSendmail();
 
 			$PHPMailer->Sender = Config::$mail->from;
-			$PHPMailer->setFrom(Config::$mail->from, Config::$mail->name);
+			$PHPMailer->setFrom(Config::$mail->from, Config::$mail->name, FALSE);
 			$PHPMailer->isHTML(true);
 			$PHPMailer->Subject = Config::$mail->subject . ' ' . Config::getSiteName();
 			$PHPMailer->Body    = $body;
