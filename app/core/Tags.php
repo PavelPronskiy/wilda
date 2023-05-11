@@ -553,7 +553,6 @@ abstract class Tags
 	 */
 	public static function htmlModify($html) : string
 	{
-
 		$dom_html5 = new \Masterminds\HTML5(['disable_html_ns' => true]);
 		$html = self::injectHTML($html);
 		$html = Cache::injectWebCleaner($html);

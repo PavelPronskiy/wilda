@@ -27,12 +27,24 @@ class Curl
 		return $obj;
 	}
 
+	public static function typesCacheStats($obj) : object
+	{
+		switch($obj->content_type)
+		{
+			case 'text/html; charset=UTF-8': $obj->body = Cache::injectWebStats($obj->body); break;
+		}
+
+		return $obj;
+	}
+
 	/**
 	 * [preCachedRequest description]
 	 * @return [type] [description]
 	 */
 	public static function preCachedRequest() : object
 	{
+		Cache::$microtime = \microtime(true);		
+
 		$results = [];
 		// $cache = new Cache;
 		if (Config::$config->cache->enabled)
@@ -49,7 +61,7 @@ class Curl
 					Cache::set(self::typesModificator($results), Config::$hash);
 			}
 
-			return $results;
+			return self::typesCacheStats($results);
 		}
 		else
 		{

@@ -10,6 +10,7 @@ use app\util\Encryption;
 class Cache
 {
 	public $hash = '';
+	public static $microtime = '';
 	public static $instance = '';
 
 	function __construct()
@@ -133,6 +134,18 @@ class Cache
 			}
 
 		}
+
+		return $html;
+	}
+
+	public static function injectWebStats($html) : string
+	{
+		if (Config::$config->cache->stats)
+		{
+			$inject_html = '<!-- Cache runtime: ' . Config::microtimeAgo(self::$microtime) . ' -->';
+			return str_replace('</body>', $inject_html . '</body>', $html);
+		}
+
 
 		return $html;
 	}

@@ -156,14 +156,14 @@ class Config
 			/**
 			 * set cache variables
 			 */
-			if (isset(self::$domain->cache))
-			{
-				if (isset(self::$domain->cache->enabled))
-					self::$config->cache->enabled = self::$domain->cache->enabled;
+			if (isset(self::$domain->cache->enabled))
+				self::$config->cache->enabled = self::$domain->cache->enabled;
 
-				if (isset(self::$domain->cache->expire))
-					self::$config->cache->expire = self::$domain->cache->expire;
-			}
+			if (isset(self::$domain->cache->expire))
+				self::$config->cache->expire = self::$domain->cache->expire;
+
+			if (isset(self::$domain->cache->stats))
+				self::$config->cache->stats = self::$domain->cache->stats;
 
 			/**
 			 * set mail submit variables
@@ -380,6 +380,54 @@ class Config
 		else
 			return $url;
 	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param float $microtime
+	 * @return string
+	 */
+	public static function microtimeAgo(float $microtime) : string
+	{
+		return round((microtime(true) - $microtime) * 1000, 2) . 's';
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $time
+	 * @param boolean $reverse
+	 * @return void
+	 */
+	public static function timeAgo($time, $reverse = false)
+	{
+		$s = 0;
+		$estimate_time = $reverse === false
+			? (int)$time - time()
+			: time() - (int)$time;
+		// var_dump($estimate_time);
+
+		if ($estimate_time < 1) {
+			return $s;
+		}
+
+		$condition = [
+			24 * 60 * 60            =>  'd',
+			60 * 60                 =>  'h',
+			60                      =>  'm',
+			1                       =>  's'
+		];
+
+		foreach ($condition as $secs => $str) {
+			$d = $estimate_time / $secs;
+			
+			if ($d >= 1) {
+				$r = round($d);
+				return $r . $str;
+			}
+		}
+	}
+
 
 	/**
 	 * [getDomainConfig description]
