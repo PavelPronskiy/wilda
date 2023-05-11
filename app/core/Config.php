@@ -125,6 +125,19 @@ class Config
 			if (isset(self::$domain->images))
 				self::$config->images = self::$domain->images;
 
+			if (
+				is_array(self::$domain->site
+			) && in_array(
+				self::$route->site,
+				self::$domain->site
+				)
+			)
+			{
+				self::$config->site = self::$route->site;
+				self::$domain->site = self::$route->site;
+			}
+
+
 			/**
 			 * set privoxy variables
 			 */
@@ -377,9 +390,25 @@ class Config
 	{
 		foreach ($array->hosts as $host)
 		{
-			$parse_host_site = (object) parse_url($host->site);
-			if (self::$route->domain === $parse_host_site->host)
-				return $host;
+			if (is_array($host->site))
+			foreach ($host->site as $site) 
+			{
+				$parse_host_site = (object) parse_url($site);
+				// var_dump(self::$route->domain === $parse_host_site->host);
+				// var_dump($host);
+
+				if (self::$route->domain === $parse_host_site->host)
+				{
+					$host->site = $site;
+					return $host;
+				}
+			}
+			else
+			{
+				$parse_host_site = (object) parse_url($host->site);
+				if (self::$route->domain === $parse_host_site->host)
+					return $host;
+			}
 		}
 	}
 }

@@ -108,7 +108,11 @@
 
 ## site
 ```json
-	"site": "https://site.tld"
+	"site": "https://site.tld",
+	"site": [
+		"https://site.tld",
+		"https://anothersite.tld"
+	]
 ```
 Имя сайта с протоколом (внешнее)
 
