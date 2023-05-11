@@ -1,7 +1,7 @@
 {
 	"hosts": [],
-	"version": "0.5",
-	"version_date": "2023-05-05",
+	"version": "0.6",
+	"version_date": "2023-05-11",
 	"styles": "relative",
 	"scripts": "relative",
 	"images": "relative",
@@ -9,6 +9,7 @@
 	"icons": "relative",
 	"salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
 	"lang": "ru",
+	"forceSSL": true,
 	"compress": true,
 	"inject": {
 		"enabled": false,

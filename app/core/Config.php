@@ -339,6 +339,34 @@ class Config
 	{
 		return str_replace(['http://', 'https://'] , '', self::$domain->site);
 	}
+	
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public static function getProjectName()
+	{
+		return str_replace(['http://', 'https://'] , '', self::$domain->project);
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public static function removeProtoUrl($url)
+	{
+		return str_replace(['http://', 'https://'] , '', $url);
+	}
+
+	public static function forceProto($url)
+	{
+		if (self::$config->forceSSL)
+			return str_replace('http://' , 'https://', $url);
+		else
+			return $url;
+	}
 
 	/**
 	 * [getDomainConfig description]

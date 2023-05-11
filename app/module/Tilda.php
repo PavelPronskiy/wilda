@@ -80,8 +80,20 @@ class Tilda extends Tags
 	 */
 	public static function changeAHrefLinks() : void
 	{
+		$project_name = Config::getProjectName();
+		$site_name = Config::getSiteName();
+
 		foreach (self::$dom->getElementsByTagName('a') as $tag)
-			if ($tag->getAttribute('href') == Config::$domain->project . Config::$route->path)
+			if (str_contains($tag->getAttribute('href'), $project_name))
+			{
+				$proto_url = Config::forceProto($tag->getAttribute('href'));
+				$parse_url = parse_url($proto_url);
+				$tag->setAttribute(
+					'href',
+					str_replace($parse_url['host'], $site_name, $proto_url)
+				);
+			}
+			elseif ($tag->getAttribute('href') == Config::$domain->project . Config::$route->path)
 				$tag->setAttribute(
 					'href',
 					Config::$route->url
