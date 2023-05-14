@@ -5,38 +5,13 @@ namespace app\util;
 use app\core\Config;
 use app\util\Encryption;
 use app\core\Tags;
-use app\module\Tilda;
-use app\module\Wix;
+use app\core\Modify;
+
+// use app\module\Tilda;
+// use app\module\Wix;
 
 class Curl
 {
-
-	/**
-	 * [typesModificator description]
-	 * @param  [type] $obj [description]
-	 * @return [type]      [description]
-	 */
-	public static function typesModificator($obj) : object
-	{
-		switch($obj->content_type)
-		{
-			case 'application/javascript; charset=utf-8': $obj->body = Tags::jsModify($obj->body); break;
-			case 'text/html; charset=UTF-8': $obj->body = Tags::htmlModify($obj->body); break;
-		}
-
-		return $obj;
-	}
-
-	public static function typesCacheStats($obj) : object
-	{
-		switch($obj->content_type)
-		{
-			case 'text/html; charset=UTF-8': $obj->body = Cache::injectWebStats($obj->body); break;
-		}
-
-		return $obj;
-	}
-
 	/**
 	 * [preCachedRequest description]
 	 * @return [type] [description]
@@ -45,7 +20,7 @@ class Curl
 	{
 		Cache::$microtime = \microtime(true);		
 
-		$results = [];
+		$results = (object) [];
 		// $cache = new Cache;
 		if (Config::$config->cache->enabled)
 		{
@@ -58,10 +33,11 @@ class Curl
 				if (empty($results))
 					self::curlErrorHandler(500);
 				else
-					Cache::set(self::typesModificator($results), Config::$hash);
+					Cache::set(
+						Modify::byContentType($results),
+						Config::$hash
+					);
 			}
-
-			return self::typesCacheStats($results);
 		}
 		else
 		{
@@ -69,9 +45,10 @@ class Curl
 			if (empty($results))
 				self::curlErrorHandler(500);
 			else
-				return self::typesModificator($results);
+				return Modify::byContentType($results);
 		}
 
+		return $results;
 	}
 
 	/**
@@ -94,42 +71,48 @@ class Curl
 	 * @param  [type] $http_code [description]
 	 * @return [type]            [description]
 	 */
-	private static function curlErrorHandler($http_code)
+	public static function curlErrorHandler($http_code)
 	{
 		if (RUN_METHOD == 'web')
 		{
 			switch($http_code)
 			{
 				case 404:
-					return Config::render( (object) [
+					$result = (object) [
 						'code' => 404,
 						'error' => true,
 						'body' => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 404</h1>' . Config::$lang[1] . '</body></html>',
 						'content_type' => 'text/html'
-					]);
+					];	
+					break;
 
 				case 503:
-					return Config::render( (object) [
+					$result = (object) [
 						'code' => 503,
 						'error' => true,
 						'body' => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[2] . '</body></html>',
 						'content_type' => 'text/html'
-					]);
+					];
+					break;
+
 				case 502:
-					return Config::render( (object) [
+					$result = (object) [
 						'code' => 502,
 						'error' => true,
 						'body' => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 502</h1>' . Config::$lang[0] . '</body></html>',
 						'content_type' => 'text/html'
-					]);
+					];
+					break;
+
 				case 500:
-					return Config::render( (object) [
+					$result = (object) [
 						'code' => 500,
 						'error' => true,
 						'body' => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[3] . '</body></html>',
 						'content_type' => 'text/html'
-					]);
-				
+					];
+					break;
+
 				case 200:
 					return true;
 				
@@ -137,6 +120,8 @@ class Curl
 				default:
 					return false;
 			}
+
+			Config::render($result);
 		}
 	}
 

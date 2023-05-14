@@ -2,10 +2,9 @@
 
 namespace app\core;
 
-// use app\core\Config;
-// use app\core\Tags;
 use app\util\Cache;
 use app\util\Curl;
+use app\util\Editor;
 
 class Router
 {
@@ -15,9 +14,11 @@ class Router
 			if (key(Config::$route->query))
 				switch (key(Config::$route->query))
 				{
-					case 'clear': return Cache::clear();
-					case 'keys': return Cache::keys();
-					case 'cleaner': return Cache::webCacheCleaner();
+					case 'clear':
+					case 'flush': Cache::clear(); break;
+					case 'keys': Cache::keys(); break;
+					case 'editor': new Editor; break;
+					case 'cleaner': Cache::webCacheCleaner(); break;
 				}
 
 		// for post submits only
@@ -25,7 +26,7 @@ class Router
 			new Submit;
 
 		// for gets
-		return Config::render(
+		Config::render(
 			self::routeGet(
 				Curl::preCachedRequest()
 			)
@@ -42,7 +43,7 @@ class Router
 		switch (Config::$route->path)
 		{
 			case '/robots.txt':
-				return Tags::changeRobotsHost($content);
+				return Modify::robots($content);
 
 			default:
 				return $content;

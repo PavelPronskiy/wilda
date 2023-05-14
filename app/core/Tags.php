@@ -5,8 +5,6 @@ namespace app\core;
 use app\core\Config;
 use app\util\Encryption;
 use app\util\Cache;
-use app\module\Tilda;
-use app\module\Wix;
 use zz\Html\HTMLMinify;
 /**
  * Tags
@@ -14,6 +12,16 @@ use zz\Html\HTMLMinify;
 abstract class Tags
 {
 	public static $dom;
+
+	public static function changeDomElements(): void
+	{
+		self::changeBaseHref();
+		self::changeImgTags();
+		self::changeLinkTags();
+		self::changeMetaTags();
+		self::removeComments();
+		self::injectMetrics();
+	}
 
 	/**
 	 * [getElementsByClass description]
@@ -39,37 +47,11 @@ abstract class Tags
 		return $nodes;
 	}
 
-
-	/**
-	 * [injectHTML description]
-	 * @param  [type] $html [description]
-	 * @return [type]       [description]
-	 */
-	private static function injectHTML($html)
-	{
-		$path_header = Config::$inject->path . '/' . Config::getSiteName() . '-header.html';
-		$path_footer = Config::$inject->path . '/' . Config::getSiteName() . '-footer.html';
-
-		if (Config::$inject->enabled)
-		{
-			if (Config::$inject->header)
-				if (file_exists($path_header))
-					$html = str_replace('</head>', file_get_contents($path_header) . '</head>', $html);
-
-			if (Config::$inject->footer)
-				if (file_exists($path_footer))
-					$html = str_replace('</body>', file_get_contents($path_footer) . '</body>', $html);
-
-		}
-
-		return $html;
-	}
-
 	/**
 	 * [injectMetrics description]
 	 * @return [type] [description]
 	 */
-	private static function injectMetrics()
+	public static function injectMetrics()
 	{
 		if (Config::$metrics->enabled)
 		{
@@ -110,35 +92,10 @@ abstract class Tags
 	}
 
 	/**
-	 * [compressHTML description]
-	 * @param  [type] $html [description]
-	 * @return [type]       [description]
-	 */
-	private static function compressHTML($html) : string
-	{
-		if (Config::$compress)
-			$html = preg_replace([
-				'/\>[^\S ]+/s',
-				'/[^\S ]+\</s',
-				'/(\s)+/s',
-				'/<!--(.|\s)*?-->/',
-				'/\n+/'
-			], [
-				'>',
-				'<',
-				'\\1',
-				'',
-				' '
-			], $html);
-		
-		return $html;
-	}
-
-	/**
 	 * [changeBaseHref description]
 	 * @return [type] [description]
 	 */
-	private static function changeBaseHref() : void
+	public static function changeBaseHref() : void
 	{
 		foreach (self::$dom->getElementsByTagName('base') as $b)
 			$b->setAttribute(
@@ -147,55 +104,12 @@ abstract class Tags
 			);
 	}
 
-	/**
-	 * [changeRobotsHost description]
-	 * @param  [type] $content [description]
-	 * @return [type]          [description]
-	 */
-	public static function changeRobotsHost($content) : object
-	{
-		$proto = ['http://', 'https://'];
-		switch (Config::$domain->type)
-		{
-			case 'tilda':
-				$project = str_replace($proto , '', Config::$domain->project);
-				$site = str_replace($proto , '', Config::$domain->site);
-
-				// change host
-				if (preg_match('/project/', $project))
-					$content->body = preg_replace(
-						'/Host:.*/',
-						'Host: ' . Config::$route->domain,
-						$content->body
-					);
-				else
-					$content->body = str_replace(
-						$project,
-						$site,
-						$content->body
-					);
-
-				// remove disallow directives
-				$content->body = str_replace(
-					'Disallow: /',
-					'',
-					$content->body
-				);
-				
-				break;
-			
-			default:
-				break;
-		}
-
-		return $content;
-	}
 
 	/**
 	 * [removeComments description]
 	 * @return [type] [description]
 	 */
-	private static function removeComments() : void
+	public static function removeComments() : void
 	{
 		$xpath = new \DOMXPath(self::$dom);
 
@@ -232,7 +146,7 @@ abstract class Tags
 	 * [changeMetaTags description]
 	 * @return [type] [description]
 	 */
-	private static function changeMetaTags() : void
+	public static function changeMetaTags() : void
 	{
 		foreach (self::$dom->getElementsByTagName('meta') as $meta)
 		{
@@ -280,7 +194,7 @@ abstract class Tags
 	 * [changeLinkTags description]
 	 * @return [type] [description]
 	 */
-	private static function changeLinkTags() : void
+	public static function changeLinkTags() : void
 	{
 		$xpath = new \DOMXPath(self::$dom);
 		$nodes = $xpath->query('//style');
@@ -353,74 +267,16 @@ abstract class Tags
 						break;
 					}
 				break;
-
-			}
-		}
-
-	}
-
-	/**
-	 * [changeScriptTags description]
-	 * @return [type] [description]
-	 */
-	private static function changeScriptTags() : void
-	{
-		foreach (self::$dom->getElementsByTagName('script') as $index => $script)
-		{
-			switch (Config::$config->scripts)
-			{
-				case 'relative':
-
-					switch ($script->getAttribute('id'))
-					{
-						case 'sentry':
-							$script->parentNode->removeChild($script);
-							break;
-
-						case 'wix-viewer-model':
-							break;
-						
-					}
-
-					$src = $script->getAttribute('src');
-					$data_url = $script->getAttribute('data-url');
-
-					if (!empty($src))
-						$script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
-
-					if (!empty($data_url))
-						$script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
-
-
-					/**
-					 * tag <script>
-					 */
-					preg_match('/static\.tildacdn\.info/', $script->textContent, $matched);
-					if (count($matched) > 0)
-					{
-						$script->textContent = preg_replace_callback(
-							"/s\.src = \'(.*)\'/",
-							function($matches)
-							{
-								if (isset($matches[1]))
-									return "s.src = '" . Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($matches[1]), 'scripts') . "'";
-							},
-							$script->textContent
-						);
-
-					}
-
-
-				break;
 			}
 		}
 	}
+
 
 	/**
 	 * [changeImgTags description]
 	 * @return [type] [description]
 	 */
-	private static function changeImgTags() : void
+	public static function changeImgTags() : void
 	{
 
 		/**
@@ -438,33 +294,6 @@ abstract class Tags
 					if (!empty($src))
 						$img->setAttribute('data-original',	Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($src), 'images'));
 
-				break;
-			}
-
-		/**
-		 * tag <style>
-		 */
-		foreach (self::$dom->getElementsByTagName('style') as $style)
-			switch (Config::$config->images)
-			{
-				case 'relative':
-
-					preg_match('/static\.tildacdn\.info/', $style->textContent, $matched);
-					if (count($matched) > 0)
-					{
-						$style->textContent = preg_replace_callback(
-							"/background\-image\: url\(\'(.*)\'\)/",
-							function($matches)
-							{
-								if (isset($matches[1]))
-								{
-									return "background-image: url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[1]), 'images') . "')";
-								}
-							},
-							$style->textContent
-						);
-
-					}
 				break;
 			}
 
@@ -529,62 +358,16 @@ abstract class Tags
 			: Config::$domain->project . $src;
 	}
 
-	/**
-	 * [jsModify description]
-	 * @param  [type] $body [description]
-	 * @return [type]       [description]
-	 */
-	public static function jsModify($body)
+
+	public static function render(): string
 	{
-		switch (Config::$domain->type)
-		{
-			case 'tilda':
-				$body = Tilda::javascriptContentReplace($body);
-				break;
-		}
-		
-		return $body;
+		return self::$dom->saveHTML();
 	}
 
-	/**
-	 * [htmlModify description]
-	 * @param  [type] $html [description]
-	 * @return [type]       [description]
-	 */
-	public static function htmlModify($html) : string
+	public static function initialize(string $html): void
 	{
-		$dom_html5 = new \Masterminds\HTML5(['disable_html_ns' => true]);
-		$html = self::injectHTML($html);
-		$html = Cache::injectWebCleaner($html);
+		$dom_html5 = new \Masterminds\HTML5([ 'disable_html_ns' => true ]);
 		self::$dom = $dom_html5->loadHTML($html);
-
-		switch (Config::$domain->type)
-		{
-			case 'wix':
-				Wix::changeWixOptions();
-				Wix::changeHtmlTags();
-				Wix::changeAHrefLinks();
-			break;
-
-			case 'tilda':
-				Tilda::changeAHrefLinks();
-				Tilda::removeTildaCopy();
-				Tilda::removeCounters();
-				Tilda::changeSubmitSuccessMessage();
-				Tilda::changeFavicon();
-			break;
-		}
-
-		self::changeBaseHref();
-		self::changeImgTags();
-		self::changeScriptTags();
-		self::changeLinkTags();
-		self::changeMetaTags();
-		self::removeComments();
-		self::injectMetrics();
-
-
-		return self::compressHTML(self::$dom->saveHTML());
 	}
 }
 

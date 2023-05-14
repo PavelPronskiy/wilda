@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login page</title>
+        <script src="/node_modules/zepto/dist/zepto.min.js"></script>
+        <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <link href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/node_modules/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet">
+        <link href="/app/tpl/editor/auth.css" rel="stylesheet">
+        <script src="/app/tpl/editor/auth.js"></script>
+    </head>
+    <body>
+        <div class="mt-4 form-signin">
+            <h2 class="form-signin-heading"><i class="bi bi-layout-wtf"></i> Авторизация</h2>
+            <form class="needs-validation" id="loginForm" role="form" novalidate="">
+                <div class="mt-3 position-relative">
+                    <label for="inputLogin" class="form-label">Логин</label>
+                    <div class="input-group input-group-lg has-validation">
+                        <span class="input-group-text" id="inputLoginPrepend"><i class="bi bi-person"></i></span>
+                        <input type="login" min="3" id="inputLogin" name="login" class="form-control" placeholder="Логин"
+                            required="" autofocus aria-describedby="inputLoginPrepend" />
+                        <div class="invalid-feedback">Введите правильный логин</div>
+                    </div>
+                </div>
+                <div class="mt-3 position-relative">
+                    <label for="inputPassword" class="form-label">Пароль</label>
+                    <div class="input-group input-group-lg has-validation">
+                        <span class="input-group-text" id="inputPasswordPrepend"><i class="bi bi-shield"></i></span>
+                        <input type="password" min="3" id="inputPassword" name="password" class="form-control"
+                            placeholder="Пароль" required="" aria-describedby="inputPasswordPrepend" />
+                        <div class="invalid-feedback">Введите правильный пароль</div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="mt-2 status-login">
+        
+                    </div>
+                    <button class="btn btn-lg btn-primary" type="submit">Войти</button>
+                </div>
+            </form>
+        </div>
+
+    </body>
+</html>

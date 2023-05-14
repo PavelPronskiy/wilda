@@ -7,73 +7,81 @@ namespace app\core;
  */
 class Config
 {
+	/**
+	 * domain
+	 *
+	 * @var [type]
+	 */
 	public static $domain;
+
+	/**
+	 * config
+	 *
+	 * @var [type]
+	 */
 	public static $config;
+
 	public static $route;
 	public static $hash;
 	public static $crypt;
 	public static $hash_key;
+	public static $editor;
 	public static $compress;
 	public static $request_uri;
-	public static $name 			= 'wilda';
-	public static $lang 			= [];
-	public static $mail 			= [];
-	public static $metrics 			= [];
-	public static $favicon 			= [];
-	public static $inject 			= [];
+	public static $name = 'wilda';
+	public static $lang = [];
+	public static $mail = [];
+	public static $metrics = [];
+	public static $favicon = [];
+	public static $inject = [];
+	public static $access = [];
+	const CONFIG_ACCESS = PATH . '/app/config/access.json';
+	const CONFIG_GLOBAL = PATH . '/app/config/global.json';
+	const CONFIG_HOSTS = PATH . '/app/config/hosts.json';
 
-	const CONFIG_GLOBAL 			= PATH . '/global.json';
-	const CONFIG_USER 				= PATH . '/.config.json';
+	const QUERY_PARAM_IMG = '/?img=';
+	const QUERY_PARAM_ICO = '/?ico=';
+	const QUERY_PARAM_JS = '/?js=';
+	const QUERY_PARAM_CSS = '/?css=';
+	const QUERY_PARAM_FONT = '/?font=';
 
-	const QUERY_PARAM_IMG 			= '/?img=';
-	const QUERY_PARAM_ICO 			= '/?ico=';
-	const QUERY_PARAM_JS 			= '/?js=';
-	const QUERY_PARAM_CSS 			= '/?css=';
-	const QUERY_PARAM_FONT 			= '/?font=';
-
-	const URI_QUERY_TYPES 			= ['ico', 'img', 'js', 'css', 'font'];
-	const URI_QUERY_ADMIN 			= ['cleaner', 'flush', 'keys'];
+	const URI_QUERY_TYPES = [ 'ico', 'img', 'js', 'css', 'font' ];
+	const URI_QUERY_ADMIN = [ 'cleaner', 'flush', 'keys' ];
 
 	function __construct()
 	{
 		self::initialize();
 	}
 
-	/**
-	 * [initialize description]
-	 * @return [type] [description]
-	 */
-	public static function initialize() : void
+	
+	public static function initialize(): void
 	{
-		$array = [];
-		$config_json = [];
+		$array            = [];
+		$config_json      = [];
 		$config_user_json = [];
 
-		if (RUN_METHOD == 'web')
-		{
+		if (RUN_METHOD == 'web') {
 			$request_uri = parse_url(
-				preg_replace('{^//}', '/', $_SERVER['REQUEST_URI'])
+				preg_replace('{^//}', '/', $_SERVER[ 'REQUEST_URI' ])
 			);
 
-			self::$route = (object) [
-				'domain' => $_SERVER['HTTP_HOST'],
-				'path' => $request_uri['path'],
-				'site' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-					? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST']
-					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
-				'url' => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-					? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
-					: $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
+			self::$route = (object) [ 
+				'domain' => $_SERVER[ 'HTTP_HOST' ],
+				'path' => $request_uri[ 'path' ],
+				'site' => isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ])
+				? $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] . '://' . $_SERVER[ 'HTTP_HOST' ]
+				: $_SERVER[ 'REQUEST_SCHEME' ] . '://' . $_SERVER[ 'HTTP_HOST' ],
+				'url' => isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ])
+				? $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] . '://' . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ]
+				: $_SERVER[ 'REQUEST_SCHEME' ] . '://' . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ]
 			];
 
-			if (isset($request_uri['query']))
-			{
-				parse_str($request_uri['query'], $query);
+			if (isset($request_uri[ 'query' ])) {
+				parse_str($request_uri[ 'query' ], $query);
 				self::$route->query = (object) $query;
 			}
-			else
-			{
-				self::$route->query = (object) [];	
+			else {
+				self::$route->query = (object) [];
 			}
 
 			if (isset($_POST) && count($_POST) > 0)
@@ -81,40 +89,33 @@ class Config
 
 		}
 
-		if (file_exists(self::CONFIG_GLOBAL))
-		{
-			$config_json = json_decode(file_get_contents(self::CONFIG_GLOBAL));
-			if (json_last_error() > 0)
-				die(json_last_error_msg() . ' ' . self::CONFIG_GLOBAL);
-		
-		}
-		else
-			die('Global config: ' . self::CONFIG_GLOBAL . ' not found');
+		self::$config = (object) array_merge(
+			(array) self::getGlobalConfig(),
+			(array) self::getHostsConfig()
+		);
 
-		if (file_exists(self::CONFIG_USER))
-		{
-			$config_user_json = json_decode(file_get_contents(self::CONFIG_USER));
-			if (json_last_error() > 0)
-				die(json_last_error_msg() . ' ' . self::CONFIG_USER);
-		}
-		else
-			die('User config: ' . self::CONFIG_USER . ' not found');
-
-		$array = (object) array_merge((array)$config_json, (array)$config_user_json);
-		
-		self::$config = $array;
-
-		if (RUN_METHOD == 'web')
-		{
-			$device_type = self::isMobile() ? 'mobile' : 'desktop';
-			self::$domain = self::getDomainConfig($array);
-			self::$mail = (object) [];
+		if (RUN_METHOD == 'web') {
+			$device_type   = self::isMobile() ? 'mobile' : 'desktop';
+			self::$domain  = self::getDomainConfig();
+			self::$mail    = (object) [];
 			self::$favicon = (object) [];
-			self::$inject = (object) [];
+			self::$inject  = (object) [];
 			self::$metrics = (object) [];
+			self::$editor  = (object) [];
+			self::$access  = (array) Access::getAccessConfig();
+
+
+			/**
+			 * set lang translations
+			 * @var [type]
+			 */
+			self::$lang = isset(self::$domain->lang)
+				? self::$config->translations->{self::$domain->lang}
+				: self::$config->translations->{self::$config->lang};
+
 
 			if (!isset(self::$domain->type))
-				die('Error domain type');
+				\app\util\Curl::curlErrorHandler(500);
 
 			if (isset(self::$domain->styles))
 				self::$config->styles = self::$domain->styles;
@@ -126,13 +127,13 @@ class Config
 				self::$config->images = self::$domain->images;
 
 			if (
-				is_array(self::$domain->site
-			) && in_array(
-				self::$route->site,
-				self::$domain->site
+				is_array(
+					self::$domain->site
+				) && in_array(
+					self::$route->site,
+					self::$domain->site
 				)
-			)
-			{
+			) {
 				self::$config->site = self::$route->site;
 				self::$domain->site = self::$route->site;
 			}
@@ -141,11 +142,10 @@ class Config
 			/**
 			 * set privoxy variables
 			 */
-			if (isset(self::$domain->privoxy))
-			{
+			if (isset(self::$domain->privoxy)) {
 				if (isset(self::$domain->privoxy->enabled))
 					self::$config->privoxy->enabled = self::$domain->privoxy->enabled;
-				
+
 				if (isset(self::$domain->privoxy->host))
 					self::$config->privoxy->host = self::$domain->privoxy->host;
 
@@ -197,12 +197,12 @@ class Config
 				self::$mail->success = self::$domain->mail->success;
 			else
 				self::$mail->success = self::$config->mail->success;
-		
+
 			if (isset(self::$domain->mail->error))
 				self::$mail->error = self::$domain->mail->error;
 			else
 				self::$mail->error = self::$config->mail->error;
-		
+
 
 			/**
 			 * set favicon variables
@@ -212,15 +212,7 @@ class Config
 			else
 				self::$favicon->enabled = self::$config->favicon->enabled;
 
-			if (isset(self::$domain->favicon->path))
-				self::$favicon->path = self::$domain->favicon->path;
-			else
-				self::$favicon->path = self::$config->favicon->path;
-
-			if (isset(self::$domain->favicon->default))
-				self::$favicon->default = self::$domain->favicon->default;
-			else
-				self::$favicon->default = self::$config->favicon->default;
+			self::$favicon->path = "app/favicon";
 
 			/**
 			 * set compress variables
@@ -239,10 +231,7 @@ class Config
 			else
 				self::$metrics->enabled = self::$config->metrics->enabled;
 
-			if (isset(self::$domain->metrics->path))
-				self::$metrics->path = APP_PATH . self::$domain->metrics->path;
-			else
-				self::$metrics->path = APP_PATH . self::$config->metrics->path;
+			self::$metrics->path = APP_PATH . "tpl/metrics";
 
 			if (isset(self::$domain->metrics->ga))
 				self::$metrics->ga = self::$domain->metrics->ga;
@@ -264,26 +253,31 @@ class Config
 				self::$inject->header = self::$config->inject->header;
 
 			if (isset(self::$domain->inject->path))
-				self::$inject->path = APP_PATH . self::$domain->inject->path;
+				self::$inject->path = APP_PATH . 'inject';
 			else
-				self::$inject->path = APP_PATH . self::$config->inject->path;
+				self::$inject->path = APP_PATH . 'inject';
 
 			if (isset(self::$domain->inject->footer))
 				self::$inject->footer = self::$domain->inject->footer;
 			else
 				self::$inject->footer = self::$config->inject->footer;
 
-
 			/**
-			 * set lang translations
-			 * @var [type]
+			 * set editor variables
 			 */
-			self::$lang = isset(self::$domain->lang)
-				? self::$config->translations->{self::$domain->lang}
-				: self::$config->translations->{self::$config->lang};
+			if (isset(self::$domain->editor->enabled))
+				self::$editor->enabled = self::$domain->editor->enabled;
+			else
+				self::$editor->enabled = self::$config->editor->enabled;
+
+			self::$editor->path = 'tpl/editor';
+
+
 
 			self::$hash_key = self::$name . ':' . self::$route->domain . ':' . self::$domain->type;
-			self::$hash = self::$hash_key . ':' . $device_type . ':' . self::getURIEncryptHash();
+			self::$hash     = self::$hash_key . ':' . $device_type . ':' . self::getURIEncryptHash();
+
+
 		}
 		else
 			self::$lang = self::$config->translations->ru;
@@ -291,13 +285,85 @@ class Config
 	}
 
 	/**
+	 * Эта функция извлекает глобальные параметры конфигурации из файла JSON и добавляет имя текущего
+	 * объекта в конфигурацию перед ее возвратом.
+	 * 
+	 * @return глобальные параметры конфигурации в виде объекта JSON с добавленным свойством «имя».
+	 */
+	public static function getGlobalConfig()
+	{
+		$config_json = [];
+		if (file_exists(self::CONFIG_GLOBAL)) {
+			$config_json = json_decode(file_get_contents(self::CONFIG_GLOBAL));
+			if (json_last_error() > 0)
+				die(json_last_error_msg() . ' ' . self::CONFIG_GLOBAL);
+
+		}
+		else
+			die('Global config: ' . self::CONFIG_GLOBAL . ' not found');
+
+
+		$config_json->name = self::$name;
+
+		return $config_json;
+	}
+
+	/**
+	 * Функция проверяет, является ли данная строка допустимой конфигурацией JSON, и возвращает логическое
+	 * значение.
+	 * 
+	 * @param string data Параметр `` представляет собой строку, представляющую данные конфигурации
+	 * JSON. Функция `validateConfig` принимает этот параметр и проверяет, является ли он допустимым JSON,
+	 * используя функцию `json_decode`. Если декодирование не удается, возвращается false, в противном
+	 * случае возвращается true.
+	 * 
+	 * @return bool логическое значение. Он вернет «true», если входная строка «» является допустимой
+	 * строкой JSON, и «false» в противном случае.
+	 */
+	public static function validateConfig(string $data): bool
+	{
+		json_decode($data);
+		return json_last_error() > 0 ? false : true;
+	}
+
+	public static function getHostsConfig()
+	{
+		$config_json = [];
+		if (file_exists(self::CONFIG_HOSTS)) {
+			$config_json = json_decode(file_get_contents(self::CONFIG_HOSTS));
+			if (json_last_error() > 0) {
+				die(json_last_error_msg() . ' ' . self::CONFIG_HOSTS);
+			}
+		}
+		else
+			die('User config: ' . self::CONFIG_HOSTS . ' not found');
+
+		return $config_json;
+	}
+
+	/**
+	 * Эта функция устанавливает данные конфигурации пользователя, записывая их в файл JSON, если файл
+	 * существует.
+	 * 
+	 * @param array data  — это массив, содержащий данные конфигурации пользователя, которые
+	 * необходимо записать в файл.
+	 */
+	public static function setUserConfig(array $data): void
+	{
+		if (file_exists(self::CONFIG_HOSTS))
+			file_put_contents(
+				self::CONFIG_HOSTS,
+				(string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+			);
+	}
+
+	/**
 	 * [getURIEncryptHash description]
 	 * @return [type] [description]
 	 */
-	public static function getURIEncryptHash() : string
+	public static function getURIEncryptHash(): string
 	{
-		foreach (Config::URI_QUERY_TYPES as $type)
-		{
+		foreach (Config::URI_QUERY_TYPES as $type) {
 			if (isset(self::$route->query->{$type}))
 				return $type . ':' . self::$route->query->{$type};
 		}
@@ -310,19 +376,17 @@ class Config
 	 * @param  [type] $response [description]
 	 * @return [type]           [description]
 	 */
-	public static function render($response) : void
+	public static function render($response): void
 	{
 		if (RUN_METHOD == 'web')
 		{
+
 			if (isset($response->error) && isset($response->code))
 				http_response_code($response->code);
 
+				
 			header("Content-type: " . $response->content_type);
 			die($response->body);
-		}
-		else
-		{
-			echo $response->body;
 		}
 	}
 
@@ -330,13 +394,11 @@ class Config
 	 * [isMobile description]
 	 * @return boolean [description]
 	 */
-	public static function isMobile() : bool
+	public static function isMobile(): bool
 	{
-		if(isset($_SERVER['HTTP_USER_AGENT']) and !empty($_SERVER['HTTP_USER_AGENT']))
-		{
+		if (isset($_SERVER[ 'HTTP_USER_AGENT' ]) and !empty($_SERVER[ 'HTTP_USER_AGENT' ])) {
 			$bool = false;
-			if(preg_match('/(Mobile|Android|Tablet|GoBrowser|[0-9]x[0-9]*|uZardWeb\/|Mini|Doris\/|Skyfire\/|iPhone|Fennec\/|Maemo|Iris\/|CLDC\-|Mobi\/)/uis', $_SERVER['HTTP_USER_AGENT']))
-			{
+			if (preg_match('/(Mobile|Android|Tablet|GoBrowser|[0-9]x[0-9]*|uZardWeb\/|Mini|Doris\/|Skyfire\/|iPhone|Fennec\/|Maemo|Iris\/|CLDC\-|Mobi\/)/uis', $_SERVER[ 'HTTP_USER_AGENT' ])) {
 				$bool = true;
 			}
 		}
@@ -350,17 +412,7 @@ class Config
 	 */
 	public static function getSiteName()
 	{
-		return str_replace(['http://', 'https://'] , '', self::$domain->site);
-	}
-	
-	/**
-	 * Undocumented function
-	 *
-	 * @return void
-	 */
-	public static function getProjectName()
-	{
-		return str_replace(['http://', 'https://'] , '', self::$domain->project);
+		return str_replace([ 'http://', 'https://' ], '', self::$domain->site);
 	}
 
 	/**
@@ -368,15 +420,25 @@ class Config
 	 *
 	 * @return void
 	 */
-	public static function removeProtoUrl($url)
+	public static function getProjectName() : string
 	{
-		return str_replace(['http://', 'https://'] , '', $url);
+		return str_replace([ 'http://', 'https://' ], '', self::$domain->project);
 	}
 
-	public static function forceProto($url)
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public static function removeProtoUrl($url) : string
+	{
+		return str_replace([ 'http://', 'https://' ], '', $url);
+	}
+
+	public static function forceProto($url) : string
 	{
 		if (self::$config->forceSSL)
-			return str_replace('http://' , 'https://', $url);
+			return str_replace('http://', 'https://', $url);
 		else
 			return $url;
 	}
@@ -387,7 +449,7 @@ class Config
 	 * @param float $microtime
 	 * @return string
 	 */
-	public static function microtimeAgo(float $microtime) : string
+	public static function microtimeAgo(float $microtime): string
 	{
 		return round((microtime(true) - $microtime) * 1000, 2) . 's';
 	}
@@ -399,28 +461,28 @@ class Config
 	 * @param boolean $reverse
 	 * @return void
 	 */
-	public static function timeAgo($time, $reverse = false)
+	public static function timeAgo($time, $reverse = false) : string
 	{
-		$s = 0;
+		$s             = 0;
 		$estimate_time = $reverse === false
-			? (int)$time - time()
-			: time() - (int)$time;
+			? (int) $time - time()
+			: time() - (int) $time;
 		// var_dump($estimate_time);
 
 		if ($estimate_time < 1) {
 			return $s;
 		}
 
-		$condition = [
-			24 * 60 * 60            =>  'd',
-			60 * 60                 =>  'h',
-			60                      =>  'm',
-			1                       =>  's'
+		$condition = [ 
+			24 * 60 * 60 => 'd',
+			60 * 60 => 'h',
+			60 => 'm',
+			1 => 's'
 		];
 
 		foreach ($condition as $secs => $str) {
 			$d = $estimate_time / $secs;
-			
+
 			if ($d >= 1) {
 				$r = round($d);
 				return $r . $str;
@@ -431,32 +493,27 @@ class Config
 
 	/**
 	 * [getDomainConfig description]
-	 * @param  [type] $array [description]
 	 * @return [type]        [description]
 	 */
-	public static function getDomainConfig($array)
+	public static function getDomainConfig() : object
 	{
-		foreach ($array->hosts as $host)
-		{
-			if (is_array($host->site))
-			foreach ($host->site as $site) 
-			{
-				$parse_host_site = (object) parse_url($site);
-				// var_dump(self::$route->domain === $parse_host_site->host);
-				// var_dump($host);
 
-				if (self::$route->domain === $parse_host_site->host)
-				{
-					$host->site = $site;
-					return $host;
+		foreach (self::$config->hosts as $host) {
+			if (is_array($host->site))
+				foreach ($host->site as $site) {
+					$parse_host_site = (object) parse_url($site);
+					if (self::$route->domain === $parse_host_site->host) {
+						$host->site = $site;
+						return $host;
+					}
 				}
-			}
-			else
-			{
+			else {
 				$parse_host_site = (object) parse_url($host->site);
 				if (self::$route->domain === $parse_host_site->host)
 					return $host;
 			}
 		}
+
+		return (object) [];
 	}
 }

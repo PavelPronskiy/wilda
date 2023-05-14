@@ -1,5 +1,4 @@
 {
-  "hosts": [],
   "version": "0.6",
   "version_date": "2023-05-11",
   "styles": "relative",
@@ -11,24 +10,24 @@
   "lang": "ru",
   "forceSSL": true,
   "compress": true,
+  "editor": {
+    "enabled": true
+  },
   "inject": {
     "enabled": false,
-    "path": "inject",
     "header": false,
     "footer": false
   },
   "metrics": {
     "enabled": false,
-    "path": "tpl/metrics"
+    "ya": "",
+    "ga": ""
   },
   "favicon": {
-    "enabled": false,
-    "path": "app/favicon",
-    "default": "default.ico"
+    "enabled": false
   },
   "mail": {
     "enabled": true,
-    "tpl": "tpl/mail",
     "subject": "Заявка с сайта",
     "from": "info@qdes.ru",
     "name": "submission",
@@ -62,5 +61,15 @@
       "<h2>Страница недоступна.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
       "<h2>Страница недоступна.</h2><strong>Пустой результат</strong>"
     ]
-  }
+  },
+  "hosts": [
+    {
+      "type": "tilda",
+      "site": [
+        "https://sitename.tld",
+        "https://www.sitename.tld"
+      ],
+      "project": "https://project123.site.tld"
+    }
+  ]
 }

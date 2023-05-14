@@ -1,0 +1,395 @@
+{
+    "hosts": [
+        {
+            "type": "Tilda",
+            "site": [],
+            "project": "https://dinamika-cleaningr.Wixsite.com/inde"
+        },
+        {
+            "type": "Wix",
+            "site": [
+                "https://rampack.ru",
+                "https://www.rampack.ru"
+            ],
+            "project": "https://rampackru.Wixsite.com"
+        },
+        {
+            "type": "Wix",
+            "site": [
+                "https://zhuk-musor.ru",
+                "https://www.zhuk-musor.ru"
+            ],
+            "project": "https://rammusor.Wixsite.com"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://ram-ses.ru",
+                "https://www.ram-ses.ru"
+            ],
+            "project": "https://project3326759.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://mob.qdes.ru",
+            "project": "https://project99881.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://qdes.ru",
+            "project": "https://project99881.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://granit-bogatyrev.ru",
+            "project": "https://project2353692.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://geopls.ru",
+            "project": "https://ramgeo.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://xn----8sbejd2asdjez8j.xn--p1ai",
+                "https://www.xn----8sbejd2asdjez8j.xn--p1ai"
+            ],
+            "project": "https://project2128234.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://sahara.msk.ru",
+            "project": "https://project2471261.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://xn----dtbjbjb2aek9aej1bs.xn--p1ai",
+                "https://www.xn----dtbjbjb2aek9aej1bs.xn--p1ai"
+            ],
+            "project": "https://project3326759.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://dobrajavest.ru",
+                "https://www.dobrajavest.ru"
+            ],
+            "project": "https://project4125634.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://ecoenergo.org",
+                "https://www.ecoenergo.org"
+            ],
+            "project": "https://project3340164.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://expert-go.ru",
+                "https://www.expert-go.ru"
+            ],
+            "project": "https://project3640333.Tilda.ws"
+        },
+        {
+            "type": "Wix",
+            "site": [
+                "https://ram-govorun.ru",
+                "https://www.ram-govorun.ru"
+            ],
+            "project": "https://ram-govorunru.Wixsite.com"
+        },
+        {
+            "type": "Wix",
+            "site": [
+                "https://zhuk-govorun.ru",
+                "https://www.zhuk-govorun.ru"
+            ],
+            "project": "https://ram-govorunru.Wixsite.com/website"
+        },
+        {
+            "type": "Wix",
+            "site": [
+                "https://xn--80aaleg6aciio3a.xn--p1ai",
+                "https://www.xn--80aaleg6aciio3a.xn--p1ai"
+            ],
+            "project": "https://ram-demontaj.Wixsite.com"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://ram-rem.ru",
+                "https://www.ram-rem.ru"
+            ],
+            "project": "https://project4187367.Tilda.ws"
+        },
+        {
+            "type": "Wix",
+            "site": "https://xn----7sbababmx0apk4appi3ab0f1d.xn--p1ai",
+            "project": "https://rybalkatatarincev.Wixsite.com"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://qdes.ru",
+                "https://www.qdes.ru"
+            ],
+            "project": "https://project99881.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://ezoterworld.ru",
+                "https://www.ezoterworld.ru"
+            ],
+            "project": "https://project4676228.Tilda.ws"
+        },
+        {
+            "type": "Wix",
+            "site": [
+                "https://ramgarantplus.ru",
+                "https://www.ramgarantplus.ru"
+            ],
+            "project": "https://ram-demontaj.Wixsite.com/ramgarantplus"
+        },
+        {
+            "type": "Wix",
+            "site": [
+                "https://xn--80aaleg6aciio3a.xn--p1ai",
+                "https://www.xn--80aaleg6aciio3a.xn--p1ai"
+            ],
+            "project": "https://ram-demontaj.Wixsite.com"
+        },
+        {
+            "type": "Wix",
+            "site": "https://xn--b1addbubj0bjh1ji.xn--p1ai",
+            "project": "https://rskedelvesrf.Wixsite.com"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://nb-partner.ru",
+                "https://www.nb-partner.ru"
+            ],
+            "project": "https://project4707178.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://www.ramned.ru",
+                "https://ramned.ru"
+            ],
+            "project": "https://ramned.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://zhuklashes.ru",
+            "project": "https://project5109619.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://ramtime.ru",
+            "project": "https://ramtime.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://krasivaya-ti.ru",
+            "project": "https://project5276125.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://super-leto.ru",
+                "https://www.super-leto.ru"
+            ],
+            "project": "https://project5262582.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://ter-tech.ru",
+                "https://www.ter-tech.ru"
+            ],
+            "project": "https://project5420156.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://xn----7sba5berabcbc1b.xn--p1ai",
+            "project": "https://project5105764.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://enhome.shop",
+            "project": "https://project4787082.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://its-art-flo.ru",
+            "project": "https://project5713869.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://glavdrsu.ru",
+                "https://glav-drsu.ru"
+            ],
+            "project": "https://project5827348.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://shatskaia.ru",
+                "https://www.shatskaia.ru"
+            ],
+            "project": "https://project5868648.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://solovey-mebel.ru",
+                "https://www.solovey-mebel.ru"
+            ],
+            "project": "https://project5906753.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://xn----jtbjfnpnf6aj.xn--p1ai",
+                "https://www.xn----jtbjfnpnf6aj.xn--p1ai"
+            ],
+            "project": "https://project6219677.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://www.dubvkube.ru",
+                "https://dubvkube.ru"
+            ],
+            "project": "https://project4894870.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://zhulebinskiekuxni.ru",
+                "https://www.zhulebinskiekuxni.ru"
+            ],
+            "project": "https://project6478597.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://ramdelfin.ru",
+                "https://www.ramdelfin.ru"
+            ],
+            "project": "https://project6531444.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://cafe-sinica.ru",
+            "project": "https://project6551245.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://smt-parts.ru",
+                "https://www.smt-parts.ru"
+            ],
+            "project": "https://project6579361.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://xn--b1addbubj5ck8gh.xn--p1ai",
+            "project": "https://project6707684.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://xn----7sblcdjhc8bdci3a5c.xn--p1ai",
+            "project": "https://project6746581.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://xn--80adhe4b4a1e.xn--p1ai",
+            "project": "https://project6744464.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://drive-east-west.ru",
+            "project": "https://project6778675.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": [
+                "https://dinamik-stal.ru",
+                "https://wwww.dinamik-stal.ru"
+            ],
+            "project": "https://project6894096.Tilda.ws"
+        },
+        {
+            "mail": {
+                "enabled": true,
+                "subject": "Заявка с сайта",
+                "from": "info@qdes.ru",
+                "name": "submission",
+                "success": "Сообщение успешно отправлено!",
+                "error": "Ошибка!",
+                "to": [
+                    "info@qdes.ru"
+                ]
+            },
+            "type": "Tilda",
+            "site": "https://glavstrojmontazh77.ru",
+            "project": "https://project7021153.Tilda.ws"
+        },
+        {
+            "type": "Tilda",
+            "site": "https://grigopol.ru",
+            "project": "https://grigopol.Tilda.ws"
+        },
+        {
+            "privoxy": {
+                "enabled": false
+            },
+            "mail": {
+                "enabled": true,
+                "subject": "Заявка с сайта",
+                "name": "submission",
+                "from": "info@wdlab.ru",
+                "to": [
+                    "info@profstroyproekt.com",
+                    "kadikin@gmail.com",
+                    "pavel.pronskiy@gmail.com"
+                ]
+            },
+            "favicon": {
+                "enabled": true
+            },
+            "metrics": {
+                "enabled": true,
+                "ya": "93523220"
+            },
+            "inject": {
+                "enabled": true,
+                "header": true
+            },
+            "type": "Tilda",
+            "site": "https://profstroyproekt.com",
+            "project": "https://project7097086.Tilda.ws"
+        },
+        {
+            "cache": {
+                "enabled": true,
+                "expire": 86400,
+                "stats": false
+            },
+            "type": "Tilda",
+            "site": [
+                "https://enhome.pronskiy.ru",
+                "https://enhom.pronskiy.ru"
+            ],
+            "project": "https://makeuphairstudio.Tilda.ws"
+        }
+    ]
+}

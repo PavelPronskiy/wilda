@@ -1,0 +1,61 @@
+
+body {
+    color: #ccc;
+    background-color: #272727;
+}
+
+h1 {
+
+}
+
+.header,
+#jsoneditor {
+    width: 100%;
+}
+
+#jsoneditor {
+    height: 600px;
+}
+
+hr {
+    border-width: 0px;
+    border-top: 1px solid #ccc;
+    background-color: none;
+    height: 1px;
+    font-size: 0px;
+}
+
+.jsoneditor-contextmenu .jsoneditor-menu li ul .jsoneditor-icon {
+    margin-left: 5px;
+}
+
+.jsoneditor-contextmenu .jsoneditor-selected .jsoneditor-type-object .jsoneditor-text {
+    padding: 4px 0 4px 4px;
+}
+
+.revision-wrapper {
+ /*    display: flex;
+    flex-wrap: nowrap;
+ */
+}
+
+.revision-wrapper>div {
+    /* padding: 5px; */
+    /* color:#fff; */
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+#revision-counts {
+    
+}
+#revision-menu {
+    list-style:none;
+    display:flex;
+}
+#revision-menu li {
+    /* color:#fff; */
+
+}

@@ -2,6 +2,7 @@
 
 namespace app\module;
 
+use app\core\Config;
 use app\core\Tags;
 
 /**
@@ -9,6 +10,70 @@ use app\core\Tags;
  */
 class Wix extends Tags
 {
+
+	function __construct()
+	{
+		self::changeWixOptions();
+		self::changeScriptTags();
+		self::changeHtmlTags();
+		self::changeAHrefLinks();
+		self::changeImgTags();
+	}
+
+	/**
+	 * [changeScriptTags description]
+	 * @return [type] [description]
+	 */
+	public static function changeScriptTags(): void
+	{
+		foreach (self::$dom->getElementsByTagName('script') as $index => $script) {
+			switch (Config::$config->scripts) {
+				case 'relative':
+
+					switch ($script->getAttribute('id')) {
+						case 'sentry':
+							$script->parentNode->removeChild($script);
+							break;
+
+						case 'wix-viewer-model':
+							break;
+
+					}
+
+					$src = $script->getAttribute('src');
+					$data_url = $script->getAttribute('data-url');
+
+					if (!empty($src))
+						$script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+
+					if (!empty($data_url))
+						$script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
+
+
+					/**
+					 * tag <script>
+					 */
+					preg_match('/static\.tildacdn\.info/', $script->textContent, $matched);
+					if (count($matched) > 0) {
+						$script->textContent = preg_replace_callback(
+							"/s\.src = \'(.*)\'/",
+							function ($matches) {
+								if (isset($matches[ 1 ]))
+									return "s.src = '" . Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($matches[ 1 ]), 'scripts') . "'";
+							},
+							$script->textContent
+						);
+
+					}
+
+
+					break;
+			}
+		}
+	}
+
+
+
 	public static function changeWixOptions() : void
 	{
 		$xpath = new \DOMXPath(self::$dom);
@@ -121,4 +186,32 @@ class Wix extends Tags
 			}
 		}
 	}
+
+
+	/**
+	 * [changeImgTags description]
+	 * @return [type] [description]
+	 */
+	public static function changeImgTags(): void
+	{
+
+	}
+
+
+	public static function html(string $content): string
+	{
+		return $content;
+	}
+
+	public static function javascript(string $content) : string
+	{
+		return $content;
+	}
+
+	public static function robots(object $content): object
+	{
+
+		return $content;
+	}
+
 } 

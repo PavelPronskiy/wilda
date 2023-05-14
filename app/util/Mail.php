@@ -26,7 +26,7 @@ class Mail
 	{
 		$gmdate = gmdate('D, d M Y H:i:s T', time());
 
-		$fc = dirname(__DIR__) . '/' . Config::$config->mail->tpl . '/index.html';
+		$fc = dirname(__DIR__) . '/tpl/mail/index.html';
 		$file_gc = '';
 
 		if (file_exists($fc))

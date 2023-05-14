@@ -16,10 +16,15 @@ class Submit
 					'message' => 'OK',
 					'results' => []
 				];
-			else
+				else
 				$msg = [
 					'error' => Config::$mail->error
 				];
+		else
+			$msg = [
+				'message' => 'OK',
+				'results' => []
+			];
 
 		self::message($msg);
 	}
