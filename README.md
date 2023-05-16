@@ -1,6 +1,6 @@
 
 # Wilda
-Репроксирование с модификацией страниц для конструкторов tilda, wix
+Репроксирование с модификацией страниц.
 
 ## Зависимости
 `nginx` `redis` `php81-fpm` `php81-redis` `php81-cli` `php81-ctype` `php81-dom` `php81-bcmath`
@@ -21,26 +21,20 @@
 ```
 Параметр используется для вкл/выкл различного функционала.
 
-## hosts
+## hosts (global)
 ```json
 	"hosts": []
 ```
 Описание конфигурации для каждого сайта отдельно
 > Если некоторые параметры не заданы в настройках сайта, они наследуются из глобальной конфигурации
 
-## compress
-```json
-	"compress": true
-```
-Включение HTML компрессии
-
-## forceSSL
+## forceSSL (global)
 ```json
 	"forceSSL": true
 ```
 Принудительная установка HTTPS урлов.
 
-## styles
+## styles (global, hosts)
 ```json
 	"styles": "relative"
 ```
@@ -49,7 +43,7 @@
 
 `absolute` - абсолютный путь css
 
-## scripts
+## scripts (global, hosts)
 ```json
 	"scripts": "relative"
 ```
@@ -58,7 +52,7 @@
 
 `absolute` - абсолютный путь js
 
-## images
+## images (global, hosts)
 ```json
 	"images": "relative"
 ```
@@ -67,7 +61,7 @@
 
 `absolute` - абсолютный путь img
 
-## fonts
+## fonts (global, hosts)
 ```json
 	"fonts": "relative"
 ```
@@ -76,7 +70,7 @@
 
 `absolute` - абсолютный путь font
 
-## icons
+## icons (global, hosts)
 ```json
 	"icons": "relative"
 ```
@@ -85,28 +79,34 @@
 
 `absolute` - абсолютный путь icons
 
-## salt
+## salt (global)
 ```json
 	"salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g"
 ```
 Используется для `relative` шифрует ссылки
 
-## lang
+## lang (global)
 ```json
 	"lang": "ru"
 ```
 Локализация для внутренних и внешних сообщений приложения
 
-## type
+## type (hosts)
 ```json
-	"type": "tilda"
+	"type": "Plain"
 ```
 Тип конструктора
 
-**tilda** - проект из тилды
-**wix** - проект из викс
+**Plain** - пустой модуль
 
-## site
+## editor (global)
+```json
+ "editor": {
+  "enabled": true
+ }
+```
+
+## site (hosts)
 ```json
 	"site": "https://site.tld",
 	"site": [
@@ -116,14 +116,14 @@
 ```
 Имя сайта с протоколом (внешнее)
 
-## project
+## project (hosts)
 ```json
 	"project": "https://project.tld"
 ```
 
 Имя сайта с протоколом (внутреннее)
 
-## cache
+## cache (global, hosts)
 ```json
 	"cache": {
 		"enabled": false,
@@ -131,7 +131,6 @@
 		"stats": true
 	}
 ```
-
 Все элементы сайта можно закешировать, чтобы ускорить процесс рендера страницы. 
 Кеширование элементов: html, css, js, font, ico.
 
@@ -140,13 +139,20 @@
 `stats` - Отображать в разметке комментарий с временем загрузки страницы.
 
 ### Методы очистки кеша
-
 `https://sitename.tld/?cleaner` - получение браузерного идентификатора для очистки кеша. 
 После получения идентификатора браузером, происходит перенаправление на главную страницу сайта.
 Сверху слева появится иконка перезагрузки &#10227; при нажатии, произойдёт очистка
 кеша и перезагрузка страницы.
 
-## privoxy
+## compress (global, hosts)
+```json
+ "compress": {
+ "enabled": true
+ }
+ ```
+ Включение HTML компрессии
+
+## privoxy (global, hosts)
 ```json
 	"privoxy": {
 		"enabled": false,
@@ -161,7 +167,7 @@
 
 `port` - порт хоста
 
-## metrics
+## metrics (global, hosts)
 ```json
 	"metrics": {
 		"enabled": true,
@@ -169,14 +175,13 @@
 		"ya": "93467514"
 	}
 ```
-
 Счётчики Google Analytics & Yandex Metrika
 
 `ga` - идентификатор Google Analytics
 
 `ya` - идентификатор Yandex Metrika
 
-## mail
+## mail (global, hosts)
 ```json
 	"mail": {
 		"enabled": true,
@@ -190,7 +195,6 @@
 		]
 	}
 ```
-
 Отправка почтовых сообщений
 
 `subject` - Заголовок сообщения
@@ -204,7 +208,7 @@
 `error` - Сообщение об ошибке
 
 
-## favicon
+## favicon (global, hosts)
 ```json
 	"favicon": {
 		"enabled": true
@@ -214,7 +218,7 @@
 Замена favicon на сайте
 Необходимо добавить файл favicon в директорию `app/favicon`. Имя файла должно совпадать с именем основного домена `sitename.tld.ico`
 
-## inject
+## inject (hosts)
 ```json
 	"inject": {
 		"enabled": true,
@@ -235,10 +239,15 @@
 ```json
 "hosts": [
 		{
-			"compress": true,
-			"type": "tilda",
-			"site": "https://sitename.tld",
-			"project": "https://project123-constructor.tld"
+			"compress": {
+				"enabled": true
+			},
+			"type": "Plain",
+			"site": [
+				"https://sitename.tld",
+				"https://anothersitename.tld"
+			],
+			"project": "https://project123-constructor.tld",
 			"privoxy": {
 				"enabled": false
 			},
