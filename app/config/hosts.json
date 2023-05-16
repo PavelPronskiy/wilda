@@ -350,7 +350,7 @@
         },
         {
             "cache": {
-                "enabled": false,
+                "enabled": true,
                 "expire": 86400,
                 "stats": true
             },
