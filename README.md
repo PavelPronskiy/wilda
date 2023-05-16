@@ -3,7 +3,7 @@
 Репроксирование с модификацией страниц.
 
 ## Зависимости
-`nginx` `redis` `php81-fpm` `php81-redis` `php81-cli` `php81-ctype` `php81-dom` `php81-bcmath`
+`nginx` `redis` `php81-fpm` `php81-redis` `php81-cli` `php81-ctype` `php81-dom` `php81-bcmath` `php81-session`
 
 ## Конфигурация
 Вся конфигурация для сайтов описывается в файле `.config.json`
