@@ -2,14 +2,14 @@
 # Wilda
 Репроксирование с модификацией страниц.
 
-### Зависимости
+## Зависимости
 `nginx` `redis` `php81-fpm` `php81-redis` `php81-cli` `php81-ctype` `php81-dom` `php81-bcmath` `php81-session`
 
-### Конфигурация
+## Конфигурация
 Вся конфигурация для сайтов описывается в файле `.config.json`
 Файл `global.json` не изменяется.
 
-### Файлы конфигурации
+## Файлы конфигурации
 `app/config/global.json` - Глобальная конфигурация
 
 `app/config/hosts.json` - Конфигурация сайтов
@@ -25,7 +25,7 @@
 Параметр используется для вкл/выкл различного функционала.
 
 
-### hosts (global)
+## hosts (global)
 ```json
 	"hosts": []
 ```
@@ -33,14 +33,14 @@
 > Если некоторые параметры не заданы в настройках сайта, они наследуются из глобальной конфигурации
 
 
-### forceSSL (global)
+## forceSSL (global)
 ```json
 	"forceSSL": true
 ```
 Принудительная установка HTTPS урлов.
 
 
-### styles (global, hosts)
+## styles (global, hosts)
 ```json
 	"styles": "relative"
 ```
@@ -50,7 +50,7 @@
 `absolute` - абсолютный путь css
 
 
-### scripts (global, hosts)
+## scripts (global, hosts)
 ```json
 	"scripts": "relative"
 ```
@@ -60,7 +60,7 @@
 `absolute` - абсолютный путь js
 
 
-### images (global, hosts)
+## images (global, hosts)
 ```json
 	"images": "relative"
 ```
@@ -70,7 +70,7 @@
 `absolute` - абсолютный путь img
 
 
-### fonts (global, hosts)
+## fonts (global, hosts)
 ```json
 	"fonts": "relative"
 ```
@@ -80,7 +80,7 @@
 `absolute` - абсолютный путь font
 
 
-### icons (global, hosts)
+## icons (global, hosts)
 ```json
 	"icons": "relative"
 ```
@@ -90,21 +90,21 @@
 `absolute` - абсолютный путь icons
 
 
-### salt (global)
+## salt (global)
 ```json
 	"salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g"
 ```
 Используется для `relative` шифрует ссылки
 
 
-### lang (global)
+## lang (global)
 ```json
 	"lang": "ru"
 ```
 Локализация для внутренних и внешних сообщений приложения
 
 
-### type (hosts)
+## type (hosts)
 ```json
 	"type": "Plain"
 ```
@@ -113,7 +113,7 @@
 **Plain** - пустой модуль
 
 
-### editor (global)
+## editor (global)
 ```json
  "editor": {
   "enabled": true
@@ -123,7 +123,7 @@
 > Используется совместно с access.json
 
 
-### site (hosts)
+## site (hosts)
 ```json
 	"site": "https://site.tld",
 	"site": [
@@ -134,7 +134,7 @@
 Имя сайта с протоколом (внешнее)
 
 
-### project (hosts)
+## project (hosts)
 ```json
 	"project": "https://project.tld"
 ```
@@ -142,7 +142,7 @@
 Имя сайта с протоколом (внутреннее)
 
 
-### cache (global, hosts)
+## cache (global, hosts)
 ```json
 	"cache": {
 		"enabled": false,
@@ -158,14 +158,14 @@
 `stats` - Отображать в разметке комментарий с временем загрузки страницы.
 
 
-#### Методы очистки кеша
+### Методы очистки кеша
 `https://sitename.tld/?cleaner` - получение браузерного идентификатора для очистки кеша. 
 После получения идентификатора браузером, происходит перенаправление на главную страницу сайта.
 Сверху слева появится иконка перезагрузки &#10227; при нажатии, произойдёт очистка
 кеша и перезагрузка страницы.
 
 
-### compress (global, hosts)
+## compress (global, hosts)
 ```json
  "compress": {
  "enabled": true
@@ -174,7 +174,7 @@
 Включение HTML компрессии
 
 
-### privoxy (global, hosts)
+## privoxy (global, hosts)
 ```json
 	"privoxy": {
 		"enabled": false,
@@ -190,7 +190,7 @@
 `port` - порт хоста
 
 
-### metrics (global, hosts)
+## metrics (global, hosts)
 ```json
 	"metrics": {
 		"enabled": true,
@@ -205,7 +205,7 @@
 `ya` - идентификатор Yandex Metrika
 
 
-### mail (global, hosts)
+## mail (global, hosts)
 ```json
 	"mail": {
 		"enabled": true,
@@ -232,7 +232,7 @@
 `error` - Сообщение об ошибке
 
 
-### favicon (global, hosts)
+## favicon (global, hosts)
 ```json
 	"favicon": {
 		"enabled": true
@@ -243,7 +243,7 @@
 Необходимо добавить файл favicon в директорию `app/favicon`. Имя файла должно совпадать с именем основного домена `sitename.tld.ico`
 
 
-### inject (hosts)
+## inject (hosts)
 ```json
 	"inject": {
 		"enabled": true,
@@ -260,7 +260,7 @@
 > Имя файла должно совпадать с именем основного домена sitename.tld-footer.html
 
 
-### Пример описания конфигурации для определённого сайта
+## Пример описания конфигурации для определённого сайта
 ```json
 "hosts": [
 		{
