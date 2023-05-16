@@ -31,13 +31,11 @@
   "mail": {
     "enabled": true,
     "subject": "Заявка с сайта",
-    "from": "info@qdes.ru",
+    "from": "info@",
     "name": "submission",
     "success": "Сообщение успешно отправлено!",
     "error": "Ошибка!",
-    "to": [
-      "info@qdes.ru"
-    ]
+    "to": []
   },
   "privoxy": {
     "enabled": true,

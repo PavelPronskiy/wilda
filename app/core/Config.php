@@ -186,7 +186,7 @@ class Config
 		if (isset(static::$domain->mail->from))
 			static::$mail->from = static::$domain->mail->from;
 		else
-			static::$mail->from = static::$config->mail->from;
+			static::$mail->from = static::$config->mail->from . Config::getSiteName();
 
 		if (isset(static::$domain->mail->to))
 			static::$mail->to = static::$domain->mail->to;
