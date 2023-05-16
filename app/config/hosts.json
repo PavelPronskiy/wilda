@@ -349,6 +349,11 @@
             "project": "https://grigopol.Tilda.ws"
         },
         {
+            "cache": {
+                "enabled": false,
+                "expire": 86400,
+                "stats": true
+            },
             "privoxy": {
                 "enabled": false
             },
@@ -375,18 +380,20 @@
                 "header": true
             },
             "type": "Tilda",
-            "site": "https://profstroyproekt.com",
+            "site": [
+                "https://enhome.pronskiy.ru"
+            ],
             "project": "https://project7097086.Tilda.ws"
         },
         {
             "cache": {
-                "enabled": true,
+                "enabled": false,
                 "expire": 86400,
                 "stats": false
             },
             "type": "Tilda",
             "site": [
-                "https://enhome.pronskiy.ru",
+                "https://enhome.pronskiy.ru1",
                 "https://enhom.pronskiy.ru"
             ],
             "project": "https://makeuphairstudio.Tilda.ws"

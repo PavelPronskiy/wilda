@@ -55,7 +55,7 @@ abstract class Tags
 	{
 		if (Config::$metrics->enabled)
 		{
-			if (Config::$metrics->ya)
+			if (isset(Config::$metrics->ya))
 				foreach (self::$dom->getElementsByTagName('head') as $node)
 					if (file_exists(Config::$metrics->path . '/ya.js'))
 						$node->appendChild(
@@ -68,8 +68,7 @@ abstract class Tags
 							)
 						);
 
-			if (Config::$metrics->ga)
-			{
+			if (isset(Config::$metrics->ga))
 				foreach (self::$dom->getElementsByTagName('head') as $node)
 					if (file_exists(Config::$metrics->path . '/ga.js'))
 					{
@@ -86,7 +85,6 @@ abstract class Tags
 							)
 						);
 					}
-			}
 
 		}
 	}
@@ -369,5 +367,95 @@ abstract class Tags
 		$dom_html5 = new \Masterminds\HTML5([ 'disable_html_ns' => true ]);
 		self::$dom = $dom_html5->loadHTML($html);
 	}
+
+	/**
+	 * [htmlModify description]
+	 * @param  [type] $html [description]
+	 * @return [type]       [description]
+	 */
+	public static function processHTML(string $html): string
+	{
+		$html = self::injectHTML($html);
+		$html = Cache::injectWebCleaner($html);
+		$html = Cache::injectWebStats($html);
+		// $module    = self::$class_module_name . Config::$domain->type;
+
+		/*        if (method_exists(self::$module, __FUNCTION__))
+				   self::$module::html($html); */
+
+		self::initialize($html);
+		self::changeDomElements();
+
+		return self::compressHTML(
+			self::render()
+		);
+	}
+
+	public static function postProcessHTML(): string
+	{
+		return self::compressHTML(
+			self::render()
+		);
+	}
+
+	public static function preProcessHTML(string $html): string
+	{
+		return self::injectHTML(
+			Cache::injectWebCleaner(
+				Cache::injectWebStats($html)
+			)
+		);
+	}
+
+
+	/**
+	 * [compressHTML description]
+	 * @param  [type] $html [description]
+	 * @return [type]       [description]
+	 */
+	private static function compressHTML($html): string
+	{
+		if (Config::$compress)
+			$html = preg_replace([ 
+				'/\>[^\S ]+/s',
+				'/[^\S ]+\</s',
+				'/(\s)+/s',
+				'/<!--(.|\s)*?-->/',
+				'/\n+/'
+			], [ 
+					'>',
+					'<',
+					'\\1',
+					'',
+					' '
+				], $html);
+
+		return $html;
+	}
+
+	/**
+	 * [injectHTML description]
+	 * @param  [type] $html [description]
+	 * @return [type]       [description]
+	 */
+	private static function injectHTML($html)
+	{
+		$path_header = Config::$inject->path . '/' . Config::getSiteName() . '-header.html';
+		$path_footer = Config::$inject->path . '/' . Config::getSiteName() . '-footer.html';
+
+		if (Config::$inject->enabled) {
+			if (Config::$inject->header)
+				if (file_exists($path_header))
+					$html = str_replace('</head>', file_get_contents($path_header) . '</head>', $html);
+
+			if (Config::$inject->footer)
+				if (file_exists($path_footer))
+					$html = str_replace('</body>', file_get_contents($path_footer) . '</body>', $html);
+
+		}
+
+		return $html;
+	}
+
 }
 

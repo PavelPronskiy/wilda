@@ -2,7 +2,6 @@
 
 namespace app\module;
 
-
 use app\core\Tags;
 use app\core\Config;
 
@@ -24,7 +23,11 @@ class Plain extends Tags
 
     public static function robots(object $content): object
     {
+        return $content;
+    }
 
+    public static function css(string $content): string
+    {
         return $content;
     }
 

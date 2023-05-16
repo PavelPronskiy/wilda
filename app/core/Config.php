@@ -25,15 +25,15 @@ class Config
 	public static $hash;
 	public static $crypt;
 	public static $hash_key;
-	public static $editor;
 	public static $compress;
 	public static $request_uri;
 	public static $name = 'wilda';
+	public static $editor = [];
 	public static $lang = [];
 	public static $mail = [];
 	public static $metrics = [];
 	public static $favicon = [];
-	public static $inject = [];
+	public static $inject =  [];
 	public static $access = [];
 	const CONFIG_ACCESS = PATH . '/app/config/access.json';
 	const CONFIG_GLOBAL = PATH . '/app/config/global.json';
@@ -50,237 +50,227 @@ class Config
 
 	function __construct()
 	{
-		self::initialize();
+		static::initialize();
 	}
 
 	
 	public static function initialize(): void
 	{
-		$array            = [];
-		$config_json      = [];
-		$config_user_json = [];
+		static::$lang 		= (array) 	[];
+		static::$access 	= (array) 	[];
+		static::$mail 		= (object) 	[];
+		static::$metrics 	= (object) 	[];
+		static::$favicon 	= (object) 	[];
+		static::$inject 	= (object) 	[];
+		static::$editor 	= (object) 	[];
 
-		if (RUN_METHOD == 'web') {
-			$request_uri = parse_url(
-				preg_replace('{^//}', '/', $_SERVER[ 'REQUEST_URI' ])
-			);
-
-			self::$route = (object) [ 
-				'domain' => $_SERVER[ 'HTTP_HOST' ],
-				'path' => $request_uri[ 'path' ],
-				'site' => isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ])
-				? $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] . '://' . $_SERVER[ 'HTTP_HOST' ]
-				: $_SERVER[ 'REQUEST_SCHEME' ] . '://' . $_SERVER[ 'HTTP_HOST' ],
-				'url' => isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ])
-				? $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] . '://' . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ]
-				: $_SERVER[ 'REQUEST_SCHEME' ] . '://' . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ]
-			];
-
-			if (isset($request_uri[ 'query' ])) {
-				parse_str($request_uri[ 'query' ], $query);
-				self::$route->query = (object) $query;
-			}
-			else {
-				self::$route->query = (object) [];
-			}
-
-			if (isset($_POST) && count($_POST) > 0)
-				self::$route->post = (object) $_POST;
-
-		}
-
-		self::$config = (object) array_merge(
-			(array) self::getGlobalConfig(),
-			(array) self::getHostsConfig()
+		$request_uri = parse_url(
+			preg_replace('{^//}', '/', $_SERVER[ 'REQUEST_URI' ])
 		);
 
-		if (RUN_METHOD == 'web') {
-			$device_type   = self::isMobile() ? 'mobile' : 'desktop';
-			self::$domain  = self::getDomainConfig();
-			self::$mail    = (object) [];
-			self::$favicon = (object) [];
-			self::$inject  = (object) [];
-			self::$metrics = (object) [];
-			self::$editor  = (object) [];
-			self::$access  = (array) Access::getAccessConfig();
+		static::$route = (object) [ 
+			'domain' => $_SERVER[ 'HTTP_HOST' ],
+			'path' => $request_uri[ 'path' ],
+			'site' => isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ])
+			? $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] . '://' . $_SERVER[ 'HTTP_HOST' ]
+			: $_SERVER[ 'REQUEST_SCHEME' ] . '://' . $_SERVER[ 'HTTP_HOST' ],
+			'url' => isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ])
+			? $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] . '://' . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ]
+			: $_SERVER[ 'REQUEST_SCHEME' ] . '://' . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ]
+		];
 
-
-			/**
-			 * set lang translations
-			 * @var [type]
-			 */
-			self::$lang = isset(self::$domain->lang)
-				? self::$config->translations->{self::$domain->lang}
-				: self::$config->translations->{self::$config->lang};
-
-
-			if (!isset(self::$domain->type))
-				\app\util\Curl::curlErrorHandler(500);
-
-			if (isset(self::$domain->styles))
-				self::$config->styles = self::$domain->styles;
-
-			if (isset(self::$domain->scripts))
-				self::$config->scripts = self::$domain->scripts;
-
-			if (isset(self::$domain->images))
-				self::$config->images = self::$domain->images;
-
-			if (
-				is_array(
-					self::$domain->site
-				) && in_array(
-					self::$route->site,
-					self::$domain->site
-				)
-			) {
-				self::$config->site = self::$route->site;
-				self::$domain->site = self::$route->site;
-			}
-
-
-			/**
-			 * set privoxy variables
-			 */
-			if (isset(self::$domain->privoxy)) {
-				if (isset(self::$domain->privoxy->enabled))
-					self::$config->privoxy->enabled = self::$domain->privoxy->enabled;
-
-				if (isset(self::$domain->privoxy->host))
-					self::$config->privoxy->host = self::$domain->privoxy->host;
-
-				if (isset(self::$domain->privoxy->port))
-					self::$config->privoxy->port = self::$domain->privoxy->port;
-			}
-
-			/**
-			 * set cache variables
-			 */
-			if (isset(self::$domain->cache->enabled))
-				self::$config->cache->enabled = self::$domain->cache->enabled;
-
-			if (isset(self::$domain->cache->expire))
-				self::$config->cache->expire = self::$domain->cache->expire;
-
-			if (isset(self::$domain->cache->stats))
-				self::$config->cache->stats = self::$domain->cache->stats;
-
-			/**
-			 * set mail submit variables
-			 */
-			if (isset(self::$domain->mail->enabled))
-				self::$mail->enabled = self::$domain->mail->enabled;
-			else
-				self::$mail->enabled = self::$config->mail->enabled;
-
-			if (isset(self::$domain->mail->subject))
-				self::$mail->subject = self::$domain->mail->subject;
-			else
-				self::$mail->subject = self::$config->mail->subject;
-
-			if (isset(self::$domain->mail->name))
-				self::$mail->name = self::$domain->mail->name;
-			else
-				self::$mail->name = self::$config->mail->name;
-
-			if (isset(self::$domain->mail->from))
-				self::$mail->from = self::$domain->mail->from;
-			else
-				self::$mail->from = self::$config->mail->from;
-
-			if (isset(self::$domain->mail->to))
-				self::$mail->to = self::$domain->mail->to;
-			else
-				self::$mail->to = self::$config->mail->to;
-
-			if (isset(self::$domain->mail->success))
-				self::$mail->success = self::$domain->mail->success;
-			else
-				self::$mail->success = self::$config->mail->success;
-
-			if (isset(self::$domain->mail->error))
-				self::$mail->error = self::$domain->mail->error;
-			else
-				self::$mail->error = self::$config->mail->error;
-
-
-			/**
-			 * set favicon variables
-			 */
-			if (isset(self::$domain->favicon->enabled))
-				self::$favicon->enabled = self::$domain->favicon->enabled;
-			else
-				self::$favicon->enabled = self::$config->favicon->enabled;
-
-			self::$favicon->path = "app/favicon";
-
-			/**
-			 * set compress variables
-			 */
-			if (isset(self::$domain->compress))
-				self::$compress = self::$domain->compress;
-			else
-				self::$compress = self::$config->compress;
-
-
-			/**
-			 * set metrics variables
-			 */
-			if (isset(self::$domain->metrics->enabled))
-				self::$metrics->enabled = self::$domain->metrics->enabled;
-			else
-				self::$metrics->enabled = self::$config->metrics->enabled;
-
-			self::$metrics->path = APP_PATH . "tpl/metrics";
-
-			if (isset(self::$domain->metrics->ga))
-				self::$metrics->ga = self::$domain->metrics->ga;
-
-			if (isset(self::$domain->metrics->ya))
-				self::$metrics->ya = self::$domain->metrics->ya;
-
-			/**
-			 * set inject variables
-			 */
-			if (isset(self::$domain->inject->enabled))
-				self::$inject->enabled = self::$domain->inject->enabled;
-			else
-				self::$inject->enabled = self::$config->inject->enabled;
-
-			if (isset(self::$domain->inject->header))
-				self::$inject->header = self::$domain->inject->header;
-			else
-				self::$inject->header = self::$config->inject->header;
-
-			if (isset(self::$domain->inject->path))
-				self::$inject->path = APP_PATH . 'inject';
-			else
-				self::$inject->path = APP_PATH . 'inject';
-
-			if (isset(self::$domain->inject->footer))
-				self::$inject->footer = self::$domain->inject->footer;
-			else
-				self::$inject->footer = self::$config->inject->footer;
-
-			/**
-			 * set editor variables
-			 */
-			if (isset(self::$domain->editor->enabled))
-				self::$editor->enabled = self::$domain->editor->enabled;
-			else
-				self::$editor->enabled = self::$config->editor->enabled;
-
-			self::$editor->path = 'tpl/editor';
-
-
-
-			self::$hash_key = self::$name . ':' . self::$route->domain . ':' . self::$domain->type;
-			self::$hash     = self::$hash_key . ':' . $device_type . ':' . self::getURIEncryptHash();
-
-
+		if (isset($request_uri[ 'query' ]))
+		{
+			parse_str($request_uri[ 'query' ], $query);
+			static::$route->query = (object) $query;
 		}
 		else
-			self::$lang = self::$config->translations->ru;
+		{
+			static::$route->query = (object) [];
+		}
+
+		if (isset($_POST) && count($_POST) > 0)
+			static::$route->post = (object) $_POST;
+
+		static::$config = (object) [
+			... (array) static::getGlobalConfig(),
+			... (array) static::getHostsConfig()
+		];
+		
+		// $device_type   = static::isMobile() ? 'mobile' : 'desktop';
+		static::$domain  = (object) static::getDomainConfig();
+		static::$access  = (array) Access::getAccessConfig();
+
+		/**
+		 * set lang translations
+		 * @var [type]
+		 */
+		static::$lang = isset(static::$domain->lang)
+			? (object) static::$config->translations->{static::$domain->lang}
+			: (object) static::$config->translations->{static::$config->lang};
+
+
+		/**
+		 * if not type defined
+		 */
+		if (!isset(static::$domain->type))
+			\app\util\Curl::curlErrorHandler(500);
+
+		if (isset(static::$domain->styles))
+			static::$config->styles = static::$domain->styles;
+
+		if (isset(static::$domain->scripts))
+			static::$config->scripts = static::$domain->scripts;
+
+		if (isset(static::$domain->images))
+			static::$config->images = static::$domain->images;
+
+		if (
+			is_array(
+				static::$domain->site
+			) && in_array(
+				static::$route->site,
+				static::$domain->site
+			)
+		) {
+			static::$config->site = static::$route->site;
+			static::$domain->site = static::$route->site;
+		}
+
+
+		/**
+		 * set privoxy variables
+		 */
+		if (isset(static::$domain->privoxy)) {
+			if (isset(static::$domain->privoxy->enabled))
+				static::$config->privoxy->enabled = static::$domain->privoxy->enabled;
+
+			if (isset(static::$domain->privoxy->host))
+				static::$config->privoxy->host = static::$domain->privoxy->host;
+
+			if (isset(static::$domain->privoxy->port))
+				static::$config->privoxy->port = static::$domain->privoxy->port;
+		}
+
+		/**
+		 * set cache variables
+		 */
+		if (isset(static::$domain->cache->enabled))
+			static::$config->cache->enabled = static::$domain->cache->enabled;
+
+		if (isset(static::$domain->cache->expire))
+			static::$config->cache->expire = static::$domain->cache->expire;
+
+		if (isset(static::$domain->cache->stats))
+			static::$config->cache->stats = static::$domain->cache->stats;
+
+		/**
+		 * set mail submit variables
+		 */
+		if (isset(static::$domain->mail->enabled))
+			static::$mail->enabled = static::$domain->mail->enabled;
+		else
+			static::$mail->enabled = static::$config->mail->enabled;
+
+		if (isset(static::$domain->mail->subject))
+			static::$mail->subject = static::$domain->mail->subject;
+		else
+			static::$mail->subject = static::$config->mail->subject;
+
+		if (isset(static::$domain->mail->name))
+			static::$mail->name = static::$domain->mail->name;
+		else
+			static::$mail->name = static::$config->mail->name;
+
+		if (isset(static::$domain->mail->from))
+			static::$mail->from = static::$domain->mail->from;
+		else
+			static::$mail->from = static::$config->mail->from;
+
+		if (isset(static::$domain->mail->to))
+			static::$mail->to = static::$domain->mail->to;
+		else
+			static::$mail->to = static::$config->mail->to;
+
+		if (isset(static::$domain->mail->success))
+			static::$mail->success = static::$domain->mail->success;
+		else
+			static::$mail->success = static::$config->mail->success;
+
+		if (isset(static::$domain->mail->error))
+			static::$mail->error = static::$domain->mail->error;
+		else
+			static::$mail->error = static::$config->mail->error;
+
+
+		/**
+		 * set favicon variables
+		 */
+		if (isset(static::$domain->favicon->enabled))
+			static::$favicon->enabled = static::$domain->favicon->enabled;
+		else
+			static::$favicon->enabled = static::$config->favicon->enabled;
+
+		static::$favicon->path = "app/favicon";
+
+		/**
+		 * set compress variables
+		 */
+		if (isset(static::$domain->compress))
+			static::$compress = static::$domain->compress;
+		else
+			static::$compress = static::$config->compress;
+
+		/**
+		 * set metrics variables
+		 */
+		if (isset(static::$domain->metrics->enabled))
+			static::$metrics->enabled = static::$domain->metrics->enabled;
+		else
+			static::$metrics->enabled = static::$config->metrics->enabled;
+
+		static::$metrics->path = APP_PATH . "tpl/metrics";
+
+		if (isset(static::$domain->metrics->ga))
+			static::$metrics->ga = static::$domain->metrics->ga;
+
+		if (isset(static::$domain->metrics->ya))
+			static::$metrics->ya = static::$domain->metrics->ya;
+
+		/**
+		 * set inject variables
+		 */
+		if (isset(static::$domain->inject->enabled))
+			static::$inject->enabled = static::$domain->inject->enabled;
+		else
+			static::$inject->enabled = static::$config->inject->enabled;
+
+		if (isset(static::$domain->inject->header))
+			static::$inject->header = static::$domain->inject->header;
+		else
+			static::$inject->header = static::$config->inject->header;
+
+		if (isset(static::$domain->inject->path))
+			static::$inject->path = APP_PATH . 'inject';
+		else
+			static::$inject->path = APP_PATH . 'inject';
+
+		if (isset(static::$domain->inject->footer))
+			static::$inject->footer = static::$domain->inject->footer;
+		else
+			static::$inject->footer = static::$config->inject->footer;
+
+
+		static::$editor->path = 'tpl/editor';
+
+		// set hash keys by cache required
+		static::$hash_key = static::$name . ':' .
+			static::$route->domain . ':' .
+			static::$domain->type;
+			
+		static::$hash = static::$hash_key . ':' .
+			static::getKeyUserDisplayResolution() . ':' .
+			static::getURIEncryptHash();
 
 	}
 
@@ -293,17 +283,17 @@ class Config
 	public static function getGlobalConfig()
 	{
 		$config_json = [];
-		if (file_exists(self::CONFIG_GLOBAL)) {
-			$config_json = json_decode(file_get_contents(self::CONFIG_GLOBAL));
+		if (file_exists(static::CONFIG_GLOBAL)) {
+			$config_json = json_decode(file_get_contents(static::CONFIG_GLOBAL));
 			if (json_last_error() > 0)
-				die(json_last_error_msg() . ' ' . self::CONFIG_GLOBAL);
+				die(json_last_error_msg() . ' ' . static::CONFIG_GLOBAL);
 
 		}
 		else
-			die('Global config: ' . self::CONFIG_GLOBAL . ' not found');
+			die('Global config: ' . static::CONFIG_GLOBAL . ' not found');
 
 
-		$config_json->name = self::$name;
+		$config_json->name = static::$name;
 
 		return $config_json;
 	}
@@ -329,14 +319,14 @@ class Config
 	public static function getHostsConfig()
 	{
 		$config_json = [];
-		if (file_exists(self::CONFIG_HOSTS)) {
-			$config_json = json_decode(file_get_contents(self::CONFIG_HOSTS));
+		if (file_exists(static::CONFIG_HOSTS)) {
+			$config_json = json_decode(file_get_contents(static::CONFIG_HOSTS));
 			if (json_last_error() > 0) {
-				die(json_last_error_msg() . ' ' . self::CONFIG_HOSTS);
+				die(json_last_error_msg() . ' ' . static::CONFIG_HOSTS);
 			}
 		}
 		else
-			die('User config: ' . self::CONFIG_HOSTS . ' not found');
+			die('User config: ' . static::CONFIG_HOSTS . ' not found');
 
 		return $config_json;
 	}
@@ -350,9 +340,9 @@ class Config
 	 */
 	public static function setUserConfig(array $data): void
 	{
-		if (file_exists(self::CONFIG_HOSTS))
+		if (file_exists(static::CONFIG_HOSTS))
 			file_put_contents(
-				self::CONFIG_HOSTS,
+				static::CONFIG_HOSTS,
 				(string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
 			);
 	}
@@ -363,12 +353,11 @@ class Config
 	 */
 	public static function getURIEncryptHash(): string
 	{
-		foreach (Config::URI_QUERY_TYPES as $type) {
-			if (isset(self::$route->query->{$type}))
-				return $type . ':' . self::$route->query->{$type};
-		}
+		foreach (Config::URI_QUERY_TYPES as $type)
+			if (isset(static::$route->query->{$type}))
+				return $type . ':' . static::$route->query->{$type};
 
-		return 'html' . ':' . self::$route->url;
+		return 'html' . ':' . static::$route->url;
 	}
 
 	/**
@@ -376,14 +365,13 @@ class Config
 	 * @param  [type] $response [description]
 	 * @return [type]           [description]
 	 */
-	public static function render($response): void
+	public static function render(object $response): void
 	{
 		if (RUN_METHOD == 'web')
 		{
 
 			if (isset($response->error) && isset($response->code))
 				http_response_code($response->code);
-
 				
 			header("Content-type: " . $response->content_type);
 			die($response->body);
@@ -407,12 +395,21 @@ class Config
 	}
 
 	/**
+	 * [isMobile description]
+	 * @return boolean [description]
+	 */
+	public static function getKeyUserDisplayResolution(): string
+	{
+		return static::isMobile() ? 'mobile' : 'desktop';
+	}
+
+	/**
 	 * [getSiteName description]
 	 * @return [type] [description]
 	 */
 	public static function getSiteName()
 	{
-		return str_replace([ 'http://', 'https://' ], '', self::$domain->site);
+		return str_replace([ 'http://', 'https://' ], '', static::$domain->site);
 	}
 
 	/**
@@ -422,7 +419,7 @@ class Config
 	 */
 	public static function getProjectName() : string
 	{
-		return str_replace([ 'http://', 'https://' ], '', self::$domain->project);
+		return str_replace([ 'http://', 'https://' ], '', static::$domain->project);
 	}
 
 	/**
@@ -437,7 +434,7 @@ class Config
 
 	public static function forceProto($url) : string
 	{
-		if (self::$config->forceSSL)
+		if (static::$config->forceSSL)
 			return str_replace('http://', 'https://', $url);
 		else
 			return $url;
@@ -498,18 +495,18 @@ class Config
 	public static function getDomainConfig() : object
 	{
 
-		foreach (self::$config->hosts as $host) {
+		foreach (static::$config->hosts as $host) {
 			if (is_array($host->site))
 				foreach ($host->site as $site) {
 					$parse_host_site = (object) parse_url($site);
-					if (self::$route->domain === $parse_host_site->host) {
+					if (static::$route->domain === $parse_host_site->host) {
 						$host->site = $site;
 						return $host;
 					}
 				}
 			else {
 				$parse_host_site = (object) parse_url($host->site);
-				if (self::$route->domain === $parse_host_site->host)
+				if (static::$route->domain === $parse_host_site->host)
 					return $host;
 			}
 		}

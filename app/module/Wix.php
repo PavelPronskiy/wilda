@@ -13,11 +13,6 @@ class Wix extends Tags
 
 	function __construct()
 	{
-		self::changeWixOptions();
-		self::changeScriptTags();
-		self::changeHtmlTags();
-		self::changeAHrefLinks();
-		self::changeImgTags();
 	}
 
 	/**
@@ -26,18 +21,16 @@ class Wix extends Tags
 	 */
 	public static function changeScriptTags(): void
 	{
+
 		foreach (self::$dom->getElementsByTagName('script') as $index => $script) {
 			switch (Config::$config->scripts) {
 				case 'relative':
 
-					switch ($script->getAttribute('id')) {
+					switch ($script->getAttribute('id'))
+					{
 						case 'sentry':
 							$script->parentNode->removeChild($script);
 							break;
-
-						case 'wix-viewer-model':
-							break;
-
 					}
 
 					$src = $script->getAttribute('src');
@@ -48,25 +41,6 @@ class Wix extends Tags
 
 					if (!empty($data_url))
 						$script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
-
-
-					/**
-					 * tag <script>
-					 */
-					preg_match('/static\.tildacdn\.info/', $script->textContent, $matched);
-					if (count($matched) > 0) {
-						$script->textContent = preg_replace_callback(
-							"/s\.src = \'(.*)\'/",
-							function ($matches) {
-								if (isset($matches[ 1 ]))
-									return "s.src = '" . Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($matches[ 1 ]), 'scripts') . "'";
-							},
-							$script->textContent
-						);
-
-					}
-
-
 					break;
 			}
 		}
@@ -80,10 +54,9 @@ class Wix extends Tags
 		$nodes = $xpath->query('//script[@id="wix-viewer-model"]');
 		$route_url = str_replace('http://', 'https://', Config::$route->url);
 		$base_url = str_replace('http://', 'https://', Config::$domain->site);
-		$features_exclude = [
-			// 'thunderboltInitializer',
-		];
-		foreach ($nodes as $key => $node) {
+
+		foreach ($nodes as $key => $node)
+		{
 			$dec = json_decode($node->nodeValue);
 			// var_dump($dec);
 			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->domain))
@@ -93,9 +66,7 @@ class Wix extends Tags
 				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = $base_url;
 			
 			if (isset($dec->site->externalBaseUrl))
-				// $dec->site->externalBaseUrl = Config::$domain->project;
 				$dec->site->externalBaseUrl = $base_url;
-				// $dec->site->externalBaseUrl = preg_replace('#/$#', '', $route_url);
 
 			if (isset($dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl))
 				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = $base_url;
@@ -126,16 +97,8 @@ class Wix extends Tags
 			if (isset($dec->siteAssets->modulesParams->platform->externalBaseUrl))
 				$dec->siteAssets->modulesParams->platform->externalBaseUrl = $base_url;
 
-/*			foreach ($dec->siteFeatures as $key => $feature)
-			{
-				if (in_array($feature, $features_exclude))
-					unset($dec->siteFeatures[$key]);
-			}*/
-
 			$node->nodeValue = '';
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
-			// $dec->siteFeaturesConfigs = '';
-			//var_dump(Config::$route->url);
 
 		}
 
@@ -150,6 +113,7 @@ class Wix extends Tags
 			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
 		}
 	}
+
 
 	/**
 	 * [changeAHrefLinks description]
@@ -197,10 +161,20 @@ class Wix extends Tags
 
 	}
 
-
-	public static function html(string $content): string
+	public static function html(string $html): string
 	{
-		return $content;
+		self::initialize(
+			self::preProcessHTML($html)
+		);
+
+		self::initialize($html);
+		self::changeDomElements();
+		self::changeAHrefLinks();
+		self::changeScriptTags();
+		self::changeImgTags();
+		self::changeHtmlTags();
+		self::changeWixOptions();
+		return self::postProcessHTML();
 	}
 
 	public static function javascript(string $content) : string
@@ -210,7 +184,11 @@ class Wix extends Tags
 
 	public static function robots(object $content): object
 	{
+		return $content;
+	}
 
+	public static function css(string $content): string
+	{
 		return $content;
 	}
 

@@ -61,6 +61,7 @@ class Curl
 			? '?' . http_build_query((array) Config::$route->query)
 			: '';
 
+		// var_dump(Config::$route);
 		return isset(Config::$route->query) && in_array(key(Config::$route->query), Config::URI_QUERY_TYPES)
 			? self::get(Encryption::decode(Config::$route->query->{key(Config::$route->query)}))
 			: self::get(Config::$domain->project . Config::$route->path . $build_query);

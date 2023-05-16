@@ -14,14 +14,7 @@ class Tilda extends Tags
 
     function __construct()
     {
-		self::changeAHrefLinks();
-		self::changeScriptTags();
-		self::removeTildaCopy();
-		self::removeCounters();
-		self::changeSubmitSuccessMessage();
-		self::changeFavicon();
-		self::changeImgTags();
-
+		// var_dump('123');
 	}
 
 	/**
@@ -124,14 +117,11 @@ class Tilda extends Tags
 							$script->parentNode->removeChild($script);
 							break;
 
-						case 'wix-viewer-model':
-							break;
-
 					}
 
 					$src = $script->getAttribute('src');
 					$data_url = $script->getAttribute('data-url');
-
+					
 					if (!empty($src))
 						$script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
 
@@ -194,7 +184,21 @@ class Tilda extends Tags
 
 	public static function html(string $html): string
 	{
-		return $html;
+		self::initialize(
+			self::preProcessHTML($html)
+		);
+
+		self::initialize($html);
+		self::changeDomElements();
+		self::changeAHrefLinks();
+		self::changeScriptTags();
+		self::removeTildaCopy();
+		self::removeCounters();
+		self::changeSubmitSuccessMessage();
+		self::changeFavicon();
+		self::changeImgTags();
+
+		return self::postProcessHTML();
 	}
 
 
@@ -229,5 +233,29 @@ class Tilda extends Tags
 			}
 
 	}
+
+
+	public static function css(string $content): string
+	{
+		preg_match('/static\.tildacdn\.com/', $content, $matched);
+		if (count($matched) > 0) {
+			$content = preg_replace_callback(
+				"/url\(([\s])?([\"|\'])?(.*?)([\"|\'])?([\s])?\)/i",
+				function ($matches) {
+					if (isset($matches[ 3 ]))
+					{
+						// var_dump($matches[3]);
+						return "url('" . Config::QUERY_PARAM_FONT . self::getRelativePath(self::parseURL($matches[ 3 ]), 'fonts') . "')";
+					}
+				},
+				$content
+			);
+			// var_dump($matched);
+		}
+
+		// $content = str_replace('', '', $content);
+		return $content;
+	}
+
 }
 
