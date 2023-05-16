@@ -293,7 +293,7 @@ class Config
 		return json_last_error() > 0 ? false : true;
 	}
 
-	public static function getHostsConfig()
+	public static function getHostsConfig() : object
 	{
 		$config_json = (object) [];
 
@@ -343,7 +343,7 @@ class Config
 	 * 
 	 * @return глобальные параметры конфигурации в виде объекта JSON с добавленным свойством «имя».
 	 */
-	public static function getGlobalConfig()
+	public static function getGlobalConfig() : object
 	{
 		$config_json = [];
 		if (file_exists(static::CONFIG_GLOBAL)) {
