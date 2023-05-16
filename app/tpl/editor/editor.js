@@ -277,7 +277,7 @@ const options = {
                             return !excludes.includes(item.text);
                         })
                         
-                        console.log(node.path[1]);
+                        // console.log(node.path[1]);
                         if (node.path[1] == 'site')
                         {
                             items[index].submenu = items[index].submenu.filter(function (item) {
@@ -298,27 +298,26 @@ const options = {
 
                         break;
                         
+                    case 4:
+                        items[index].submenu = items[index].submenu.filter(function (item) {
+                            var excludes = [
+                                'Auto', 'Array', 'Object', 'String', 'Новый сайт',
+                                'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон', 'Кэширование',
+                                'Сжатие страниц', 'Название сайта'
+                            ];
+                            return !excludes.includes(item.text);
+                        })
+
+                        break;
+                        
                     default:
                         break;
                 }
                 
-                /* if (node.path[1] && node.path[1] === 'site') {
-                    items[index].submenu = items[index].submenu.filter(function (item) {
-                        var excludes = [
-                            'Auto', 'Array', 'Object', 'String', 'Новый сайт',
-                            'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон', 'Кэширование',
-                        ];
-                        return !excludes.includes(item.text);
-                    });
-                } */
-                
-                /* if (items[index].submenu && items[index].submenu.length === 0) {
-                    console.log(items[index].submenu);
-                } */
             }
             
         })
-        
+
         /* items = items.filter(function (item) {
             return item.type !== 'separator'
         }) */
