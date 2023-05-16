@@ -96,11 +96,8 @@ class Editor
                     if (($key = array_search($input[ 'revision' ], $config_all_revs[ 'revisions' ])) !== false) {
                         unset($config_all_revs[ 'revisions' ][ $key ]);
                         Cache::delConfigRevision($input[ 'revision' ]);
-                        Config::setUserConfig($config_rev);
+                        Config::setHostsConfig($config_rev);
                     }
-
-                    // if (isset($config_all_revs[ $input[ 'revision' ] ]))
-                    // unset($config_all_revs[ $input[ 'revision' ] ]);
 
                     Config::render((object) [ 
                         'content_type' => 'application/json',
@@ -125,12 +122,10 @@ class Editor
 
             if (isset($input[ 'save' ]) && isset($input[ 'data' ]) && $input[ 'save' ]) {
                 if (Config::validateConfig($input[ 'data' ])) {
-                    $hosts = (array) [ 
-                        'hosts' => json_decode($input[ 'data' ])
-                    ];
+                    $hosts = json_decode($input[ 'data' ]);
 
                     Cache::setConfigRevision($hosts);
-                    Config::setUserConfig($hosts);
+                    Config::setHostsConfig($hosts);
 
                     $result = (object) [ 
                         'status' => true,

@@ -59,3 +59,8 @@ hr {
     /* color:#fff; */
 
 }
+
+.jsoneditor-contextmenu .jsoneditor-menu,
+.jsoneditor-contextmenu .jsoneditor-menu button {
+    width:200px;
+}

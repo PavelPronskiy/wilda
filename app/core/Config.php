@@ -25,7 +25,7 @@ class Config
 	public static $hash;
 	public static $crypt;
 	public static $hash_key;
-	public static $compress;
+	public static $compress = [];
 	public static $request_uri;
 	public static $name = 'wilda';
 	public static $editor = [];
@@ -62,6 +62,7 @@ class Config
 		static::$metrics 	= (object) 	[];
 		static::$favicon 	= (object) 	[];
 		static::$inject 	= (object) 	[];
+		static::$compress 	= (object) 	[];
 		static::$editor 	= (object) 	[];
 
 		$request_uri = parse_url(
@@ -99,7 +100,7 @@ class Config
 		
 		// $device_type   = static::isMobile() ? 'mobile' : 'desktop';
 		static::$domain  = (object) static::getDomainConfig();
-		static::$access  = (array) Access::getAccessConfig();
+		static::$access  = (array) static::getAccessConfig();
 
 		/**
 		 * set lang translations
@@ -216,10 +217,10 @@ class Config
 		/**
 		 * set compress variables
 		 */
-		if (isset(static::$domain->compress))
-			static::$compress = static::$domain->compress;
+		if (isset(static::$domain->compress->enabled))
+			static::$compress->enabled = static::$domain->compress->enabled;
 		else
-			static::$compress = static::$config->compress;
+			static::$compress->enabled = static::$config->compress->enabled;
 
 		/**
 		 * set metrics variables
@@ -275,30 +276,6 @@ class Config
 	}
 
 	/**
-	 * Эта функция извлекает глобальные параметры конфигурации из файла JSON и добавляет имя текущего
-	 * объекта в конфигурацию перед ее возвратом.
-	 * 
-	 * @return глобальные параметры конфигурации в виде объекта JSON с добавленным свойством «имя».
-	 */
-	public static function getGlobalConfig()
-	{
-		$config_json = [];
-		if (file_exists(static::CONFIG_GLOBAL)) {
-			$config_json = json_decode(file_get_contents(static::CONFIG_GLOBAL));
-			if (json_last_error() > 0)
-				die(json_last_error_msg() . ' ' . static::CONFIG_GLOBAL);
-
-		}
-		else
-			die('Global config: ' . static::CONFIG_GLOBAL . ' not found');
-
-
-		$config_json->name = static::$name;
-
-		return $config_json;
-	}
-
-	/**
 	 * Функция проверяет, является ли данная строка допустимой конфигурацией JSON, и возвращает логическое
 	 * значение.
 	 * 
@@ -318,18 +295,28 @@ class Config
 
 	public static function getHostsConfig()
 	{
-		$config_json = [];
+		$config_json = (object) [];
+
 		if (file_exists(static::CONFIG_HOSTS)) {
-			$config_json = json_decode(file_get_contents(static::CONFIG_HOSTS));
+			$config_json->hosts = json_decode(file_get_contents(static::CONFIG_HOSTS));
 			if (json_last_error() > 0) {
 				die(json_last_error_msg() . ' ' . static::CONFIG_HOSTS);
 			}
 		}
 		else
-			die('User config: ' . static::CONFIG_HOSTS . ' not found');
+		{
+			$config_json = [
+				(object) [
+					'hosts' => []
+				]
+			];
+
+			static::setHostsConfig($config_json);
+		}
 
 		return $config_json;
 	}
+
 
 	/**
 	 * Эта функция устанавливает данные конфигурации пользователя, записывая их в файл JSON, если файл
@@ -338,14 +325,77 @@ class Config
 	 * @param array data  — это массив, содержащий данные конфигурации пользователя, которые
 	 * необходимо записать в файл.
 	 */
-	public static function setUserConfig(array $data): void
+	public static function setHostsConfig(array $data): void
 	{
-		if (file_exists(static::CONFIG_HOSTS))
-			file_put_contents(
-				static::CONFIG_HOSTS,
-				(string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-			);
+		file_put_contents(
+			static::CONFIG_HOSTS,
+			(string) json_encode(
+				$data,
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+			)
+		);
 	}
+
+
+	/**
+	 * Эта функция извлекает глобальные параметры конфигурации из файла JSON и добавляет имя текущего
+	 * объекта в конфигурацию перед ее возвратом.
+	 * 
+	 * @return глобальные параметры конфигурации в виде объекта JSON с добавленным свойством «имя».
+	 */
+	public static function getGlobalConfig()
+	{
+		$config_json = [];
+		if (file_exists(static::CONFIG_GLOBAL)) {
+			$config_json = json_decode(file_get_contents(static::CONFIG_GLOBAL));
+			if (json_last_error() > 0)
+				die(json_last_error_msg() . ' ' . static::CONFIG_GLOBAL);
+
+		}
+		else
+			die('Global config: ' . static::CONFIG_GLOBAL . ' not found');
+
+		$config_json->name = static::$name;
+		return $config_json;
+	}
+
+    public static function getAccessConfig() : array
+    {
+        $config_json = [];
+        if (file_exists(Config::CONFIG_ACCESS)) {
+            $config_json = json_decode(file_get_contents(Config::CONFIG_ACCESS));
+            if (json_last_error() > 0)
+                die(json_last_error_msg() . ' ' . Config::CONFIG_ACCESS);
+
+        }
+        else
+        {
+            $config_json = [
+				(object) [
+					'login' => 'admin',
+					'password' => 'admin'
+				]
+			];
+
+			static::setAccessConfig($config_json);
+        }
+
+        return $config_json;
+    }
+
+
+    public static function setAccessConfig(array $data) : void
+    {
+		file_put_contents(
+			Config::CONFIG_ACCESS,
+			(string) json_encode(
+				$data,
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+			)
+		);
+    }
+
+
 
 	/**
 	 * [getURIEncryptHash description]

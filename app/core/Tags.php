@@ -415,7 +415,7 @@ abstract class Tags
 	 */
 	private static function compressHTML($html): string
 	{
-		if (Config::$compress)
+		if (Config::$compress->enabled)
 			$html = preg_replace([ 
 				'/\>[^\S ]+/s',
 				'/[^\S ]+\</s',

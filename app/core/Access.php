@@ -12,24 +12,6 @@ class Access
 
     }
 
-    public static function getAccessConfig() : object
-    {
-        $config_json = [];
-        if (file_exists(Config::CONFIG_ACCESS)) {
-            $config_json = json_decode(file_get_contents(Config::CONFIG_ACCESS));
-            if (json_last_error() > 0)
-                die(json_last_error_msg() . ' ' . Config::CONFIG_ACCESS);
-
-        }
-        else
-            die('Global config: ' . Config::CONFIG_ACCESS . ' not found');
-
-
-        return (object) $config_json;
-    }
-
-
-
     /**
      * Функция проверяет, установлены ли файлы cookie пользователя и пароля, и перебирает массив
      * доступа в классе Config.

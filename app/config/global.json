@@ -9,7 +9,9 @@
   "salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
   "lang": "ru",
   "forceSSL": true,
-  "compress": true,
+  "compress": {
+    "enabled": true
+  },
   "editor": {
     "enabled": true
   },
@@ -64,7 +66,7 @@
   },
   "hosts": [
     {
-      "type": "tilda",
+      "type": "Tilda",
       "site": [
         "https://sitename.tld",
         "https://www.sitename.tld"
