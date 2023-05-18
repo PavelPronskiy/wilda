@@ -3,9 +3,9 @@
 namespace app\core;
 
 use app\core\Config;
-use app\util\Encryption;
-use app\util\Cache;
-use zz\Html\HTMLMinify;
+// use app\util\Encryption;
+// use app\util\Cache;
+// use zz\Html\HTMLMinify;
 
 /**
  * Tags

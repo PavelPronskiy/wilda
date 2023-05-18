@@ -5,7 +5,7 @@ namespace app\core;
 use app\core\Config;
 use app\util\Encryption;
 use app\util\Cache;
-use zz\Html\HTMLMinify;
+// use zz\Html\HTMLMinify;
 /**
  * Tags
  */
@@ -368,31 +368,9 @@ abstract class Tags
 		self::$dom = $dom_html5->loadHTML($html);
 	}
 
-	/**
-	 * [htmlModify description]
-	 * @param  [type] $html [description]
-	 * @return [type]       [description]
-	 */
-	public static function processHTML(string $html): string
-	{
-		$html = self::injectHTML($html);
-		$html = Cache::injectWebCleaner($html);
-		$html = Cache::injectWebStats($html);
-		// $module    = self::$class_module_name . Config::$domain->type;
-
-		/*        if (method_exists(self::$module, __FUNCTION__))
-				   self::$module::html($html); */
-
-		self::initialize($html);
-		self::changeDomElements();
-
-		return self::compressHTML(
-			self::render()
-		);
-	}
-
 	public static function postProcessHTML(): string
 	{
+		// var_dump(self::render());
 		return self::compressHTML(
 			self::render()
 		);
@@ -438,19 +416,20 @@ abstract class Tags
 	 * @param  [type] $html [description]
 	 * @return [type]       [description]
 	 */
-	private static function injectHTML($html)
+	private static function injectHTML(string $html) : string
 	{
 		$path_header = Config::$inject->path . '/' . Config::getSiteName() . '-header.html';
 		$path_footer = Config::$inject->path . '/' . Config::getSiteName() . '-footer.html';
-
-		if (Config::$inject->enabled) {
+		
+		if (Config::$inject->enabled)
+		{
 			if (Config::$inject->header)
 				if (file_exists($path_header))
-					$html = str_replace('</head>', file_get_contents($path_header) . '</head>', $html);
+					return str_replace('</head>', file_get_contents($path_header) . '</head>', $html);
 
 			if (Config::$inject->footer)
 				if (file_exists($path_footer))
-					$html = str_replace('</body>', file_get_contents($path_footer) . '</body>', $html);
+					return str_replace('</body>', file_get_contents($path_footer) . '</body>', $html);
 
 		}
 

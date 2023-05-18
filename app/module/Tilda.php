@@ -184,11 +184,11 @@ class Tilda extends Tags
 
 	public static function html(string $html): string
 	{
+		$html = self::preProcessHTML($html);
 		self::initialize(
-			self::preProcessHTML($html)
+			$html
 		);
-
-		self::initialize($html);
+		
 		self::changeDomElements();
 		self::changeAHrefLinks();
 		self::changeScriptTags();
@@ -197,7 +197,7 @@ class Tilda extends Tags
 		self::changeSubmitSuccessMessage();
 		self::changeFavicon();
 		self::changeImgTags();
-
+		
 		return self::postProcessHTML();
 	}
 
