@@ -66,11 +66,11 @@ abstract class Modify
      * @param string $content
      */
     public static function robots(
-        object $content
+        object $obj
     )
     {
-        $content->body = self::module($content->body, 'robots');
+        $obj->body = self::module($obj->body, 'robots');
 
-        return $content;
+        return $obj;
     }
 }

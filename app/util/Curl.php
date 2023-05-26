@@ -17,8 +17,13 @@ class Curl
      */
     public static function curlErrorHandler($http_code)
     {
-        if (RUN_METHOD == 'web') {
-            switch ($http_code) {
+
+        Config::$lang = (array) Config::$lang;
+
+        if (RUN_METHOD == 'web')
+        {
+            switch ($http_code)
+            {
                 case 404:
                     $result = (object) [
                         'code'         => 404,
@@ -79,7 +84,8 @@ class Curl
         ? $_SERVER['HTTP_USER_AGENT']
         : Config::$config->headers->ua;
 
-        if (Config::$config->privoxy->enabled) {
+        if (Config::$config->privoxy->enabled)
+        {
             curl_setopt($curl, CURLOPT_PROXY,
                 Config::$config->privoxy->host . ':' .
                 Config::$config->privoxy->port
@@ -99,7 +105,7 @@ class Curl
             : ''
         );
         // $cache = new Cache;
-        curl_setopt($curl, CURLOPT_ENCODING, "gzip");
+        curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
 
         $response     = curl_exec($curl);
         $info         = curl_getinfo($curl);
@@ -108,13 +114,16 @@ class Curl
         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
-        if (self::curlErrorHandler($http_code)) {
+        if (self::curlErrorHandler($http_code))
+        {
             return (object) [
                 'body'         => $response,
                 'status'       => $http_code,
                 'content_type' => $content_type,
             ];
-        } else {
+        }
+        else
+        {
             return self::curlErrorHandler(502);
         }
 
@@ -130,15 +139,20 @@ class Curl
 
         $results = (object) [];
         // var_dump(Config::$route);
-        if (Config::$config->cache->enabled) {
+        if (Config::$config->cache->enabled)
+        {
             // curl_setopt($curl, CURLOPT_VERBOSE, true);
             $results = Cache::get(Config::$hash);
-            if (count((array) $results) == 0) {
+            if (count((array) $results) == 0)
+            {
                 $results = self::rget();
 
-                if (empty($results)) {
+                if (empty($results))
+                {
                     self::curlErrorHandler(500);
-                } else {
+                }
+                else
+                {
                     Cache::set(
                         Modify::byContentType($results),
                         Config::$hash
@@ -146,11 +160,16 @@ class Curl
                 }
 
             }
-        } else {
+        }
+        else
+        {
             $results = self::rget();
-            if (empty($results)) {
+            if (empty($results))
+            {
                 self::curlErrorHandler(500);
-            } else {
+            }
+            else
+            {
                 return Modify::byContentType($results);
             }
 
