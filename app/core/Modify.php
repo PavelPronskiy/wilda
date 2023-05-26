@@ -35,7 +35,7 @@ abstract class Modify
         {
             if (str_contains($obj->content_type, $mime))
             {
-                $obj->body = self::module($obj->body, $type);
+                $obj->body = static::module($obj->body, $type);
             }
         }
 
@@ -52,9 +52,9 @@ abstract class Modify
         string $type
     ): string
     {
-        if (method_exists(self::$module, $type))
+        if (method_exists(static::$module, $type))
         {
-            return self::$module::{$type}($content);
+            return static::$module::{$type}($content);
         }
         else
         {
@@ -69,7 +69,9 @@ abstract class Modify
         object $obj
     )
     {
-        $obj->body = self::module($obj->body, 'robots');
+        static::$module = static::$class_module_name . Config::$domain->type;
+
+        $obj->body = static::module($obj->body, 'robots');
 
         return $obj;
     }
