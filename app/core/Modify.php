@@ -14,7 +14,7 @@ abstract class Modify
      */
     public static $class_module_name = '\\app\\module\\';
 
-    public static string $module;
+    public static ?string $module = null;
 
     public static array $types = [
         'css'        => 'text/css',
@@ -27,7 +27,7 @@ abstract class Modify
      * @param  [type] $obj            [description]
      * @return [type] [description]
      */
-    public static function byContentType(object $obj): object
+    public static function byContentType(object $obj) : object
     {
         static::$module = static::$class_module_name . Config::$domain->type;
 
