@@ -10,186 +10,237 @@ use app\core\Tags;
  */
 class Wix extends Tags
 {
+    public function __construct()
+    {
+    }
 
-	function __construct()
-	{
-	}
+    /**
+     * [changeAHrefLinks description]
+     * @return [type] [description]
+     */
+    public static function changeAHrefLinks(): void
+    {
+        // var_dump(Config::$route);
+        $project_parse_url = parse_url(Config::$domain->project);
+        foreach (self::$dom->getElementsByTagName('a') as $tag)
+        {
+            if (isset($project_parse_url['host']))
+            {
+                $tag->setAttribute(
+                    'href',
+                    str_replace(Config::$domain->project, '', $tag->getAttribute('href'))
+                );
+            }
+        }
 
-	/**
-	 * [changeScriptTags description]
-	 * @return [type] [description]
-	 */
-	public static function changeScriptTags(): void
-	{
+    }
 
-		foreach (self::$dom->getElementsByTagName('script') as $index => $script) {
-			switch (Config::$config->scripts) {
-				case 'relative':
+    /**
+     * [changeHtmlTags description]
+     * @return [type] [description]
+     */
+    public static function changeHtmlTags(): void
+    {
+        foreach (self::$dom->getElementsByTagName('div') as $tag)
+        {
+            // site-root
+            if ($tag->getAttribute('id') == 'WIX_ADS')
+            {
+                $tag->setAttribute('style', 'display:none');
+            }
 
-					switch ($script->getAttribute('id'))
-					{
-						case 'sentry':
-							$script->parentNode->removeChild($script);
-							break;
-					}
+            if ($tag->getAttribute('id') == 'site-root')
+            {
+                $tag->setAttribute('style', 'top:0px');
+            }
+        }
+    }
 
-					$src = $script->getAttribute('src');
-					$data_url = $script->getAttribute('data-url');
+    /**
+     * [changeImgTags description]
+     * @return [type] [description]
+     */
+    public static function changeImgTags(): void
+    {
 
-					if (!empty($src))
-						$script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+    }
 
-					if (!empty($data_url))
-						$script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
-					break;
-			}
-		}
-	}
+    /**
+     * [changeScriptTags description]
+     * @return [type] [description]
+     */
+    public static function changeScriptTags(): void
+    {
 
+        foreach (self::$dom->getElementsByTagName('script') as $index => $script)
+        {
+            switch (Config::$config->scripts)
+            {
+                case 'relative':
 
+                    switch ($script->getAttribute('id'))
+                    {
+                        case 'sentry':
+                            $script->parentNode->removeChild($script);
+                            break;
+                    }
 
-	public static function changeWixOptions() : void
-	{
-		$xpath = new \DOMXPath(self::$dom);
-		$nodes = $xpath->query('//script[@id="wix-viewer-model"]');
-		$route_url = str_replace('http://', 'https://', Config::$route->url);
-		$base_url = str_replace('http://', 'https://', Config::$domain->site);
+                    $src      = $script->getAttribute('src');
+                    $data_url = $script->getAttribute('data-url');
 
-		foreach ($nodes as $key => $node)
-		{
-			$dec = json_decode($node->nodeValue);
-			// var_dump($dec);
-			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->domain))
-				$dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = Config::$route->domain;
+                    if (!empty($src))
+                {
+                        $script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+                    }
 
-			if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl))
-				$dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = $base_url;
-			
-			if (isset($dec->site->externalBaseUrl))
-				$dec->site->externalBaseUrl = $base_url;
+                    if (!empty($data_url))
+                {
+                        $script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
+                    }
 
-			if (isset($dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl))
-				$dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = $base_url;
-			if (isset($dec->siteFeaturesConfigs->router->baseUrl))
-				$dec->siteFeaturesConfigs->router->baseUrl = $base_url;
+                    break;
+            }
+        }
+    }
 
-			if (isset($dec->siteFeaturesConfigs->seo->context->siteUrl))
-				$dec->siteFeaturesConfigs->seo->context->siteUrl = $route_url;
+    public static function changeWixOptions(): void
+    {
+        $xpath     = new \DOMXPath (self::$dom);
+        $nodes     = $xpath->query('//script[@id="wix-viewer-model"]');
+        $route_url = str_replace('http://', 'https://', Config::$route->url);
+        $base_url  = str_replace('http://', 'https://', Config::$domain->site);
 
-			if (isset($dec->siteFeaturesConfigs->seo->context->defaultUrl))
-				$dec->siteFeaturesConfigs->seo->context->defaultUrl = $route_url;
-			
-			if (isset($dec->requestUrl))
-				$dec->requestUrl = $route_url;
-			
-			if (isset($dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl))
-				$dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = $base_url;
+        foreach ($nodes as $key => $node)
+        {
+            $dec = json_decode($node->nodeValue);
+            // var_dump($dec);
+            if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->domain))
+            {
+                $dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = Config::$route->domain;
+            }
 
-			if (isset($dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl))
-				$dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = $base_url;
-			
-			if (isset($dec->siteFeaturesConfigs->tpaCommons->requestUrl))
-				$dec->siteFeaturesConfigs->tpaCommons->requestUrl = $route_url;
-			
-			if (isset($dec->siteAssets->modulesParams->features->externalBaseUrl))
-				$dec->siteAssets->modulesParams->features->externalBaseUrl = $base_url;
+            if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl))
+            {
+                $dec->siteFeaturesConfigs->platform->bootstrapData->location->externalBaseUrl = $base_url;
+            }
 
-			if (isset($dec->siteAssets->modulesParams->platform->externalBaseUrl))
-				$dec->siteAssets->modulesParams->platform->externalBaseUrl = $base_url;
+            if (isset($dec->site->externalBaseUrl))
+            {
+                $dec->site->externalBaseUrl = $base_url;
+            }
 
-			$node->nodeValue = '';
-			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
+            if (isset($dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl))
+            {
+                $dec->siteFeaturesConfigs->tpaCommons->externalBaseUrl = $base_url;
+            }
 
-		}
+            if (isset($dec->siteFeaturesConfigs->router->baseUrl))
+            {
+                $dec->siteFeaturesConfigs->router->baseUrl = $base_url;
+            }
 
-		$nodes = $xpath->query('//script[@id="wix-fedops"]');
+            if (isset($dec->siteFeaturesConfigs->seo->context->siteUrl))
+            {
+                $dec->siteFeaturesConfigs->seo->context->siteUrl = $route_url;
+            }
 
-		foreach ($nodes as $key => $node) {
-			$dec = json_decode($node->nodeValue);
-			$dec->data->site->externalBaseUrl = $route_url;
-			$dec->data->requestUrl = $route_url;
+            if (isset($dec->siteFeaturesConfigs->seo->context->defaultUrl))
+            {
+                $dec->siteFeaturesConfigs->seo->context->defaultUrl = $route_url;
+            }
 
-			$node->nodeValue = '';
-			$node->appendChild(self::$dom->createTextNode(json_encode($dec)));
-		}
-	}
+            if (isset($dec->requestUrl))
+            {
+                $dec->requestUrl = $route_url;
+            }
 
+            if (isset($dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl))
+            {
+                $dec->siteFeaturesConfigs->locationWixCodeSdk->baseUrl = $base_url;
+            }
 
-	/**
-	 * [changeAHrefLinks description]
-	 * @return [type] [description]
-	 */
-	public static function changeAHrefLinks() : void
-	{
-		// var_dump(Config::$route);
-		$project_parse_url = parse_url(Config::$domain->project);
-		foreach (self::$dom->getElementsByTagName('a') as $tag)
-			if (isset($project_parse_url['host']))
-				$tag->setAttribute(
-					'href',
-					str_replace(Config::$domain->project, '', $tag->getAttribute('href'))
-				);
+            if (isset($dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl))
+            {
+                $dec->siteFeaturesConfigs->siteWixCodeSdk->baseUrl = $base_url;
+            }
 
-	}
+            if (isset($dec->siteFeaturesConfigs->tpaCommons->requestUrl))
+            {
+                $dec->siteFeaturesConfigs->tpaCommons->requestUrl = $route_url;
+            }
 
-	/**
-	 * [changeHtmlTags description]
-	 * @return [type] [description]
-	 */
-	public static function changeHtmlTags() : void
-	{
-		foreach (self::$dom->getElementsByTagName('div') as $tag)
-		{
-			// site-root
-			if ($tag->getAttribute('id') == 'WIX_ADS') {
-				$tag->setAttribute('style', 'display:none');
-			}
+            if (isset($dec->siteAssets->modulesParams->features->externalBaseUrl))
+            {
+                $dec->siteAssets->modulesParams->features->externalBaseUrl = $base_url;
+            }
 
-			if ($tag->getAttribute('id') == 'site-root') {
-				$tag->setAttribute('style', 'top:0px');
-			}
-		}
-	}
+            if (isset($dec->siteAssets->modulesParams->platform->externalBaseUrl))
+            {
+                $dec->siteAssets->modulesParams->platform->externalBaseUrl = $base_url;
+            }
 
+            $node->nodeValue = '';
+            $node->appendChild(self::$dom->createTextNode(json_encode($dec)));
 
-	/**
-	 * [changeImgTags description]
-	 * @return [type] [description]
-	 */
-	public static function changeImgTags(): void
-	{
+        }
 
-	}
+        $nodes = $xpath->query('//script[@id="wix-fedops"]');
 
-	public static function html(string $html): string
-	{
-		self::initialize(
-			self::preProcessHTML($html)
-		);
+        foreach ($nodes as $key => $node)
+        {
+            $dec                              = json_decode($node->nodeValue);
+            $dec->data->site->externalBaseUrl = $route_url;
+            $dec->data->requestUrl            = $route_url;
 
-		self::initialize($html);
-		self::changeDomElements();
-		self::changeAHrefLinks();
-		self::changeScriptTags();
-		self::changeImgTags();
-		self::changeHtmlTags();
-		self::changeWixOptions();
-		return self::postProcessHTML();
-	}
+            $node->nodeValue = '';
+            $node->appendChild(self::$dom->createTextNode(json_encode($dec)));
+        }
+    }
 
-	public static function javascript(string $content) : string
-	{
-		return $content;
-	}
+    /**
+     * @param string $content
+     * @return mixed
+     */
+    public static function css(string $content): string
+    {
+        return $content;
+    }
 
-	public static function robots(object $content): object
-	{
-		return $content;
-	}
+    /**
+     * @param string $html
+     */
+    public static function html(string $html): string
+    {
+        self::initialize(
+            self::preProcessHTML($html)
+        );
 
-	public static function css(string $content): string
-	{
-		return $content;
-	}
+        self::initialize($html);
+        self::changeDomElements();
+        self::changeAHrefLinks();
+        self::changeScriptTags();
+        self::changeImgTags();
+        self::changeHtmlTags();
+        self::changeWixOptions();
 
-} 
+        return self::postProcessHTML();
+    }
+
+    /**
+     * @param string $content
+     * @return mixed
+     */
+    public static function javascript(string $content): string
+    {
+        return $content;
+    }
+
+    /**
+     * @param object $content
+     * @return mixed
+     */
+    public static function robots(object $content): object
+    {
+        return $content;
+    }
+}
