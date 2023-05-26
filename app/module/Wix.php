@@ -78,23 +78,21 @@ class Wix extends Tags
             {
                 case 'relative':
 
-                    switch ($script->getAttribute('id'))
+                    if ($script->getAttribute('id') === 'sentry')
                     {
-                        case 'sentry':
-                            $script->parentNode->removeChild($script);
-                            break;
+                        $script->parentNode->removeChild($script);
                     }
 
                     $src      = $script->getAttribute('src');
                     $data_url = $script->getAttribute('data-url');
 
                     if (!empty($src))
-                {
+                    {
                         $script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
                     }
 
                     if (!empty($data_url))
-                {
+                    {
                         $script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
                     }
 
@@ -198,7 +196,7 @@ class Wix extends Tags
     }
 
     /**
-     * @param string $content
+     * @param  string  $content
      * @return mixed
      */
     public static function css(string $content): string
@@ -227,7 +225,7 @@ class Wix extends Tags
     }
 
     /**
-     * @param string $content
+     * @param  string  $content
      * @return mixed
      */
     public static function javascript(string $content): string
@@ -236,7 +234,7 @@ class Wix extends Tags
     }
 
     /**
-     * @param object $content
+     * @param  object  $content
      * @return mixed
      */
     public static function robots(object $content): object
