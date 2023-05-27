@@ -6,3 +6,5 @@ composer.phar
 node_modules
 app/config/access.json
 app/config/hosts.json
+app/favicon/
+app/inject/
