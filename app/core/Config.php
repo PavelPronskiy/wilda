@@ -534,14 +534,31 @@ class Config
         /**
          * set storage type [redis: memory, ssdb: disk]
          */
-
-        if (isset(static::$domain->storage))
+        if (isset(static::$domain->storage) && isset(static::$domain->storage->type))
         {
-            static::$storage = static::$domain->storage;
+            static::$storage->type = static::$domain->storage->type;
         }
         else
         {
-            static::$storage = static::$config->storage;
+            static::$storage->type = static::$config->storage->type;
+        }
+
+        if (isset(static::$domain->storage) && isset(static::$domain->storage->redis))
+        {
+            static::$storage->redis = static::$domain->storage->redis;
+        }
+        else
+        {
+            static::$storage->redis = static::$config->storage->redis;
+        }
+
+        if (isset(static::$domain->storage) && isset(static::$domain->storage->ssdb))
+        {
+            static::$storage->ssdb = static::$domain->storage->ssdb;
+        }
+        else
+        {
+            static::$storage->ssdb = static::$config->storage->ssdb;
         }
 
         /**

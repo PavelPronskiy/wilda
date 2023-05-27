@@ -211,6 +211,15 @@ const options = {
             className: 'jsoneditor-type-object',
             field: 'compress',
             value: GLOBAL_CONFIG.compress
+        },
+        {
+            text: 'Сторейдж',
+            title: 'Изменить тип сторейдж',
+            className: 'jsoneditor-type-object',
+            field: 'storage',
+            value: {
+                "type": "disk"
+            }
         }
     ],
     onChange: function () {
@@ -272,7 +281,8 @@ const options = {
                         items[index].submenu = items[index].submenu.filter(function (item) {
                             var excludes = [
                                 'Auto', 'Array', 'Object', 'String', 'Новый сайт',
-                                'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон', 'Кэширование', 'Сжатие страниц'
+                                'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон',
+                                'Кэширование', 'Сжатие страниц', 'Сторейдж'
                             ];
                             return !excludes.includes(item.text);
                         })
