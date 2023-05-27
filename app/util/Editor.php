@@ -177,6 +177,6 @@ class Editor
      */
     public static function shortcodes(string $html)
     {
-        return str_replace('{ GLOBAL_CONFIG }', 'const GLOBAL_CONFIG=' . json_encode(Config::getGlobalConfig()), (string) $html);
+        return str_replace('{GLOBAL_CONFIG}', 'const GLOBAL_CONFIG=' . json_encode(Config::getGlobalConfig()), (string) $html);
     }
 }
