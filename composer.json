@@ -17,6 +17,7 @@
         "ext-bcmath": "*",
         "masterminds/html5": "^2.8",
         "phpmailer/phpmailer": "^5.2",
-        "hashids/hashids": "^5.0"
+        "hashids/hashids": "^5.0",
+        "phpfastcache/phpssdb": "^1.1"
     }
 }

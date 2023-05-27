@@ -3,7 +3,7 @@
 Репроксирование с модификацией страниц.
 
 ## Зависимости
-`nginx` `redis` `php81-fpm` `php81-redis` `php81-cli` `php81-ctype` `php81-dom` `php81-bcmath` `php81-session`
+`nginx` `redis` `ssdb` `php81-fpm` `php81-redis` `php81-cli` `php81-ctype` `php81-dom` `php81-bcmath` `php81-session`
 
 ## Конфигурация
 Вся конфигурация для сайтов описывается в файле `.config.json`
@@ -24,6 +24,26 @@
 ```
 Параметр используется для вкл/выкл различного функционала.
 
+## storage (global, hosts)
+```json
+  "storage": {
+    "type": "disk",
+    "redis": {
+      "host": "127.0.0.1",
+      "port": 6379
+    },
+    "ssdb": {
+      "host": "127.0.0.1",
+      "port": 8888
+    }
+  }
+
+`type` - disk, memory
+Опция устанавливает где хранить статичные элементы сайтов в `cache`
+Тип `disk` хранение в ssdb
+Тип `memory` хранение в redis 
+
+> Если весь кэш не помещается в память, рекомендуется установить тип `disk`
 
 ## hosts (global)
 ```json

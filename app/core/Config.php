@@ -111,6 +111,14 @@ class Config
      */
     public static $route;
 
+    /**
+     * @var mixed
+     */
+    public static $storage = [];
+
+    /**
+     * Constructs a new instance.
+     */
     public function __construct()
     {
         static::initialize();
@@ -145,7 +153,6 @@ class Config
             {
                 die(json_last_error_msg() . ' ' . self::CONFIG_ACCESS);
             }
-
         }
         else
         {
@@ -183,7 +190,6 @@ class Config
                         return $host;
                     }
                 }
-
             }
             else
             {
@@ -214,7 +220,6 @@ class Config
             {
                 die(json_last_error_msg() . ' ' . static::CONFIG_GLOBAL);
             }
-
         }
         else
         {
@@ -310,6 +315,7 @@ class Config
         static::$inject   = (object) [];
         static::$compress = (object) [];
         static::$editor   = (object) [];
+        static::$storage  = (object) [];
 
         $request_uri = parse_url(
             preg_replace('{^//}', '/', $_SERVER['REQUEST_URI'])
@@ -526,6 +532,19 @@ class Config
         }
 
         /**
+         * set storage type [redis: memory, ssdb: disk]
+         */
+
+        if (isset(static::$domain->storage))
+        {
+            static::$storage = static::$domain->storage;
+        }
+        else
+        {
+            static::$storage = static::$config->storage;
+        }
+
+        /**
          * set metrics variables
          */
         if (isset(static::$domain->metrics->enabled))
@@ -645,7 +664,6 @@ class Config
     {
         if (RUN_METHOD == 'web')
         {
-
             if (isset($response->error) && isset($response->code))
             {
                 http_response_code($response->code);

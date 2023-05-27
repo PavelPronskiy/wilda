@@ -1,4 +1,5 @@
 <?php
+
 namespace app\util;
 
 use app\core\Config;
@@ -80,16 +81,11 @@ class Curl
     public static function get($url)
     {
         $curl = \curl_init ();
-        $ua   = isset($_SERVER['HTTP_USER_AGENT'])
-        ? $_SERVER['HTTP_USER_AGENT']
-        : Config::$config->headers->ua;
+        $ua   = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : Config::$config->headers->ua;
 
         if (Config::$config->privoxy->enabled)
         {
-            curl_setopt($curl, CURLOPT_PROXY,
-                Config::$config->privoxy->host . ':' .
-                Config::$config->privoxy->port
-            );
+            curl_setopt($curl, CURLOPT_PROXY, Config::$config->privoxy->host . ':' . Config::$config->privoxy->port);
         }
 
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -97,17 +93,11 @@ class Curl
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_USERAGENT, $ua);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt(
-            $curl,
-            CURLOPT_REFERER,
-            (RUN_METHOD === 'web')
-            ? Config::$domain->project
-            : ''
-        );
-        // $cache = new Cache;
+        curl_setopt($curl, CURLOPT_REFERER, (RUN_METHOD === 'web') ? Config::$domain->project : '');
         curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
 
-        $response     = curl_exec($curl);
+        $response = curl_exec($curl);
+
         $info         = curl_getinfo($curl);
         $content_type = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
         // get cache results
@@ -158,12 +148,12 @@ class Curl
                         Config::$hash
                     );
                 }
-
             }
         }
         else
         {
             $results = self::rget();
+
             if (empty($results))
             {
                 self::curlErrorHandler(500);
@@ -172,7 +162,6 @@ class Curl
             {
                 return Modify::byContentType($results);
             }
-
         }
 
         return $results;
@@ -184,11 +173,7 @@ class Curl
      */
     public static function rget(): object
     {
-        $build_query = count((array) Config::$route->query) > 0
-        ? '?' . http_build_query((array) Config::$route->query)
-        : '';
-
-        // $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $build_query = count((array) Config::$route->query) > 0 ? '?' . http_build_query((array) Config::$route->query) : '';
 
         return isset(Config::$route->query) && in_array(key(Config::$route->query), Config::URI_QUERY_TYPES)
         ? self::get(Encryption::decode(Config::$route->query->{key(Config::$route->query)}))

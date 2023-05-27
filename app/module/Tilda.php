@@ -46,10 +46,9 @@ class Tilda extends Tags
     }
 
     /**
-     * [changeFavicon description]
-     * @return [type] [description]
+     * { function_description }
      */
-    public static function changeFavicon()
+    public static function changeFavicon(): void
     {
         if (Config::$favicon->enabled)
         {
@@ -85,7 +84,6 @@ class Tilda extends Tags
             switch (Config::$config->images)
             {
                 case 'relative':
-
                     preg_match('/static\.tildacdn\.info/', $style->textContent, $matched);
                     if (count($matched) > 0)
                     {
@@ -117,7 +115,6 @@ class Tilda extends Tags
             switch (Config::$config->scripts)
             {
                 case 'relative':
-
                     if ($script->getAttribute('id') === 'sentry')
                     {
                         $script->parentNode->removeChild($script);
@@ -249,7 +246,6 @@ class Tilda extends Tags
     {
         foreach (self::$dom->getElementsByTagName('script') as $script)
         {
-
             if (strlen($script->textContent) == 564)
             {
                 $script->parentNode->removeChild($script);

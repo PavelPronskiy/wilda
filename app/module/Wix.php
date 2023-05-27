@@ -77,7 +77,6 @@ class Wix extends Tags
             switch (Config::$config->scripts)
             {
                 case 'relative':
-
                     if ($script->getAttribute('id') === 'sentry')
                     {
                         $script->parentNode->removeChild($script);
@@ -111,7 +110,6 @@ class Wix extends Tags
         foreach ($nodes as $key => $node)
         {
             $dec = json_decode($node->nodeValue);
-            // var_dump($dec);
             if (isset($dec->siteFeaturesConfigs->platform->bootstrapData->location->domain))
             {
                 $dec->siteFeaturesConfigs->platform->bootstrapData->location->domain = Config::$route->domain;
@@ -179,7 +177,6 @@ class Wix extends Tags
 
             $node->nodeValue = '';
             $node->appendChild(self::$dom->createTextNode(json_encode($dec)));
-
         }
 
         $nodes = $xpath->query('//script[@id="wix-fedops"]');

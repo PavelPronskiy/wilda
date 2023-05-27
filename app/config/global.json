@@ -7,6 +7,17 @@
   "fonts": "relative",
   "icons": "relative",
   "salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
+  "storage": {
+    "type": "disk",
+    "redis": {
+      "host": "127.0.0.1",
+      "port": 6379
+    },
+    "ssdb": {
+      "host": "127.0.0.1",
+      "port": 8888
+    }
+  },
   "lang": "ru",
   "forceSSL": true,
   "compress": {
@@ -41,10 +52,6 @@
     "enabled": true,
     "host": "127.0.0.1",
     "port": 8118
-  },
-  "redis": {
-    "host": "127.0.0.1",
-    "port": 6379
   },
   "cache": {
     "enabled": true,

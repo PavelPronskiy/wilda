@@ -8,45 +8,59 @@ use app\util\Editor;
 
 class Router
 {
-	function __construct()
-	{
-		if (isset(Config::$route->query))
-			if (key(Config::$route->query))
-				switch (key(Config::$route->query))
-				{
-					case 'clear':
-					case 'flush': Cache::clear(); break;
-					case 'keys': Cache::keys(); break;
-					case 'editor': new Editor; break;
-					case 'cleaner': Cache::webCacheCleaner(); break;
-				}
+    public function __construct()
+    {
+        if (isset(Config::$route->query))
+        {
+            if (key(Config::$route->query))
+            {
+                switch (key(Config::$route->query))
+                {
+                    case 'clear':
+                    case 'flush':
+                        Cache::clear();
+                        break;
+                    case 'keys':
+                        Cache::keys();
+                        break;
+                    case 'editor':
+                        new Editor();
+                        break;
+                    case 'cleaner':
+                        Cache::webCacheCleaner();
+                        break;
+                }
+            }
+        }
 
-		// for post submits only
-		if (isset(Config::$route->post))
-			new Submit;
+        // for post submits only
+        if (isset(Config::$route->post))
+        {
+            new Submit();
+        }
 
-		// for gets
-		Config::render(
-			self::routeGet(
-				Curl::preCachedRequest()
-			)
-		);
-	}
+        // for gets
+        Config::render(
+            self::routeGet(
+                Curl::preCachedRequest()
+            )
+        );
+    }
 
-	/**
-	 * [routeGet description]
-	 * @param  [type] $content [description]
-	 * @return [type]          [description]
-	 */
-	private static function routeGet($content)
-	{
-		switch (Config::$route->path)
-		{
-			case '/robots.txt':
-				return Modify::robots($content);
+    /**
+     * [routeGet description]
+     * @param  [type] $content        [description]
+     * @return [type] [description]
+     */
+    private static function routeGet($content)
+    {
+        switch (Config::$route->path)
+        {
+            case '/robots.txt':
+                return Modify::robots($content);
 
-			default:
-				return $content;
-		}
-	}
+            default:
+                return $content;
+        }
+    }
 }
