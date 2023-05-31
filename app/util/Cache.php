@@ -34,6 +34,8 @@ class Cache
 
     public function __construct()
     {
+        static::$revision_key = Config::$name . ':' . static::$revision_key;
+
         $this->dbInstance();
     }
 
@@ -42,7 +44,7 @@ class Cache
      */
     public static function clear(): void
     {
-        $pages = self::$instance->keys(Config::$hash_key . ':*');
+        $pages = static::storageKeys(Config::$hash_key . ':*');
 
         if (count($pages) > 0)
         {
@@ -83,7 +85,7 @@ class Cache
      */
     public static function delConfigRevision(string $revision): void
     {
-        $keys = self::$instance->keys(self::$revision_key . ':' . $revision);
+        $keys = static::storageKeys(static::$revision_key . ':' . $revision);
 
         if (count($keys) > 0)
         {
@@ -125,7 +127,7 @@ class Cache
     public static function getAllConfigRevisions(): array
     {
         $array = [];
-        $keys  = self::$instance->keys(self::$revision_key . ':*');
+        $keys  = static::storageKeys(static::$revision_key . ':*');
 
         if (count($keys) > 0)
         {
@@ -146,11 +148,25 @@ class Cache
      */
     public static function getAllKeysConfigRevisions(): array
     {
-        $array = [];
-        $keys  = self::$instance->keys(self::$revision_key . ':*');
+        $maxSize = 10000;
+        $array   = [];
+        $revs    = [
+            'revisions' => [],
+        ];
+
+        $keys = static::storageKeys(static::$revision_key . ':*');
+
+        if ($keys === false)
+        {
+            return $revs;
+        }
+
         foreach ($keys as $key)
         {
-            $array[] = str_replace(self::$revision_key . ':', '', $key);
+            if (str_contains($key, static::$revision_key))
+            {
+                $array[] = str_replace(static::$revision_key . ':', '', $key);
+            }
         }
 
         usort($array, function (
@@ -161,9 +177,9 @@ class Cache
             return (int) $a - (int) $b;
         });
 
-        return [
-            'revisions' => $array,
-        ];
+        $revs['revisions'] = $array;
+
+        return $revs;
     }
 
     /**
@@ -177,7 +193,7 @@ class Cache
      */
     public static function getConfigRevision(string $revision): array
     {
-        return (array) json_decode(self::$instance->get(self::$revision_key . ':' . $revision));
+        return (array) json_decode(self::$instance->get(static::$revision_key . ':' . $revision));
     }
 
     /**
@@ -234,7 +250,7 @@ class Cache
      */
     public static function keys(): void
     {
-        $pages = self::$instance->keys(Config::$hash_key . ':*');
+        $pages = static::storageKeys(Config::$hash_key . ':*');
 
         if (count($pages) > 0)
         {
@@ -301,13 +317,39 @@ class Cache
      */
     public static function setConfigRevision(array $data): string
     {
-        $hash = self::$revision_key . ':' . \time ();
+        $hash = static::$revision_key . ':' . \time ();
         self::$instance->set(
             (string) $hash,
             (string) json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
         return $hash;
+    }
+
+    /**
+     * @param string $key
+     */
+    public static function storageKeys(string $key)
+    {
+        return self::$instance->keys(
+            static::storageType($key)
+        );
+    }
+
+    /**
+     * @param  $key
+     * @return mixed
+     */
+    public static function storageType(string $key)
+    {
+        switch (Config::$storage->type)
+        {
+            case 'disk':
+                return [$key, '', 1000];
+
+            case 'memory':
+                return $key;
+        }
     }
 
     /**

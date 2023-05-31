@@ -12,13 +12,13 @@ use app\util\Encryption;
 class Curl
 {
     /**
-     * [curlErrorHandler description]
-     * @param  [type] $http_code      [description]
-     * @return [type] [description]
+     * Handles HTTP error codes and renders an appropriate response.
+     *
+     * @param  int       $http_code The HTTP status code to handle.
+     * @return bool|null Returns true if HTTP status code is 200, false if code is or unhandled, null for all other codes.
      */
     public static function curlErrorHandler($http_code)
     {
-
         Config::$lang = (array) Config::$lang;
 
         if (RUN_METHOD == 'web')
@@ -168,8 +168,8 @@ class Curl
     }
 
     /**
-     * [rget description]
-     * @return [type] [description]
+     * Retrieve resource from server using GET request
+     * @return object Response from server
      */
     public static function rget(): object
     {
