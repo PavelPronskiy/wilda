@@ -102,7 +102,7 @@ class Wix extends Tags
 
     public static function changeWixOptions(): void
     {
-        $xpath     = new \DOMXPath (self::$dom);
+        $xpath     = new \DOMXPath(self::$dom);
         $nodes     = $xpath->query('//script[@id="wix-viewer-model"]');
         $route_url = str_replace('http://', 'https://', Config::$route->url);
         $base_url  = str_replace('http://', 'https://', Config::$domain->site);
@@ -235,6 +235,17 @@ class Wix extends Tags
      * @return mixed
      */
     public static function robots(object $content): object
+    {
+        return $content;
+    }
+
+    /**
+     * { function_description }
+     *
+     * @param  string $content The content
+     * @return string ( description_of_the_return_value )
+     */
+    public static function sitemap(string $content): string
     {
         return $content;
     }
