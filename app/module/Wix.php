@@ -234,8 +234,24 @@ class Wix extends Tags
      * @param  object  $content
      * @return mixed
      */
-    public static function robots(object $content): object
+    public static function robots(string $content): string
     {
+        $project = str_replace(self::$proto, '', Config::$domain->project);
+        $site    = str_replace(self::$proto, '', Config::$domain->site);
+
+        // replace sitemap
+        $content = str_replace(
+            (string) Config::getProjectName(),
+            (string) Config::getSiteName(),
+            (string) $content
+        );
+
+        $content = str_replace(
+            self::$proto[0],
+            self::$proto[1],
+            $content
+        );
+
         return $content;
     }
 

@@ -21,56 +21,53 @@ class Curl
     {
         Config::$lang = (array) Config::$lang;
 
-        if (RUN_METHOD == 'web')
+        switch ($http_code)
         {
-            switch ($http_code)
-            {
-                case 404:
-                    $result = (object) [
-                        'code'         => 404,
-                        'error'        => true,
-                        'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 404</h1>' . Config::$lang[1] . '</body></html>',
-                        'content_type' => 'text/html',
-                    ];
-                    break;
+            case 404:
+                $result = (object) [
+                    'code'         => 404,
+                    'error'        => true,
+                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 404</h1>' . Config::$lang[1] . '</body></html>',
+                    'content_type' => 'text/html',
+                ];
+                break;
 
-                case 503:
-                    $result = (object) [
-                        'code'         => 503,
-                        'error'        => true,
-                        'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[2] . '</body></html>',
-                        'content_type' => 'text/html',
-                    ];
-                    break;
+            case 503:
+                $result = (object) [
+                    'code'         => 503,
+                    'error'        => true,
+                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[2] . '</body></html>',
+                    'content_type' => 'text/html',
+                ];
+                break;
 
-                case 502:
-                    $result = (object) [
-                        'code'         => 502,
-                        'error'        => true,
-                        'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 502</h1>' . Config::$lang[0] . '</body></html>',
-                        'content_type' => 'text/html',
-                    ];
-                    break;
+            case 502:
+                $result = (object) [
+                    'code'         => 502,
+                    'error'        => true,
+                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 502</h1>' . Config::$lang[0] . '</body></html>',
+                    'content_type' => 'text/html',
+                ];
+                break;
 
-                case 500:
-                    $result = (object) [
-                        'code'         => 500,
-                        'error'        => true,
-                        'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[3] . '</body></html>',
-                        'content_type' => 'text/html',
-                    ];
-                    break;
+            case 500:
+                $result = (object) [
+                    'code'         => 500,
+                    'error'        => true,
+                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 500</h1>' . Config::$lang[3] . '</body></html>',
+                    'content_type' => 'text/html',
+                ];
+                break;
 
-                case 200:
-                    return true;
+            case 200:
+                return true;
 
-                case 0:
-                default:
-                    return false;
-            }
-
-            Config::render($result);
+            case 0:
+            default:
+                return false;
         }
+
+        Config::render($result);
     }
 
     /**
@@ -80,7 +77,7 @@ class Curl
      */
     public static function get($url)
     {
-        $curl = \curl_init ();
+        $curl = \curl_init();
         $ua   = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : Config::$config->headers->ua;
 
         if (Config::$config->privoxy->enabled)
@@ -93,7 +90,7 @@ class Curl
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_USERAGENT, $ua);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_REFERER, (RUN_METHOD === 'web') ? Config::$domain->project : '');
+        curl_setopt($curl, CURLOPT_REFERER, (Config::$runType === 'web') ? Config::$domain->project : '');
         curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
 
         $response = curl_exec($curl);
@@ -125,7 +122,7 @@ class Curl
      */
     public static function preCachedRequest(): object
     {
-        Cache::$microtime = \microtime (true);
+        Cache::$microtime = \microtime(true);
 
         $results = (object) [];
         // var_dump(Config::$route);

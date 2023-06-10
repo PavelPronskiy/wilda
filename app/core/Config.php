@@ -112,6 +112,11 @@ class Config
     public static $route;
 
     /**
+     * @var string
+     */
+    public static $runType = 'web';
+
+    /**
      * @var mixed
      */
     public static $storage = [];
@@ -316,320 +321,323 @@ class Config
         static::$compress = (object) [];
         static::$editor   = (object) [];
         static::$storage  = (object) [];
-
-        $request_uri = parse_url(
-            preg_replace('{^//}', '/', $_SERVER['REQUEST_URI'])
-        );
-
-        static::$route = (object) [
-            'domain' => $_SERVER['HTTP_HOST'],
-            'path'   => $request_uri['path'],
-            'site'   => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-            ? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST']
-            : $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
-            'url'    => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-            ? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
-            : $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
-        ];
-
-        if (isset($request_uri['query']))
-        {
-            parse_str($request_uri['query'], $query);
-            static::$route->query = (object) $query;
-        }
-        else
-        {
-            static::$route->query = (object) [];
-        }
-
-        if (isset($_POST) && count($_POST) > 0)
-        {
-            static::$route->post = (object) $_POST;
-        }
-
-        static::$config = (object) [
+        static::$config   = (object) [
             ...(array) static::getGlobalConfig(),
             ...(array) static::getHostsConfig(),
         ];
 
-        // $device_type   = static::isMobile() ? 'mobile' : 'desktop';
-        static::$domain = (object) static::getDomainConfig();
-        static::$access = (array) static::getAccessConfig();
-
-        /**
-         * set lang translations
-         * @var [type]
-         */
-        static::$lang = isset(static::$domain->lang)
-        ? (array) static::$config->translations->{static::$domain->lang}
-        : (array) static::$config->translations->{static::$config->lang};
-
-        /**
-         * if not type defined
-         */
-        if (!isset(static::$domain->type))
+        static::$lang = static::$config->translations->{static::$config->lang};
+        if (self::$runType === 'web')
         {
-            \app\util\Curl::curlErrorHandler(500);
-        }
+            $request_uri = parse_url(
+                preg_replace('{^//}', '/', $_SERVER['REQUEST_URI'])
+            );
 
-        if (isset(static::$domain->styles))
-        {
-            static::$config->styles = static::$domain->styles;
-        }
+            static::$route = (object) [
+                'domain' => $_SERVER['HTTP_HOST'],
+                'path'   => $request_uri['path'],
+                'site'   => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+                ? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST']
+                : $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'],
+                'url'    => isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+                ? $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
+                : $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+            ];
 
-        if (isset(static::$domain->scripts))
-        {
-            static::$config->scripts = static::$domain->scripts;
-        }
+            if (isset($request_uri['query']))
+            {
+                parse_str($request_uri['query'], $query);
+                static::$route->query = (object) $query;
+            }
+            else
+            {
+                static::$route->query = (object) [];
+            }
 
-        if (isset(static::$domain->images))
-        {
-            static::$config->images = static::$domain->images;
-        }
+            if (isset($_POST) && count($_POST) > 0)
+            {
+                static::$route->post = (object) $_POST;
+            }
 
-        if (
-            is_array(
-                static::$domain->site
-            ) && in_array(
-                static::$route->site,
-                static::$domain->site
+            // $device_type   = static::isMobile() ? 'mobile' : 'desktop';
+            static::$domain = (object) static::getDomainConfig();
+            static::$access = (array) static::getAccessConfig();
+
+            /**
+             * if not type defined
+             */
+            if (!isset(static::$domain->type))
+            {
+                \app\util\Curl::curlErrorHandler(500);
+            }
+
+            static::$hash_key = static::$name . ':' . static::$route->domain . ':' . static::$domain->type;
+
+            static::$hash = static::$hash_key . ':' . static::getKeyUserDisplayResolution() . ':' . static::getURIEncryptHash();
+
+            /**
+             * set lang translations
+             * @var [type]
+             */
+            static::$lang = isset(static::$domain->lang)
+            ? (array) static::$config->translations->{static::$domain->lang}
+            : (array) static::$config->translations->{static::$config->lang};
+
+            if (isset(static::$domain->styles))
+            {
+                static::$config->styles = static::$domain->styles;
+            }
+
+            if (isset(static::$domain->scripts))
+            {
+                static::$config->scripts = static::$domain->scripts;
+            }
+
+            if (isset(static::$domain->images))
+            {
+                static::$config->images = static::$domain->images;
+            }
+
+            if (
+                is_array(
+                    static::$domain->site
+                ) && in_array(
+                    static::$route->site,
+                    static::$domain->site
+                )
             )
-        )
-        {
-            static::$config->site = static::$route->site;
-            static::$domain->site = static::$route->site;
-        }
-
-        /**
-         * set privoxy variables
-         */
-        if (isset(static::$domain->privoxy))
-        {
-            if (isset(static::$domain->privoxy->enabled))
             {
-                static::$config->privoxy->enabled = static::$domain->privoxy->enabled;
+                static::$config->site = static::$route->site;
+                static::$domain->site = static::$route->site;
             }
 
-            if (isset(static::$domain->privoxy->host))
+            /**
+             * set privoxy variables
+             */
+            if (isset(static::$domain->privoxy))
             {
-                static::$config->privoxy->host = static::$domain->privoxy->host;
+                if (isset(static::$domain->privoxy->enabled))
+                {
+                    static::$config->privoxy->enabled = static::$domain->privoxy->enabled;
+                }
+
+                if (isset(static::$domain->privoxy->host))
+                {
+                    static::$config->privoxy->host = static::$domain->privoxy->host;
+                }
+
+                if (isset(static::$domain->privoxy->port))
+                {
+                    static::$config->privoxy->port = static::$domain->privoxy->port;
+                }
             }
 
-            if (isset(static::$domain->privoxy->port))
+            /**
+             * set cache variables
+             */
+            if (isset(static::$domain->cache->enabled))
             {
-                static::$config->privoxy->port = static::$domain->privoxy->port;
+                static::$config->cache->enabled = static::$domain->cache->enabled;
             }
-        }
 
-        /**
-         * set cache variables
-         */
-        if (isset(static::$domain->cache->enabled))
-        {
-            static::$config->cache->enabled = static::$domain->cache->enabled;
-        }
+            if (isset(static::$domain->cache->expire))
+            {
+                static::$config->cache->expire = static::$domain->cache->expire;
+            }
 
-        if (isset(static::$domain->cache->expire))
-        {
-            static::$config->cache->expire = static::$domain->cache->expire;
-        }
+            if (isset(static::$domain->cache->stats))
+            {
+                static::$config->cache->stats = static::$domain->cache->stats;
+            }
 
-        if (isset(static::$domain->cache->stats))
-        {
-            static::$config->cache->stats = static::$domain->cache->stats;
-        }
+            /**
+             * set mail submit variables
+             */
+            if (isset(static::$domain->mail->enabled))
+            {
+                static::$mail->enabled = static::$domain->mail->enabled;
+            }
+            else
+            {
+                static::$mail->enabled = static::$config->mail->enabled;
+            }
 
-        /**
-         * set mail submit variables
-         */
-        if (isset(static::$domain->mail->enabled))
-        {
-            static::$mail->enabled = static::$domain->mail->enabled;
-        }
-        else
-        {
-            static::$mail->enabled = static::$config->mail->enabled;
-        }
+            if (isset(static::$domain->mail->subject))
+            {
+                static::$mail->subject = static::$domain->mail->subject;
+            }
+            else
+            {
+                static::$mail->subject = static::$config->mail->subject;
+            }
 
-        if (isset(static::$domain->mail->subject))
-        {
-            static::$mail->subject = static::$domain->mail->subject;
-        }
-        else
-        {
-            static::$mail->subject = static::$config->mail->subject;
-        }
+            if (isset(static::$domain->mail->name))
+            {
+                static::$mail->name = static::$domain->mail->name;
+            }
+            else
+            {
+                static::$mail->name = static::$config->mail->name;
+            }
 
-        if (isset(static::$domain->mail->name))
-        {
-            static::$mail->name = static::$domain->mail->name;
-        }
-        else
-        {
-            static::$mail->name = static::$config->mail->name;
-        }
+            if (isset(static::$domain->mail->from))
+            {
+                static::$mail->from = static::$domain->mail->from;
+            }
+            else
+            {
+                static::$mail->from = static::$config->mail->from . self::getSiteName();
+            }
 
-        if (isset(static::$domain->mail->from))
-        {
-            static::$mail->from = static::$domain->mail->from;
-        }
-        else
-        {
-            static::$mail->from = static::$config->mail->from . self::getSiteName();
-        }
+            if (isset(static::$domain->mail->to))
+            {
+                static::$mail->to = static::$domain->mail->to;
+            }
+            else
+            {
+                static::$mail->to = static::$config->mail->to;
+            }
 
-        if (isset(static::$domain->mail->to))
-        {
-            static::$mail->to = static::$domain->mail->to;
-        }
-        else
-        {
-            static::$mail->to = static::$config->mail->to;
-        }
+            if (isset(static::$domain->mail->success))
+            {
+                static::$mail->success = static::$domain->mail->success;
+            }
+            else
+            {
+                static::$mail->success = static::$config->mail->success;
+            }
 
-        if (isset(static::$domain->mail->success))
-        {
-            static::$mail->success = static::$domain->mail->success;
-        }
-        else
-        {
-            static::$mail->success = static::$config->mail->success;
-        }
+            if (isset(static::$domain->mail->error))
+            {
+                static::$mail->error = static::$domain->mail->error;
+            }
+            else
+            {
+                static::$mail->error = static::$config->mail->error;
+            }
 
-        if (isset(static::$domain->mail->error))
-        {
-            static::$mail->error = static::$domain->mail->error;
-        }
-        else
-        {
-            static::$mail->error = static::$config->mail->error;
-        }
+            /**
+             * set favicon variables
+             */
+            if (isset(static::$domain->favicon->enabled))
+            {
+                static::$favicon->enabled = static::$domain->favicon->enabled;
+            }
+            else
+            {
+                static::$favicon->enabled = static::$config->favicon->enabled;
+            }
 
-        /**
-         * set favicon variables
-         */
-        if (isset(static::$domain->favicon->enabled))
-        {
-            static::$favicon->enabled = static::$domain->favicon->enabled;
-        }
-        else
-        {
-            static::$favicon->enabled = static::$config->favicon->enabled;
-        }
+            static::$favicon->path = 'app/favicon';
 
-        static::$favicon->path = 'app/favicon';
+            /**
+             * set compress variables
+             */
+            if (isset(static::$domain->compress->enabled))
+            {
+                static::$compress->enabled = static::$domain->compress->enabled;
+            }
+            else
+            {
+                static::$compress->enabled = static::$config->compress->enabled;
+            }
 
-        /**
-         * set compress variables
-         */
-        if (isset(static::$domain->compress->enabled))
-        {
-            static::$compress->enabled = static::$domain->compress->enabled;
-        }
-        else
-        {
-            static::$compress->enabled = static::$config->compress->enabled;
-        }
+            /**
+             * set storage type [redis: memory, ssdb: disk]
+             */
+            if (isset(static::$domain->storage) && isset(static::$domain->storage->type))
+            {
+                static::$storage->type = static::$domain->storage->type;
+            }
+            else
+            {
+                static::$storage->type = static::$config->storage->type;
+            }
 
-        /**
-         * set storage type [redis: memory, ssdb: disk]
-         */
-        if (isset(static::$domain->storage) && isset(static::$domain->storage->type))
-        {
-            static::$storage->type = static::$domain->storage->type;
-        }
-        else
-        {
-            static::$storage->type = static::$config->storage->type;
-        }
+            if (isset(static::$domain->storage) && isset(static::$domain->storage->redis))
+            {
+                static::$storage->redis = static::$domain->storage->redis;
+            }
+            else
+            {
+                static::$storage->redis = static::$config->storage->redis;
+            }
 
-        if (isset(static::$domain->storage) && isset(static::$domain->storage->redis))
-        {
-            static::$storage->redis = static::$domain->storage->redis;
-        }
-        else
-        {
-            static::$storage->redis = static::$config->storage->redis;
-        }
+            if (isset(static::$domain->storage) && isset(static::$domain->storage->ssdb))
+            {
+                static::$storage->ssdb = static::$domain->storage->ssdb;
+            }
+            else
+            {
+                static::$storage->ssdb = static::$config->storage->ssdb;
+            }
 
-        if (isset(static::$domain->storage) && isset(static::$domain->storage->ssdb))
-        {
-            static::$storage->ssdb = static::$domain->storage->ssdb;
-        }
-        else
-        {
-            static::$storage->ssdb = static::$config->storage->ssdb;
-        }
+            /**
+             * set metrics variables
+             */
+            if (isset(static::$domain->metrics->enabled))
+            {
+                static::$metrics->enabled = static::$domain->metrics->enabled;
+            }
+            else
+            {
+                static::$metrics->enabled = static::$config->metrics->enabled;
+            }
 
-        /**
-         * set metrics variables
-         */
-        if (isset(static::$domain->metrics->enabled))
-        {
-            static::$metrics->enabled = static::$domain->metrics->enabled;
-        }
-        else
-        {
-            static::$metrics->enabled = static::$config->metrics->enabled;
-        }
+            static::$metrics->path = APP_PATH . 'tpl/metrics';
 
-        static::$metrics->path = APP_PATH . 'tpl/metrics';
+            if (isset(static::$domain->metrics->ga))
+            {
+                static::$metrics->ga = static::$domain->metrics->ga;
+            }
 
-        if (isset(static::$domain->metrics->ga))
-        {
-            static::$metrics->ga = static::$domain->metrics->ga;
-        }
+            if (isset(static::$domain->metrics->ya))
+            {
+                static::$metrics->ya = static::$domain->metrics->ya;
+            }
 
-        if (isset(static::$domain->metrics->ya))
-        {
-            static::$metrics->ya = static::$domain->metrics->ya;
-        }
+            /**
+             * set inject variables
+             */
+            if (isset(static::$domain->inject->enabled))
+            {
+                static::$inject->enabled = static::$domain->inject->enabled;
+            }
+            else
+            {
+                static::$inject->enabled = static::$config->inject->enabled;
+            }
 
-        /**
-         * set inject variables
-         */
-        if (isset(static::$domain->inject->enabled))
-        {
-            static::$inject->enabled = static::$domain->inject->enabled;
-        }
-        else
-        {
-            static::$inject->enabled = static::$config->inject->enabled;
-        }
+            if (isset(static::$domain->inject->header))
+            {
+                static::$inject->header = static::$domain->inject->header;
+            }
+            else
+            {
+                static::$inject->header = static::$config->inject->header;
+            }
 
-        if (isset(static::$domain->inject->header))
-        {
-            static::$inject->header = static::$domain->inject->header;
-        }
-        else
-        {
-            static::$inject->header = static::$config->inject->header;
-        }
+            if (isset(static::$domain->inject->path))
+            {
+                static::$inject->path = APP_PATH . 'inject';
+            }
+            else
+            {
+                static::$inject->path = APP_PATH . 'inject';
+            }
 
-        if (isset(static::$domain->inject->path))
-        {
-            static::$inject->path = APP_PATH . 'inject';
-        }
-        else
-        {
-            static::$inject->path = APP_PATH . 'inject';
-        }
+            if (isset(static::$domain->inject->footer))
+            {
+                static::$inject->footer = static::$domain->inject->footer;
+            }
+            else
+            {
+                static::$inject->footer = static::$config->inject->footer;
+            }
 
-        if (isset(static::$domain->inject->footer))
-        {
-            static::$inject->footer = static::$domain->inject->footer;
+            static::$editor->path = 'tpl/editor';
+
         }
-        else
-        {
-            static::$inject->footer = static::$config->inject->footer;
-        }
-
-        static::$editor->path = 'tpl/editor';
-
-        // set hash keys by cache required
-        static::$hash_key = static::$name . ':' . static::$route->domain . ':' . static::$domain->type;
-
-        static::$hash = static::$hash_key . ':' . static::getKeyUserDisplayResolution() . ':' . static::getURIEncryptHash();
 
     }
 
@@ -679,7 +687,7 @@ class Config
      */
     public static function render(object $response): void
     {
-        if (RUN_METHOD == 'web')
+        if (self::$runType === 'web')
         {
             if (isset($response->error) && isset($response->code))
             {
@@ -688,6 +696,10 @@ class Config
 
             header('Content-type: ' . $response->content_type);
             die($response->body);
+        }
+        else
+        {
+            echo $response->body . PHP_EOL;
         }
     }
 
