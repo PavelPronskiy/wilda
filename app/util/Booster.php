@@ -20,10 +20,10 @@ class Booster
         foreach ($host->site as $site)
         {
             $robotsUrl = $site . '/robots.txt';
-            // $robotsData = Curl::get($robotsUrl);
             // var_dump($robotsData);
-            var_dump($robotsUrl);
-            exit;
+            echo 'Get: ' . $robotsUrl . PHP_EOL;
+            $robotsData = Curl::get($robotsUrl);
+            var_dump($robotsData);
         }
     }
 
