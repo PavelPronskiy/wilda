@@ -18,6 +18,11 @@ abstract class Tags
     public static $dom;
 
     /**
+     * @var array
+     */
+    public static $proto = ['http://', 'https://'];
+
+    /**
      * [changeBaseHref description]
      * @return [type] [description]
      */
@@ -139,7 +144,7 @@ abstract class Tags
      */
     public static function changeLinkTags(): void
     {
-        $xpath = new \DOMXPath (self::$dom);
+        $xpath = new \DOMXPath(self::$dom);
         $nodes = $xpath->query('//style');
         foreach ($nodes as $node)
         {
@@ -319,7 +324,7 @@ abstract class Tags
      */
     public static function initialize(string $html): void
     {
-        $dom_html5 = new \Masterminds\HTML5 (['disable_html_ns' => true]);
+        $dom_html5 = new \Masterminds\HTML5(['disable_html_ns' => true]);
         self::$dom = $dom_html5->loadHTML($html);
     }
 
@@ -411,7 +416,7 @@ abstract class Tags
      */
     public static function removeComments(): void
     {
-        $xpath = new \DOMXPath (self::$dom);
+        $xpath = new \DOMXPath(self::$dom);
 
         while ($node = $xpath->query('//comment()')->item(0))
         {

@@ -27,7 +27,7 @@ abstract class Modify
      * @param  [type] $obj            [description]
      * @return [type] [description]
      */
-    public static function byContentType(object $obj) : object
+    public static function byContentType(object $obj): object
     {
         static::$module = static::$class_module_name . Config::$domain->type;
 
@@ -63,7 +63,10 @@ abstract class Modify
     }
 
     /**
-     * @param string $content
+     * { function_description }
+     *
+     * @param  object $obj The object
+     * @return object ( description_of_the_return_value )
      */
     public static function robots(
         object $obj
@@ -72,6 +75,21 @@ abstract class Modify
         static::$module = static::$class_module_name . Config::$domain->type;
 
         $obj->body = static::module($obj->body, 'robots');
+
+        return $obj;
+    }
+
+    /**
+     * @param object $obj
+     * @return mixed
+     */
+    public static function sitemap(
+        object $obj
+    )
+    {
+        static::$module = static::$class_module_name . Config::$domain->type;
+
+        $obj->body = static::module($obj->body, 'sitemap');
 
         return $obj;
     }

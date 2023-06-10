@@ -267,14 +267,15 @@ class Tilda extends Tags
     }
 
     /**
-     * @param  object  $content
-     * @return mixed
+     * { function_description }
+     *
+     * @param  string $content The content
+     * @return string ( description_of_the_return_value )
      */
     public static function robots(string $content): string
     {
-        $proto   = ['http://', 'https://'];
-        $project = str_replace($proto, '', Config::$domain->project);
-        $site    = str_replace($proto, '', Config::$domain->site);
+        $project = str_replace(self::$proto, '', Config::$domain->project);
+        $site    = str_replace(self::$proto, '', Config::$domain->site);
 
         // change host
         if (preg_match('/project/', $project))
@@ -301,6 +302,38 @@ class Tilda extends Tags
             $content
         );
 
+        // replace sitemap
+        $content = str_replace(
+            (string) Config::getProjectName(),
+            (string) Config::getSiteName(),
+            $content
+        );
+
+        $content = str_replace(
+            self::$proto[0],
+            self::$proto[1],
+            $content
+        );
+
         return $content;
+    }
+
+    /**
+     * { function_description }
+     *
+     * @param  string $content The content
+     * @return string ( description_of_the_return_value )
+     */
+    public static function sitemap(string $content): string
+    {
+        return str_replace(
+            self::$proto[0],
+            self::$proto[1],
+            str_replace(
+                (string) Config::getProjectName(),
+                (string) Config::getSiteName(),
+                $content
+            )
+        );
     }
 }

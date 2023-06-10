@@ -59,6 +59,9 @@ class Router
             case '/robots.txt':
                 return Modify::robots($content);
 
+            case '/sitemap.xml':
+                return Modify::sitemap($content);
+
             default:
                 return $content;
         }
