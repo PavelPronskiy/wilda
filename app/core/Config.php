@@ -645,11 +645,10 @@ class Config
      * [isMobile description]
      * @return boolean [description]
      */
-    public static function isMobile(): bool
+    public static function isMobile($bool = false): bool
     {
         if (isset($_SERVER['HTTP_USER_AGENT']) and !empty($_SERVER['HTTP_USER_AGENT']))
         {
-            $bool = false;
             if (preg_match('/(Mobile|Android|Tablet|GoBrowser|[0-9]x[0-9]*|uZardWeb\/|Mini|Doris\/|Skyfire\/|iPhone|Fennec\/|Maemo|Iris\/|CLDC\-|Mobi\/)/uis', $_SERVER['HTTP_USER_AGENT']))
             {
                 $bool = true;

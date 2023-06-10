@@ -24,38 +24,46 @@ class Curl
         switch ($http_code)
         {
             case 404:
-                $result = (object) [
+                $result = Config::$runType === 'web' ? [
                     'code'         => 404,
                     'error'        => true,
                     'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 404</h1>' . Config::$lang[1] . '</body></html>',
                     'content_type' => 'text/html',
+                ] : [
+                    'body' => 'Ошибка: 404 ' . Config::$lang[1],
                 ];
                 break;
 
             case 503:
-                $result = (object) [
+                $result = Config::$runType === 'web' ? [
                     'code'         => 503,
                     'error'        => true,
-                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[2] . '</body></html>',
+                    'body'         => '<html><head><meta http-equiv="refresh" content="3"><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[2] . '</body></html>',
                     'content_type' => 'text/html',
+                ] : [
+                    'body' => 'Ошибка: 503 ' . Config::$lang[2],
                 ];
                 break;
 
             case 502:
-                $result = (object) [
+                $result = Config::$runType === 'web' ? [
                     'code'         => 502,
                     'error'        => true,
-                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 502</h1>' . Config::$lang[0] . '</body></html>',
+                    'body'         => '<html><head><meta http-equiv="refresh" content="3"><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 502</h1>' . Config::$lang[0] . '</body></html>',
                     'content_type' => 'text/html',
+                ] : [
+                    'body' => 'Ошибка: 502 ' . Config::$lang[0],
                 ];
                 break;
 
             case 500:
-                $result = (object) [
+                $result = Config::$runType === 'web' ? [
                     'code'         => 500,
                     'error'        => true,
                     'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 500</h1>' . Config::$lang[3] . '</body></html>',
                     'content_type' => 'text/html',
+                ] : [
+                    'body' => 'Ошибка: 500 ' . Config::$lang[3],
                 ];
                 break;
 
@@ -67,7 +75,7 @@ class Curl
                 return false;
         }
 
-        Config::render($result);
+        Config::render((object) $result);
     }
 
     /**
