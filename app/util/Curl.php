@@ -5,12 +5,18 @@ namespace app\util;
 use app\core\Config;
 use app\core\Modify;
 use app\util\Encryption;
+use \Campo\UserAgent as UA;
 
 // use app\module\Tilda;
 // use app\module\Wix;
 
 class Curl
 {
+    /**
+     * @var array
+     */
+    public static $devices = ['Mobile', 'Tablet', 'Desktop'];
+
     /**
      * Handles HTTP error codes and renders an appropriate response.
      *
@@ -83,23 +89,34 @@ class Curl
      * @param  [type] $url            [description]
      * @return [type] [description]
      */
-    public static function get($url)
+    public static function get(
+        string $url,
+        string $deviceType = ''
+    )
     {
         $curl = \curl_init();
-        $ua   = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : Config::$config->headers->ua;
+
+        $userAgent = isset($_SERVER['HTTP_USER_AGENT'])
+        ? $_SERVER['HTTP_USER_AGENT']
+        : UA::random(['device_type' =>
+            !empty($deviceType) ? [$deviceType] : self::$devices,
+        ]);
 
         if (Config::$config->privoxy->enabled)
         {
             curl_setopt($curl, CURLOPT_PROXY, Config::$config->privoxy->host . ':' . Config::$config->privoxy->port);
         }
 
+        // curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 15);
+
         curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_TIMEOUT, Config::$config->curl->timeout);
+        curl_setopt($curl, CURLOPT_REFERER, (Config::$runType === 'web') ? Config::$domain->project : '');
+        curl_setopt($curl, CURLOPT_ENCODING, Config::$config->curl->encoding);
+        curl_setopt($curl, CURLOPT_USERAGENT, $userAgent);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_USERAGENT, $ua);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_REFERER, (Config::$runType === 'web') ? Config::$domain->project : '');
-        curl_setopt($curl, CURLOPT_ENCODING, 'gzip');
 
         $response = curl_exec($curl);
 

@@ -326,7 +326,11 @@ class Config
             ...(array) static::getHostsConfig(),
         ];
 
-        static::$lang = static::$config->translations->{static::$config->lang};
+        if (self::$runType === 'cli')
+        {
+            static::$lang = static::$config->translations->cli->{static::$config->lang};
+        }
+
         if (self::$runType === 'web')
         {
             $request_uri = parse_url(
@@ -380,8 +384,8 @@ class Config
              * @var [type]
              */
             static::$lang = isset(static::$domain->lang)
-            ? (array) static::$config->translations->{static::$domain->lang}
-            : (array) static::$config->translations->{static::$config->lang};
+            ? (array) static::$config->translations->web->{static::$domain->lang}
+            : (array) static::$config->translations->web->{static::$config->lang};
 
             if (isset(static::$domain->styles))
             {

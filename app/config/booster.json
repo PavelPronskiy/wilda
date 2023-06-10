@@ -1,0 +1,52 @@
+{
+    "phantomas":
+    {
+        "mqtt":
+        {
+            "host": "127.0.0.1",
+            "port": 1883
+        },
+        "executablePath": "/usr/bin/chromium-browser",
+        "args": [
+            "--disable-dev-shm-usage"
+        ],
+        "screenshot":
+        {
+            "dir": "public/dist/images/screenshots"
+        },
+        "dimensions":
+        {
+            "desktop":
+            {
+                "deviceScaleFactor": 1,
+                "width": 2560,
+                "height": 1600
+            },
+            "tablet":
+            {
+                "deviceScaleFactor": 1,
+                "width": 1440,
+                "height": 2560
+
+            },
+            "mobile":
+            {
+                "deviceScaleFactor": 1,
+                "width": 1920,
+                "height": 1080
+
+            },
+            "form":
+            {
+                "deviceScaleFactor": 1,
+                "width": 600,
+                "height": 400
+            },
+            "thumb":
+            {
+                "width": 240,
+                "height": 240
+            }
+        }
+    }
+}

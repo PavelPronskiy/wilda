@@ -1,82 +1,106 @@
 {
-  "version": "0.8",
-  "version_date": "2023-06-09",
-  "styles": "relative",
-  "scripts": "relative",
-  "images": "relative",
-  "fonts": "relative",
-  "icons": "relative",
-  "salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
-  "storage": {
-    "type": "disk",
-    "redis": {
-      "host": "127.0.0.1",
-      "port": 6379
-    },
-    "ssdb": {
-      "host": "127.0.0.1",
-      "port": 8888
-    }
-  },
-  "lang": "ru",
-  "forceSSL": true,
-  "compress": {
-    "enabled": true
-  },
-  "editor": {
-    "enabled": true
-  },
-  "inject": {
-    "enabled": false,
-    "header": false,
-    "footer": false
-  },
-  "metrics": {
-    "enabled": false,
-    "ya": "",
-    "ga": ""
-  },
-  "favicon": {
-    "enabled": false
-  },
-  "mail": {
-    "enabled": true,
-    "subject": "Заявка с сайта",
-    "from": "info@",
-    "name": "submission",
-    "success": "Сообщение успешно отправлено!",
-    "error": "Ошибка!",
-    "to": []
-  },
-  "privoxy": {
-    "enabled": true,
-    "host": "127.0.0.1",
-    "port": 8118
-  },
-  "cache": {
-    "enabled": true,
-    "expire": 86400,
-    "stats": true
-  },
-  "headers": {
-    "ua": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"
-  },
-  "translations": {
-    "ru": [
-      "<h2>Невозможно установить соединение.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
-      "<h2>Страница не найдена.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
-      "<h2>Страница недоступна.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
-      "<h2>Страница недоступна.</h2><strong>Пустой результат</strong>"
-    ]
-  },
-  "hosts": [
+    "version": "0.8",
+    "version_date": "2023-06-09",
+    "styles": "relative",
+    "scripts": "relative",
+    "images": "relative",
+    "fonts": "relative",
+    "icons": "relative",
+    "salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
+    "storage":
     {
-      "type": "Tilda",
-      "site": [
-        "https://sitename.tld",
-        "https://www.sitename.tld"
-      ],
-      "project": "https://project123.site.tld"
-    }
-  ]
+        "type": "disk",
+        "redis":
+        {
+            "host": "127.0.0.1",
+            "port": 6379
+        },
+        "ssdb":
+        {
+            "host": "127.0.0.1",
+            "port": 8888
+        }
+    },
+    "lang": "ru",
+    "forceSSL": true,
+    "compress":
+    {
+        "enabled": true
+    },
+    "editor":
+    {
+        "enabled": true
+    },
+    "inject":
+    {
+        "enabled": false,
+        "header": false,
+        "footer": false
+    },
+    "metrics":
+    {
+        "enabled": false,
+        "ya": "",
+        "ga": ""
+    },
+    "favicon":
+    {
+        "enabled": false
+    },
+    "mail":
+    {
+        "enabled": true,
+        "subject": "Заявка с сайта",
+        "from": "info@",
+        "name": "submission",
+        "success": "Сообщение успешно отправлено!",
+        "error": "Ошибка!",
+        "to": []
+    },
+    "privoxy":
+    {
+        "enabled": true,
+        "host": "127.0.0.1",
+        "port": 8118
+    },
+    "cache":
+    {
+        "enabled": true,
+        "expire": 86400,
+        "stats": true
+    },
+    "curl": {
+      "timeout": 15,
+      "encoding": "gzip"
+    },
+    "translations":
+    {
+        "web":
+        {
+            "ru": [
+                "<h2>Невозможно установить соединение.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
+                "<h2>Страница не найдена.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
+                "<h2>Страница недоступна.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
+                "<h2>Страница недоступна.</h2><strong>Пустой результат</strong>"
+            ]
+        },
+        "cli":
+        {
+            "ru": [
+                "Невозможно установить соединение.",
+                "Страница не найдена.",
+                "Страница недоступна.",
+                "Страница недоступна."
+            ]
+        }
+    },
+    "hosts": [
+    {
+        "type": "Tilda",
+        "site": [
+            "https://sitename.tld",
+            "https://www.sitename.tld"
+        ],
+        "project": "https://project123.site.tld"
+    }]
 }
