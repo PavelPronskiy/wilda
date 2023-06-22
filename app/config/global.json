@@ -66,6 +66,7 @@
     "cache":
     {
         "enabled": true,
+        "browser": true,
         "expire": 86400,
         "stats": true
     },

@@ -493,6 +493,11 @@ class Config
                 static::$config->cache->stats = static::$domain->cache->stats;
             }
 
+            if (isset(static::$domain->cache->browser))
+            {
+                static::$config->cache->browser = static::$domain->cache->browser;
+            }
+
             /**
              * set mail submit variables
              */
@@ -736,6 +741,22 @@ class Config
             if (isset($response->error) && isset($response->code))
             {
                 http_response_code($response->code);
+            }
+
+            if (static::$config->cache->browser)
+            {
+                $etag = md5($response->body);
+                header('Cache-Control: max-age=' . static::$config->cache->expire);
+                header('ETag: ' . $etag);
+
+                if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
+                {
+                    if ($_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
+                    {
+                        header('HTTP/1.1 304 Not Modified', true, 304);
+                        exit();
+                    }
+                }
             }
 
             header('Content-type: ' . $response->content_type);
