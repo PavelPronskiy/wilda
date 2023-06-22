@@ -26,6 +26,9 @@ class Router
                     case 'editor':
                         new Editor();
                         break;
+                    /*case 'reports':
+                    new Reports();
+                    break;*/
                     case 'cleaner':
                         Cache::webCacheCleaner();
                         break;

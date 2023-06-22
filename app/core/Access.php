@@ -8,7 +8,6 @@ class Access
 {
     public function __construct()
     {
-
     }
 
     /**

@@ -23,6 +23,8 @@ class Config
 
     const QUERY_PARAM_JS = '/?js=';
 
+    const REPORTS_CONFIG = PATH . '/app/config/reports.json';
+
     const URI_QUERY_ADMIN = ['cleaner', 'flush', 'keys'];
 
     const URI_QUERY_TYPES = ['ico', 'img', 'js', 'css', 'font'];
@@ -31,6 +33,11 @@ class Config
      * @var array
      */
     public static $access = [];
+
+    /**
+     * @var mixed
+     */
+    public static $auth;
 
     /**
      * @var array
@@ -100,6 +107,11 @@ class Config
      * @var string
      */
     public static $name = 'wilda';
+
+    /**
+     * @var mixed
+     */
+    public static $reports;
 
     /**
      * @var mixed
@@ -285,6 +297,30 @@ class Config
     }
 
     /**
+     * Gets the reports configuration.
+     *
+     * @return array|object The reports configuration.
+     */
+    public static function getReportsConfig(): object
+    {
+        $config_json = [];
+        if (file_exists(static::REPORTS_CONFIG))
+        {
+            $config_json = json_decode(file_get_contents(static::REPORTS_CONFIG));
+            if (json_last_error() > 0)
+            {
+                die(json_last_error_msg() . ' ' . static::REPORTS_CONFIG);
+            }
+        }
+        else
+        {
+            die('Reports config: ' . static::REPORTS_CONFIG . ' not found');
+        }
+
+        return $config_json;
+    }
+
+    /**
      * [getSiteName description]
      * @return [type] [description]
      */
@@ -314,7 +350,9 @@ class Config
     {
         static::$lang     = (array) [];
         static::$access   = (array) [];
+        static::$reports  = (object) [];
         static::$mail     = (object) [];
+        static::$auth     = (object) [];
         static::$metrics  = (object) [];
         static::$favicon  = (object) [];
         static::$inject   = (object) [];
@@ -368,6 +406,14 @@ class Config
             static::$access = (array) static::getAccessConfig();
 
             /**
+             * set lang translations
+             * @var [type]
+             */
+            static::$lang = isset(static::$domain->lang)
+            ? (array) static::$config->translations->web->{static::$domain->lang}
+            : (array) static::$config->translations->web->{static::$config->lang};
+
+            /**
              * if not type defined
              */
             if (!isset(static::$domain->type))
@@ -377,15 +423,8 @@ class Config
 
             static::$hash_key = static::$name . ':' . static::$route->domain . ':' . static::$domain->type;
 
+            // hash cache key
             static::$hash = static::$hash_key . ':' . static::getKeyUserDisplayResolution() . ':' . static::getURIEncryptHash();
-
-            /**
-             * set lang translations
-             * @var [type]
-             */
-            static::$lang = isset(static::$domain->lang)
-            ? (array) static::$config->translations->web->{static::$domain->lang}
-            : (array) static::$config->translations->web->{static::$config->lang};
 
             if (isset(static::$domain->styles))
             {
@@ -639,7 +678,9 @@ class Config
                 static::$inject->footer = static::$config->inject->footer;
             }
 
-            static::$editor->path = 'tpl/editor';
+            static::$editor->path  = 'tpl/editor';
+            static::$auth->path    = 'tpl/auth';
+            static::$reports->path = 'tpl/reports';
 
         }
 
@@ -739,46 +780,19 @@ class Config
     }
 
     /**
-     * Undocumented function
+     * Sets the reports configuration.
      *
-     * @param  [type]  $time
-     * @param  boolean $reverse
-     * @return void
+     * @param <type> $config The configuration
      */
-    public static function timeAgo(
-        $time,
-        $reverse = false
-    ): string
+    public static function setReportsConfig($config): void
     {
-        $s             = 0;
-        $estimate_time = $reverse === false
-        ? (int) $time - time()
-        : time() - (int) $time;
-        // var_dump($estimate_time);
-
-        if ($estimate_time < 1)
-        {
-            return $s;
-        }
-
-        $condition = [
-            24 * 60 * 60 => 'd',
-            60 * 60      => 'h',
-            60           => 'm',
-            1            => 's',
-        ];
-
-        foreach ($condition as $secs => $str)
-        {
-            $d = $estimate_time / $secs;
-
-            if ($d >= 1)
-            {
-                $r = round($d);
-
-                return $r . $str;
-            }
-        }
+        file_put_contents(
+            static::REPORTS_CONFIG,
+            (string) json_encode(
+                $config,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            )
+        );
     }
 
     /**

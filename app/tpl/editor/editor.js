@@ -1,6 +1,6 @@
 var buttonSaveTrigger = false;
 const revision = {};
-const container = document.getElementById("jsoneditor")
+const container = document.getElementById("jsoneditor");
 
 const hostSchemaRefs = {
 
@@ -213,6 +213,13 @@ const options = {
             value: GLOBAL_CONFIG.compress
         },
         {
+            text: 'Проксирование',
+            title: 'Проксирование tor',
+            className: 'jsoneditor-type-object',
+            field: 'privoxy',
+            value: GLOBAL_CONFIG.privoxy
+        },
+        {
             text: 'Сторейдж',
             title: 'Изменить тип сторейдж',
             className: 'jsoneditor-type-object',
@@ -233,7 +240,7 @@ const options = {
         return { path, field, value };
     },
     onCreateMenu: function (items, node) {
-        const path = node.path
+        const path = node.path;
 
         // console.log('items:', items, 'node:', node)
 
@@ -256,8 +263,8 @@ const options = {
             if ("submenu" in item) {
 
                 items[index].submenu = items[index].submenu.filter(function (item) {
-                    return item.type !== 'separator'
-                })
+                    return item.type !== 'separator';
+                });
                 
                 switch (node.path.length) {
                     case 0:
@@ -267,14 +274,14 @@ const options = {
                         items[index].submenu = items[index].submenu.filter(function (item) {
                                 var excludes = ['Новый сайт'];
                             return excludes.includes(item.text);
-                        })
+                        });
                         break;
                         
                     case 2:
                         items[index].submenu = items[index].submenu.filter(function (item) {
                             var excludes = ['Auto', 'Array', 'Object', 'String', 'Новый сайт', 'Название сайта'];
                             return !excludes.includes(item.text);
-                        })
+                        });
                         break;
 
                     case 3:
@@ -282,10 +289,10 @@ const options = {
                             var excludes = [
                                 'Auto', 'Array', 'Object', 'String', 'Новый сайт',
                                 'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон',
-                                'Кэширование', 'Сжатие страниц', 'Сторейдж'
+                                'Кэширование', 'Сжатие страниц', 'Сторейдж', 'Проксирование'
                             ];
                             return !excludes.includes(item.text);
-                        })
+                        });
                         
                         // console.log(node.path[1]);
                         if (node.path[1] == 'site')
@@ -295,14 +302,14 @@ const options = {
                                     'Название сайта'
                                 ];
                                 return excludes.includes(item.text);
-                            })
+                            });
                         } else {
                             items[index].submenu = items[index].submenu.filter(function (item) {
                                 var excludes = [
                                     'Название сайта'
                                 ];
                                 return !excludes.includes(item.text);
-                            })
+                            });
                             
                         }
 
@@ -313,10 +320,10 @@ const options = {
                             var excludes = [
                                 'Auto', 'Array', 'Object', 'String', 'Новый сайт',
                                 'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон', 'Кэширование',
-                                'Сжатие страниц', 'Название сайта'
+                                'Сжатие страниц', 'Название сайта', 'Проксирование'
                             ];
                             return !excludes.includes(item.text);
-                        })
+                        });
 
                         break;
                         
@@ -326,7 +333,7 @@ const options = {
                 
             }
             
-        })
+        });
 
         /* items = items.filter(function (item) {
             return item.type !== 'separator'
@@ -335,13 +342,14 @@ const options = {
         items = items.filter(function (item) {
             var excludes = ['Type', 'Extract', 'Append'];
             return !excludes.includes(item.text);
-        })
+        });
 
-        return items
+        return items;
     }
 };
 
-const editor = new JSONEditor(container, options)
+const editor = new JSONEditor(container, options);
+
 var setUserConfig = function (success, beforesend, post) {
     beforesend();
     var xhr = ("onload" in new XMLHttpRequest()) ? new XMLHttpRequest() : new XDomainRequest();
@@ -368,7 +376,7 @@ var setUserConfigRevisions = function (revisions) {
                         id: 'revision-menu',
                         html: elems.join(' ')
                     }).appendTo('#revision-status'); */
-}
+};
 
 
 setUserConfig((d) => {

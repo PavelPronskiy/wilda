@@ -1,6 +1,7 @@
 <?php
 
 /* Класс Cache предоставляет методы для кэширования веб-страниц и очистки кэша. */
+
 namespace app\util;
 
 use app\core\Config;
@@ -214,7 +215,7 @@ class Cache
 
             if (isset($exp[1]) && Encryption::decode($exp[1]) === Config::$config->salt)
             {
-                $inject_html = '<div style="position:fixed;z-index:99999;left:0;top:0;padding:3px 6px;background-color:rgba(0,0,0,0.4"><a style="text-decoration:none;color:#fff;font-size:16pt;font-weight:normal" href="/?clear">&#10227;</a></div>';
+                $inject_html = '<div style="position:fixed;z-index:99999;left:0;top:0;padding:3px 6px;background-color:rgba(0,0,0,0.4)"><a style="text-decoration:none;color:#fff;font-size:16pt;font-weight:normal" href="/?clear">&#10227;</a></div>';
 
                 return str_replace('</body>', $inject_html . '</body>', (string) $html);
             }
@@ -260,7 +261,6 @@ class Cache
         {
             self::notice('cache is empty');
         }
-
     }
 
     /**
@@ -317,7 +317,7 @@ class Cache
      */
     public static function setConfigRevision(array $data): string
     {
-        $hash = static::$revision_key . ':' . \time ();
+        $hash = static::$revision_key . ':' . \time();
         self::$instance->set(
             (string) $hash,
             (string) json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
@@ -385,7 +385,7 @@ class Cache
      */
     private function redisInstance(): void
     {
-        self::$instance = new \Redis ();
+        self::$instance = new \Redis();
         self::$instance->connect(Config::$storage->redis->host, Config::$storage->redis->port);
     }
 
@@ -394,8 +394,7 @@ class Cache
      */
     private function ssdbInstance(): void
     {
-        try
-        {
+        try {
             self::$instance = new SimpleSSDB(Config::$storage->ssdb->host, Config::$storage->ssdb->port);
             self::$instance->easy();
         }
