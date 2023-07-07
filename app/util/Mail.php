@@ -53,10 +53,12 @@ class Mail
         // var_dump($mail_recipients);
 
         $html = self::getHTMLTemplate((object) [
-            'name'    => isset(Config::$route->post->Name) ? Config::$route->post->Name : '',
-            'phone'   => isset(Config::$route->post->Phone) ? Config::$route->post->Phone : '',
-            'mail'    => isset(Config::$route->post->Mail) ? Config::$route->post->Mail : '',
-            'message' => isset(Config::$route->post->Message) ? Config::$route->post->Message : '',
+            'name'      => isset(Config::$route->post->Name) ? Config::$route->post->Name : '',
+            'phone'     => isset(Config::$route->post->Phone) ? Config::$route->post->Phone : '',
+            'mail'      => isset(Config::$route->post->Mail) ? Config::$route->post->Mail : '',
+            'message'   => isset(Config::$route->post->Message) ? Config::$route->post->Message : '',
+            'Date'      => isset(Config::$route->post->Date) ? Config::$route->post->Date : '',
+            'Selectbox' => isset(Config::$route->post->Selectbox) ? Config::$route->post->Selectbox : '',
         ]);
 
         return self::send($html);
@@ -74,28 +76,39 @@ class Mail
         $date     = date('Y-m-d H:i:s');
         $padding  = 'padding: 4px 8px;';
         $html     = '';
+        $align    = 'text-align:right;';
 
-        if (isset($object->name) && !empty($object->name))
+        if (!empty($object->name))
         {
-            $html .= '<tr><th ' . $width_th . ' style="text-align:right;' . $padding . '">Имя: </th><td style="' . $padding . '">' . $object->name . '</td></tr>';
+            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '">Имя: </th><td style="' . $padding . '">' . $object->name . '</td></tr>';
         }
 
-        if (isset($object->phone) && !empty($object->phone))
+        if (!empty($object->phone))
         {
-            $html .= '<tr><th ' . $width_th . ' style="text-align:right;' . $padding . '">Телефон: </th><td style="' . $padding . '">' . $object->phone . '</td></tr>';
+            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '">Телефон: </th><td style="' . $padding . '">' . $object->phone . '</td></tr>';
         }
 
-        if (isset($object->mail) && !empty($object->mail))
+        if (!empty($object->mail))
         {
-            $html .= '<tr><th ' . $width_th . ' style="text-align:right;' . $padding . '">E-mail: </th><td style="' . $padding . '">' . $object->mail . '</td></tr>';
+            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '">E-mail: </th><td style="' . $padding . '">' . $object->mail . '</td></tr>';
         }
 
-        if (isset($object->message) && !empty($object->message))
+        if (!empty($object->Date))
+        {
+            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '"><b>Дата бронирования: </b></th><td>' . $object->Date . '</td></tr>';
+        }
+
+        if (!empty($object->Selectbox))
+        {
+            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '"><b>Объект бронирования: </b></th><td>' . $object->Selectbox . '</td></tr>';
+        }
+
+        if (!empty($object->message))
         {
             $html .= '<tr><td ' . $width_th . ' colspan="2" style="' . $padding . '"><b>Сообщение:</b><pre>' . $object->message . '</pre></td></tr>';
         }
 
-        $html .= '<tr><th ' . $width_th . ' style="text-align:right;' . $padding . '"><b>Дата создания:</b></th><td style="' . $padding . '">' . $date . '</td></tr>';
+        $html .= '<tr><td ' . $width_th . ' colspan="2" style="' . $align . $padding . '"><i>Дата создания заявки: </i>' . $date . '</td></tr>';
 
         return $html;
     }
@@ -109,7 +122,7 @@ class Mail
     {
         $bool = false;
         try {
-            $PHPMailer            = new \PHPMailer (false);
+            $PHPMailer            = new \PHPMailer(false);
             $PHPMailer->XMailer   = ' ';
             $PHPMailer->SMTPDebug = 1;
             $PHPMailer->CharSet   = 'utf-8';
