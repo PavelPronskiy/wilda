@@ -108,7 +108,7 @@ class Mail
             $html .= '<tr><td ' . $width_th . ' colspan="2" style="' . $padding . '"><b>Сообщение:</b><pre>' . $object->message . '</pre></td></tr>';
         }
 
-        $html .= '<tr><td ' . $width_th . ' colspan="2" style="' . $align . $padding . '"><i>Дата создания заявки: </i>' . $date . '</td></tr>';
+        $html .= '<tr><td ' . $width_th . ' colspan="2" style="' . $align . $padding . '"><i>Дата создания заявки: ' . $date . '</i></td></tr>';
 
         return $html;
     }
