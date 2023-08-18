@@ -19,9 +19,9 @@ class Cache
     public $hash = '';
 
     /**
-     * @var string
+     * @var mixed
      */
-    public static $instance = '';
+    public static $instance;
 
     /**
      * @var string
@@ -46,12 +46,11 @@ class Cache
     public static function clear(): void
     {
         $pages = static::storageKeys(Config::$hash_key . ':*');
-
         if (count($pages) > 0)
         {
             foreach ($pages as $key)
             {
-                self::$instance->del($key);
+                static::$instance->del($key);
             }
         }
 
@@ -92,7 +91,7 @@ class Cache
         {
             foreach ($keys as $key)
             {
-                self::$instance->del($key);
+                static::$instance->del($key);
             }
         }
     }
@@ -105,7 +104,7 @@ class Cache
      */
     public static function get(string $hash): object
     {
-        $res = self::$instance->get($hash);
+        $res = static::$instance->get($hash);
         if ($res)
         {
             $obj       = json_decode($res);
@@ -134,7 +133,7 @@ class Cache
         {
             foreach ($keys as $key)
             {
-                $array[$key] = self::$instance->get($key);
+                $array[$key] = static::$instance->get($key);
             }
         }
 
@@ -194,7 +193,7 @@ class Cache
      */
     public static function getConfigRevision(string $revision): array
     {
-        return (array) json_decode(self::$instance->get(static::$revision_key . ':' . $revision));
+        return (array) json_decode(static::$instance->get(static::$revision_key . ':' . $revision));
     }
 
     /**
@@ -288,7 +287,7 @@ class Cache
         string $hash
     ): void
     {
-        self::$instance->set(
+        static::$instance->set(
             (string) $hash,
             (string) json_encode([
                 'body'         => base64_encode($obj->body),
@@ -296,7 +295,7 @@ class Cache
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
-        self::$instance->expire(
+        static::$instance->expire(
             (string) $hash,
             (int) Config::$config->cache->expire * 60
         );
@@ -318,7 +317,7 @@ class Cache
     public static function setConfigRevision(array $data): string
     {
         $hash = static::$revision_key . ':' . \time();
-        self::$instance->set(
+        static::$instance->set(
             (string) $hash,
             (string) json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
@@ -331,7 +330,7 @@ class Cache
      */
     public static function storageKeys(string $key)
     {
-        return self::$instance->keys(
+        return static::$instance->keys(
             static::storageType($key)
         );
     }
@@ -364,12 +363,12 @@ class Cache
     {
         $hash = Config::$name . ':' . Encryption::encode(Config::$config->salt);
 
-        self::$instance->set(
+        static::$instance->set(
             (string) $hash,
             ''
         );
 
-        self::$instance->expire(
+        static::$instance->expire(
             (string) $hash,
             (int) Config::$config->cache->expire * 60
         );
@@ -385,8 +384,8 @@ class Cache
      */
     private function redisInstance(): void
     {
-        self::$instance = new \Redis();
-        self::$instance->connect(Config::$storage->redis->host, Config::$storage->redis->port);
+        static::$instance = new \Redis();
+        static::$instance->connect(Config::$storage->redis->host, Config::$storage->redis->port);
     }
 
     /**
@@ -395,8 +394,8 @@ class Cache
     private function ssdbInstance(): void
     {
         try {
-            self::$instance = new SimpleSSDB(Config::$storage->ssdb->host, Config::$storage->ssdb->port);
-            self::$instance->easy();
+            static::$instance = new SimpleSSDB(Config::$storage->ssdb->host, Config::$storage->ssdb->port);
+            static::$instance->easy();
         }
         catch (Exception $e)
         {

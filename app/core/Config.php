@@ -401,6 +401,11 @@ class Config
                 static::$route->post = (object) $_POST;
             }
 
+            if (isset($_SERVER['HTTP_REFERER']))
+            {
+                static::$route->referer = $_SERVER['HTTP_REFERER'];
+            }
+
             // $device_type   = static::isMobile() ? 'mobile' : 'desktop';
             static::$domain = (object) static::getDomainConfig();
             static::$access = (array) static::getAccessConfig();
@@ -736,6 +741,9 @@ class Config
      */
     public static function render(object $response): void
     {
+        $ref_array = ['flush', 'clear'];
+        $no_cache  = false;
+
         if (self::$runType === 'web')
         {
             if (isset($response->error) && isset($response->code))
@@ -745,17 +753,35 @@ class Config
 
             if (static::$config->cache->browser)
             {
-                $etag = md5($response->body);
-                header('Cache-Control: max-age=' . static::$config->cache->expire);
-                header('ETag: ' . $etag);
-
-                if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
+                if (isset(static::$route->referer))
                 {
-                    if ($_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
+                    $ref = parse_url(static::$route->referer);
+                    if (isset($ref['query']) && in_array($ref['query'], $ref_array))
                     {
-                        header('HTTP/1.1 304 Not Modified', true, 304);
-                        exit();
+                        $no_cache = true;
                     }
+                }
+
+                if (!$no_cache)
+                {
+                    $etag = md5($response->body);
+                    header('Cache-Control: max-age=' . static::$config->cache->expire);
+                    header('ETag: ' . $etag);
+
+                    if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
+                    {
+                        if ($_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
+                        {
+                            header('HTTP/1.1 304 Not Modified', true, 304);
+                            exit();
+                        }
+                    }
+                }
+                else
+                {
+                    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+                    header('Cache-Control: post-check=0, pre-check=0', false);
+                    header('Pragma: no-cache');
                 }
             }
 

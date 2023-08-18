@@ -100,6 +100,10 @@ const options = {
                             "type": "boolean",
                             "default": true
                         },
+                        "browser": {
+                            "type": "boolean",
+                            "default": true
+                        },
                         "expire": {
                             "type": "number",
                             "default": 86400,
