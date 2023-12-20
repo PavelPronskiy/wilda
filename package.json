@@ -1,6 +1,6 @@
 {
   "name": "operate",
-  "version": "0.9",
+  "version": "1.0",
   "dependencies": {
     "bluebird": "^3.7.2",
     "bootstrap": "^5.2.3",
