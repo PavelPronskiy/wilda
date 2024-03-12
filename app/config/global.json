@@ -62,7 +62,7 @@
     "privoxy":
     {
         "enabled": true,
-        "host": "127.0.0.1",
+        "host": "10.51.18.1",
         "port": 8118
     },
     "cache":
