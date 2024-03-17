@@ -3,6 +3,9 @@
 namespace app\util;
 
 use app\core\Config;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 
 /**
  * Mail sender
@@ -122,7 +125,7 @@ class Mail
     {
         $bool = false;
         try {
-            $PHPMailer            = new \PHPMailer(false);
+            $PHPMailer            = new PHPMailer(false);
             $PHPMailer->XMailer   = ' ';
             $PHPMailer->SMTPDebug = 1;
             $PHPMailer->CharSet   = 'utf-8';
