@@ -11,6 +11,8 @@ class Config
 
     const CONFIG_GLOBAL = PATH . '/app/config/global.json';
 
+    const CUSTOM_GLOBAL = PATH . '/.global.json';
+
     const CONFIG_HOSTS = PATH . '/app/config/hosts.json';
 
     const QUERY_PARAM_CSS = '/?css=';
@@ -248,6 +250,25 @@ class Config
         return $config_json;
     }
 
+    public static function getCustomGlobalConfig(): object
+    {
+        $config_json = [];
+        if (file_exists(static::CUSTOM_GLOBAL))
+        {
+            $config_json = json_decode(file_get_contents(static::CUSTOM_GLOBAL));
+            if (json_last_error() > 0)
+            {
+                die(json_last_error_msg() . ' ' . static::CUSTOM_GLOBAL);
+            }
+        }
+        else
+        {
+            die('Custom global config: ' . static::CUSTOM_GLOBAL . ' not found');
+        }
+
+        return $config_json;
+    }
+
     /**
      * @return mixed
      */
@@ -352,6 +373,7 @@ class Config
         static::$access   = (array) [];
         static::$reports  = (object) [];
         static::$mail     = (object) [];
+        static::$mail->smtp     = (object) [];
         static::$auth     = (object) [];
         static::$metrics  = (object) [];
         static::$favicon  = (object) [];
@@ -361,6 +383,7 @@ class Config
         static::$storage  = (object) [];
         static::$config   = (object) [
             ...(array) static::getGlobalConfig(),
+            ...(array) static::getCustomGlobalConfig(),
             ...(array) static::getHostsConfig(),
         ];
 
@@ -506,6 +529,69 @@ class Config
             /**
              * set mail submit variables
              */
+            if (isset(static::$domain->mail->send_type))
+            {
+                static::$mail->send_type = static::$domain->mail->send_type;
+            }
+            else
+            {
+                static::$mail->send_type = static::$config->mail->send_type;
+            }
+
+            if (isset(static::$domain->mail->smtp->auth))
+            {
+                static::$mail->smtp->auth = static::$domain->mail->smtp->auth;
+            }
+            else
+            {
+                static::$mail->smtp->auth = static::$config->mail->smtp->auth;
+            }
+
+            if (isset(static::$domain->mail->smtp->host))
+            {
+                static::$mail->smtp->host = static::$domain->mail->smtp->host;
+            }
+            else
+            {
+                static::$mail->smtp->host = static::$config->mail->smtp->host;
+            }
+
+            if (isset(static::$domain->mail->smtp->port))
+            {
+                static::$mail->smtp->port = static::$domain->mail->smtp->port;
+            }
+            else
+            {
+                static::$mail->smtp->port = static::$config->mail->smtp->port;
+            }
+
+            if (isset(static::$domain->mail->smtp->username))
+            {
+                static::$mail->smtp->username = static::$domain->mail->smtp->username;
+            }
+            else
+            {
+                static::$mail->smtp->username = static::$config->mail->smtp->username;
+            }
+
+            if (isset(static::$domain->mail->smtp->password))
+            {
+                static::$mail->smtp->password = static::$domain->mail->smtp->password;
+            }
+            else
+            {
+                static::$mail->smtp->password = static::$config->mail->smtp->password;
+            }
+
+            if (isset(static::$domain->mail->debug))
+            {
+                static::$mail->debug = static::$domain->mail->debug;
+            }
+            else
+            {
+                static::$mail->debug = static::$config->mail->debug;
+            }
+
             if (isset(static::$domain->mail->enabled))
             {
                 static::$mail->enabled = static::$domain->mail->enabled;

@@ -4,6 +4,10 @@ namespace app\util;
 
 use app\core\Config;
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
 /**
  * Mail sender
  */
@@ -113,6 +117,21 @@ class Mail
         return $html;
     }
 
+    private static function setDebug(): int
+    {
+        switch(Config::$mail->debug)
+        {
+            case 'off':
+                return SMTP::DEBUG_OFF;
+
+            case 'client':
+                return SMTP::DEBUG_CLIENT;
+
+            case 'server':
+                return SMTP::DEBUG_SERVER;
+        }
+    }
+
     /**
      * [send description]
      * @param  [type] $body           [description]
@@ -122,11 +141,50 @@ class Mail
     {
         $bool = false;
         try {
-            $PHPMailer            = new \PHPMailer(false);
+            $PHPMailer            = new PHPMailer(false);
             $PHPMailer->XMailer   = ' ';
-            $PHPMailer->SMTPDebug = 1;
             $PHPMailer->CharSet   = 'utf-8';
-            $PHPMailer->isSendmail();
+            $PHPMailer->SMTPDebug = self::setDebug();
+
+            switch(Config::$mail->send_type)
+            {
+                case 'sendmail':
+                    $PHPMailer->isSendmail();
+                    break;
+
+                case 'smtp':
+                    $PHPMailer->IsSMTP();
+
+                    $PHPMailer->SMTPOptions = [
+                        'ssl' => [
+                            'verify_peer' => false,
+                            'verify_peer_name' => false,
+                            'allow_self_signed' => true,
+                        ]
+                    ];
+                    
+                    // $PHPMailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $PHPMailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+
+                    //Set the hostname of the mail server
+                    $PHPMailer->Host = Config::$mail->smtp->host;
+
+                    //Set the SMTP port number:
+                    // - 465 for SMTP with implicit TLS, a.k.a. RFC8314 SMTPS or
+                    // - 587 for SMTP+STARTTLS
+                    $PHPMailer->Port = Config::$mail->smtp->port;
+
+                    //Whether to use SMTP authentication
+                    $PHPMailer->SMTPAuth = Config::$mail->smtp->auth;
+
+                    //Username to use for SMTP authentication - use full email address for gmail
+                    $PHPMailer->Username = Config::$mail->smtp->username;
+
+                    //Password to use for SMTP authentication
+                    $PHPMailer->Password = Config::$mail->smtp->password;
+
+                    break;
+            }
 
             $PHPMailer->Sender = Config::$mail->from;
             $PHPMailer->setFrom(Config::$mail->from, Config::$mail->name, false);
@@ -148,7 +206,6 @@ class Mail
             /**
              * Отправка
              */
-
             return $PHPMailer->send();
         }
         catch (Exception $e)

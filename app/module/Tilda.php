@@ -202,6 +202,28 @@ class Tilda extends Tags
         return $content;
     }
 
+
+    /**
+     * Change HTML page elements
+     */
+    public static function changeHTMLElements(): void
+    {
+        // var_dump(Config::$mail);
+        $xpath = new \DOMXPath(self::$dom);
+        foreach ($xpath->query("//div[@data-tilda-root-zone]") as $item)
+        {
+            for ( $k=0; $k < $item->attributes->length; $k++)
+            {
+                if ($item->attributes->item($k)->nodeName === 'data-tilda-root-zone')
+                {
+                    $item->removeAttributeNode(
+                        $item->attributes->item($k)
+                    );
+                }
+            }
+        }
+    }
+
     /**
      * @param string $html
      */
@@ -212,6 +234,7 @@ class Tilda extends Tags
             $html
         );
 
+        self::changeHTMLElements();
         self::changeDomElements();
         self::changeAHrefLinks();
         self::changeScriptTags();

@@ -2,7 +2,7 @@ composer.lock
 composer.phar
 /vendor/
 .phpintel
-.config.json
+.global.json
 node_modules
 app/config/access.json
 app/config/hosts.json

@@ -49,7 +49,16 @@
     },
     "mail":
     {
+        "send_type": "sendmail",
+        "smtp": {
+            "auth": true,
+            "host": "mailhost.ru",
+            "port": "25",
+            "username": "test@mail.ru",
+            "password": "userpass"
+        },
         "enabled": true,
+        "debug": "server",
         "subject": "Заявка с сайта",
         "from": "info@",
         "name": "submission",

@@ -28,7 +28,7 @@ const options = {
             "properties": {
                 "type": {
                     "title": "Тип сайта",
-                    "enum": ["Tilda", "Wix", "Plain"],
+                    "enum": ["Tilda", "Wix", "Plain", "Taplink"],
                     "type": "string",
                     "default": "Tilda"
                 },
@@ -53,9 +53,39 @@ const options = {
                 "mail": {
                     "type": "object",
                     "properties": {
+                        "smtp": {
+                            "type": "object",
+                            "properties": {
+                                "auth": {
+                                    "type": "boolean",
+                                    "default": true
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "default": "test@mail.ru"
+                                },
+                                "host": {
+                                    "type": "string",
+                                    "default": "mailhost.ru"
+                                },
+                                "port": {
+                                    "type": "number",
+                                    "default": 25
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "default": "userpass"
+                                }
+                            }
+                        },
+                        "send_type": {
+                            "enum": ["sendmail", "smtp"],
+                            "type": "string",
+                            "default": "sendmail"
+                        },
                         "enabled": {
-                            "type": "boolean",
-                            "default": true
+                            "type": "string",
+                            "default": "off"
                         },
                         "subject": {
                             "type": "string"
