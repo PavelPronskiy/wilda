@@ -232,7 +232,10 @@ class Tilda extends Tags
     {
         if (Config::$mail->enabled)
         {
-            $body = str_replace('forms.tildacdn.com', Config::getSiteName(), $body);
+            $body = str_replace([
+                'forms.tildacdn.com',
+                'forms2.tildacdn.com'
+            ], Config::getSiteName(), $body);
         }
 
         return $body;
