@@ -5,13 +5,12 @@
 		.main {
 			padding: 30px;
 		}
-		.default-table {
-			border-collapse: collapse;
-			border: 1px solid #ccc;
+		.list-fields {
+			padding:8px 0px;
 		}
-		.default-table td {
+
+		.list-fields p {
 			
-			border: 1px solid #ccc;
 		}
 
 		hr {
@@ -21,16 +20,21 @@
 			font-size: 0px;
 		}
 
+		.timestamp {
+			text-align:right;
+			font-style:italic;
+		}
+
 	</style>
 </head>
 	<body>
 		<div class="main">
-			<table class="default-table" width="500">
+			<div class="list-fields">
 				{TABLEDATA}
-			</table>
+			</div>
 			<br />
 			<div>
-				<p style="text-align:right"><i style="font-size:12px;">{TIMESTAMP}</i></p>
+				<p class="timestamp">{TIMESTAMP}</p>
 			</div>
 		</div>
 	</body>

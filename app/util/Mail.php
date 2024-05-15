@@ -18,7 +18,7 @@ class Mail
      * @param  [type] $submission     [description]
      * @return [type] [description]
      */
-    public static function getHTMLTemplate($submission)
+    public static function getHTMLTemplate(object $submission)
     {
         $gmdate = gmdate('D, d M Y H:i:s T', time());
 
@@ -31,10 +31,10 @@ class Mail
             // $file_gc = str_replace('{SUBJECT}', Config::$mail->subject . ' ' . Config::getSiteName(), $file_gc);
             $file_gc = str_replace('{MAILFROM}', Config::$mail->from, $file_gc);
             // $file_gc = str_replace('{DOMAIN}', Config::$domain->site, $file_gc);
-            $file_gc = str_replace('{TABLEDATA}', self::submissionTemplate($submission), $file_gc);
+            $file_gc = str_replace('{TABLEDATA}', self::setDynamicFieldsHTMLTemplate($submission), $file_gc);
             $file_gc = str_replace('{TIMESTAMP}', $gmdate, $file_gc);
         }
-        else
+/*        else
         {
             $this->message([
                 'message' => 'ERROR',
@@ -42,7 +42,7 @@ class Mail
                     '7097086:4614970481',
                 ],
             ]);
-        }
+        }*/
 
         return $file_gc;
     }
@@ -56,16 +56,35 @@ class Mail
         // $mail_recipients = Config::getMailRecipients();
         // var_dump($mail_recipients);
 
-        $html = self::getHTMLTemplate((object) [
+        /* $html = self::getHTMLTemplate((object) [
             'name'      => isset(Config::$route->post->Name) ? Config::$route->post->Name : '',
             'phone'     => isset(Config::$route->post->Phone) ? Config::$route->post->Phone : '',
             'mail'      => isset(Config::$route->post->Mail) ? Config::$route->post->Mail : '',
             'message'   => isset(Config::$route->post->Message) ? Config::$route->post->Message : '',
             'Date'      => isset(Config::$route->post->Date) ? Config::$route->post->Date : '',
             'Selectbox' => isset(Config::$route->post->Selectbox) ? Config::$route->post->Selectbox : '',
-        ]);
+        ]); */
 
+        $fields = self::dynamicSubmissionFields();
+        $html = self::getHTMLTemplate($fields);
+        // var_dump($html);
         return self::send($html);
+    }
+
+    public static function dynamicSubmissionFields(array $fields = []): object
+    {
+        // $mail_recipients = Config::getMailRecipients();
+        // var_dump($mail_recipients);
+
+        foreach((array) Config::$route->post as $key => $value)
+        {
+            if (!preg_match('#tildaspec#', $key) && !empty($value))
+            {
+                $fields[$key] = $value;
+            }
+        }
+
+        return (object) $fields;
     }
 
     /**
@@ -73,50 +92,60 @@ class Mail
      * @param  [type] $object         [description]
      * @return [type] [description]
      */
-    public static function submissionTemplate($object)
+    public static function setDynamicFieldsHTMLTemplate(object $object, string $html = ''): string
     {
+        $incr = 0;
+        $p_css = 'style="padding:4px 8px 4px 8px"';
 
-        $width_th = 'width="150"';
-        $date     = date('Y-m-d H:i:s');
-        $padding  = 'padding: 4px 8px;';
-        $html     = '';
-        $align    = 'text-align:right;';
-
-        if (!empty($object->name))
+        foreach((array) $object as $key => $value)
         {
-            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '">Имя: </th><td style="' . $padding . '">' . $object->name . '</td></tr>';
-        }
+            $key = str_replace('_', ' ', $key);
 
-        if (!empty($object->phone))
-        {
-            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '">Телефон: </th><td style="' . $padding . '">' . $object->phone . '</td></tr>';
-        }
+            if (preg_match('/^name$/i', $key))
+            {
+                $html .= '<p '.$p_css.'><b>Имя:</b>&nbsp;'.$value.'</p>';
+            }
+            else if (preg_match('/^phone$/i', $key))
+            {
+                $phone = preg_replace('/[^\p{L}\p{N}]/', '', $value);
+                $html .= '<p '.$p_css.'><b>Телефон:&nbsp;</b><a href="tel:'.$phone.'">'.$value.'</a></p>';
+            }
+            else if (preg_match('/^message/i', $key))
+            {
+                $html .= '<p '.$p_css.'><b>Сообщение:&nbsp;</b><pre>'.$value.'</pre></p>';
+            }
+            else if (preg_match('/^file/i', $key))
+            {
+                $file = preg_replace('/file/', 'Файл', $key);
+                $html .= '<p '.$p_css.'><b>'.$file.':&nbsp;</b><a href="'.$value.'">'.$value.'</a></p>';
+            }
+            else if (preg_match('/^mail$/i', $key))
+            {
+                $html .= '<p '.$p_css.'><b>Почта:</b>&nbsp;'.$value.'</p>';
+            }
+            else if (preg_match('/^date$/i', $key))
+            {
+                $html .= '<p '.$p_css.'><b>Дата:</b>&nbsp;'.$value.'</p>';
+            }
+            else if (preg_match('/^selectbox$/i', $key))
+            {
+                $html .= '<p '.$p_css.'><b>Выбор:</b>&nbsp;'.$value.'</p>';
+            }
+            else
+            {
+                $html .= '<p '.$p_css.'><b>'.$key.':</b>&nbsp;'.$value.'</p>';
+            }
 
-        if (!empty($object->mail))
-        {
-            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '">E-mail: </th><td style="' . $padding . '">' . $object->mail . '</td></tr>';
         }
-
-        if (!empty($object->Date))
-        {
-            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '"><b>Дата бронирования: </b></th><td>' . $object->Date . '</td></tr>';
-        }
-
-        if (!empty($object->Selectbox))
-        {
-            $html .= '<tr><th ' . $width_th . ' style="' . $align . $padding . '"><b>Объект бронирования: </b></th><td>' . $object->Selectbox . '</td></tr>';
-        }
-
-        if (!empty($object->message))
-        {
-            $html .= '<tr><td ' . $width_th . ' colspan="2" style="' . $padding . '"><b>Сообщение:</b><pre>' . $object->message . '</pre></td></tr>';
-        }
-
-        $html .= '<tr><td ' . $width_th . ' colspan="2" style="' . $align . $padding . '"><i>Дата создания заявки: ' . $date . '</i></td></tr>';
 
         return $html;
     }
 
+    /**
+     * Sets the debug.
+     *
+     * @return     int   ( description_of_the_return_value )
+     */
     private static function setDebug(): int
     {
         switch(Config::$mail->debug)
