@@ -64,3 +64,30 @@ hr {
 .jsoneditor-contextmenu .jsoneditor-menu button {
     width:200px;
 }
+
+#nav-tab {
+    border-width:0px;
+}
+
+#nav-tab-content {
+    background-color:#fff;
+}
+
+.cache-wrapper {
+    padding:10px 0;
+    min-height:200px;
+}
+
+.content {
+    color:#000;
+}
+
+/*.toast*/
+
+#cache-settings fieldset, .fieldset {
+    position: relative;
+    padding: 1rem;
+    margin:1rem 0px;
+    border: solid #dee2e6;
+    border-width: 1px;
+}

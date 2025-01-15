@@ -9,3 +9,5 @@ app/config/hosts.json
 app/favicon/
 app/inject/
 public/reports/
+media/filecache/
+reports/

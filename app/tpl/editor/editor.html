@@ -5,20 +5,21 @@
     <!-- <link href="/node_modules/ace-builds/css/ace.css" rel="stylesheet"> -->
     <!-- <script src="/node_modules/ace-builds/src-min/ace.js"></script> -->
     <!-- <script src="/node_modules/ace-builds/src-min/theme-chrome.js"></script> -->
-    <title>Wilda - configuration page</title>
-
+    <title>Wilda - глобальная конфигурация проектов</title>
     <script>{GLOBAL_CONFIG}</script>
+    <script>{HOSTS_CONFIG}</script>
+    <script>{CHROMIUM_CONFIG}</script>
+    <script>{CHROMIUM_STATS}</script>
     <script src="/node_modules/zepto/dist/zepto.min.js"></script>
-
     <script src="/node_modules/ajv/dist/ajv.min.js"></script>
-
     <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
     <link href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <script src="/node_modules/jsoneditor/dist/jsoneditor.min.js"></script>
+    <script src="/node_modules/moment/moment.js"></script>
+    <script src="/node_modules/moment/locale/ru.js"></script>
+    <script src="/node_modules/bs5-toast/dist/bs5-toast.min.js"></script>
     <link href="/node_modules/jsoneditor/dist/jsoneditor.min.css" rel="stylesheet">
     <link href="/app/tpl/editor/editor.css" rel="stylesheet">
-
     <!-- <link href="/node_modules/jsoneditor/examples/css/darktheme.css" rel="stylesheet"> -->
 </head>
 
@@ -33,29 +34,78 @@
                     <div class="badge bg-secondary" id="version"></div>
                 </div>
             </div>
-            <div class="revision-wrapper">
-                <div class="row row-cols-auto">
-                    <div class="col">
-                        <button class="btn btn-primary position-relative" id="revision-restore">Восстановить <span
-                                class="badge position-absolute top-0 start-100 translate-middle rounded-pill bg-danger"
-                                id="revision-counts"></span>
-                        </button>
+        </div>
+    </header>
+    <main role="main" class="content">
+
+        <div class="container">
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link active" id="nav-hosts-tab" data-bs-toggle="tab" data-bs-target="#nav-hosts" type="button" role="tab" aria-controls="hosts-tab" aria-selected="true">Сайты</button>
+                    <button class="nav-link" id="nav-cache-tab" data-bs-toggle="tab" data-bs-target="#nav-cache" type="button" role="tab" aria-controls="cache-tab" aria-selected="false">Кеш</button>
+                </div>
+            </nav>
+        </div>
+        <div class="tab-content container rounded" id="nav-tab-content">
+            <div class="tab-pane fade show active" id="nav-hosts" role="tabpanel" aria-labelledby="nav-hosts-tab">
+                <div class="revision-wrapper">
+                    <div class="row row-cols-auto pt-4">
+                        <div class="col">
+                            <button class="btn btn-primary position-relative" id="revision-restore">Восстановить <span class="badge position-absolute top-0 start-100 translate-middle rounded-pill bg-danger" id="revision-counts"></span>
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-primary" disabled id="revision-save">Сохранить</button>
+                        </div>
                     </div>
-                    <div class="col">
-                        <button class="btn btn-primary" disabled id="revision-save">Сохранить</button>
+                </div>
+                <div class="py-3">
+                    <div id="jsoneditor"></div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="nav-cache" role="tabpanel" aria-labelledby="nav-cache-tab">
+                <div class="cache-wrapper">
+                    <form id="cache-settings" class="pt-4">
+                        <fieldset>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="cron-cache-enabled" id="cron-cache-enabled" value="0" checked>
+                                <label class="form-check-label" for="cron-cache-enabled">Автокеширование</label>
+                            </div>
+                            <div class="container mt-3">
+                                <div class="input-group mb-3 row">
+                                    <label for="cache-revalidate-hours" class="col-5 form-label">Ревалидировать каждые:</label>
+                                    <div class="col-2 w-15">
+                                    <select class="form-select form-select-sm h-100 w-100" id="cache-revalidate-hours" name="cache-revalidate-hours"></select>
+                                    </div>
+                                    <div class="col-2">
+                                        часа
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="cache-settings-save">Сохранить</button>
+                        </fieldset>
+                        <fieldset>
+                            <label for="cache-revalidate" class="form-label">Ревалидировать вручную кеш сайта:</label>
+                            <div class="input-group mb-3">
+                                <select class="form-select form-select-sm" id="cache-revalidate-site" name="cache-revalidate-site"></select>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="cache-revalidate-run">Запустить</button>
+                        </fieldset>
+                    </form>
+                    <div class="cache-statistics">
+                        <div class="fieldset">
+                            <div class="cache-global-lastrun">Глобальный обход сайтов был <span id="cache-global-lastrun-date"></span></div>
+                            <div class="cache-global-links">Ссылок с кодом 200: <span id="cache-global-links-success"></span></div>
+                            <div class="cache-global-links">Ссылок с кодом 404: <span id="cache-global-links-broken"></span></div>
+                            <div class="cache-global-links">Ссылок с ошибками: <span id="cache-global-links-error"></span></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
-    <main role="main">
-        <div class="py-3 container">
-            <div id="jsoneditor"></div>
-        </div>
+
     </main>
-
     <script src="/app/tpl/editor/editor.js"></script>
-
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-var buttonSaveTrigger = false;
+let buttonSaveTrigger = false;
 const revision = {};
 const container = document.getElementById("jsoneditor");
 
@@ -84,8 +84,8 @@ const options = {
                             "default": "sendmail"
                         },
                         "enabled": {
-                            "type": "string",
-                            "default": "off"
+                            "type": "boolean",
+                            "default": false
                         },
                         "subject": {
                             "type": "string"
@@ -263,29 +263,29 @@ const options = {
             }
         }
     ],
-    onChange: function () {
+    onChange: () => {
         if (!buttonSaveTrigger) {
             buttonSaveTrigger = true;
             $('#revision-save').removeAttr('disabled');
             $('#revision-restore').removeAttr('disabled');
         }
     },
-    onClassName: function({ path, field, value }) {
+    onClassName: ({ path, field, value }) => {
         return { path, field, value };
     },
-    onCreateMenu: function (items, node) {
+    onCreateMenu: (items, node) => {
         const path = node.path;
 
         // console.log('items:', items, 'node:', node)
 
-        items.forEach(function (item, index, items) {
-            if (items[index].text == 'Duplicate')
+        items.forEach((item, index, items) => {
+            if (items[index].text === 'Duplicate')
                 items[index].text = 'Дублировать';
 
-            if (items[index].text == 'Remove')
+            if (items[index].text === 'Remove')
                 items[index].text = 'Удалить';
 
-            if (items[index].text == 'Insert')
+            if (items[index].text === 'Insert')
                 items[index].text = 'Добавить';
 
             // if (items[index].text == 'Append')
@@ -296,7 +296,7 @@ const options = {
                 
             if ("submenu" in item) {
 
-                items[index].submenu = items[index].submenu.filter(function (item) {
+                items[index].submenu = items[index].submenu.filter((item) => {
                     return item.type !== 'separator';
                 });
                 
@@ -305,58 +305,51 @@ const options = {
                         break;
                         
                     case 1:
-                        items[index].submenu = items[index].submenu.filter(function (item) {
-                                var excludes = ['Новый сайт'];
-                            return excludes.includes(item.text);
+                        items[index].submenu = items[index].submenu.filter((item) => {
+                            return ['Новый сайт'].includes(item.text);
                         });
                         break;
                         
                     case 2:
-                        items[index].submenu = items[index].submenu.filter(function (item) {
-                            var excludes = ['Auto', 'Array', 'Object', 'String', 'Новый сайт', 'Название сайта'];
-                            return !excludes.includes(item.text);
+                        items[index].submenu = items[index].submenu.filter((item) => {
+                            return !['Auto', 'Array', 'Object', 'String', 'Новый сайт', 'Название сайта'].includes(item.text);
                         });
                         break;
 
                     case 3:
-                        items[index].submenu = items[index].submenu.filter(function (item) {
-                            var excludes = [
+                        items[index].submenu = items[index].submenu.filter((item) => {
+                            return ![
                                 'Auto', 'Array', 'Object', 'String', 'Новый сайт',
                                 'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон',
                                 'Кэширование', 'Сжатие страниц', 'Сторейдж', 'Проксирование'
-                            ];
-                            return !excludes.includes(item.text);
+                            ].includes(item.text);
                         });
                         
                         // console.log(node.path[1]);
-                        if (node.path[1] == 'site')
+                        if (node.path[1] === 'site')
                         {
-                            items[index].submenu = items[index].submenu.filter(function (item) {
-                                var excludes = [
+                            items[index].submenu = items[index].submenu.filter((item) => {
+                                return [
                                     'Название сайта'
-                                ];
-                                return excludes.includes(item.text);
+                                ].includes(item.text);
                             });
                         } else {
-                            items[index].submenu = items[index].submenu.filter(function (item) {
-                                var excludes = [
+                            items[index].submenu = items[index].submenu.filter((item) => {
+                                return ![
                                     'Название сайта'
-                                ];
-                                return !excludes.includes(item.text);
+                                ].includes(item.text);
                             });
-                            
                         }
 
                         break;
                         
                     case 4:
-                        items[index].submenu = items[index].submenu.filter(function (item) {
-                            var excludes = [
+                        items[index].submenu = items[index].submenu.filter((item) => {
+                            return ![
                                 'Auto', 'Array', 'Object', 'String', 'Новый сайт',
                                 'Почта', 'Инжектор HTML', 'Метрика', 'Фавикон', 'Кэширование',
                                 'Сжатие страниц', 'Название сайта', 'Проксирование'
-                            ];
-                            return !excludes.includes(item.text);
+                            ].includes(item.text);
                         });
 
                         break;
@@ -373,9 +366,8 @@ const options = {
             return item.type !== 'separator'
         }) */
 
-        items = items.filter(function (item) {
-            var excludes = ['Type', 'Extract', 'Append'];
-            return !excludes.includes(item.text);
+        items = items.filter((item) => {
+            return !['Type', 'Extract', 'Append'].includes(item.text);
         });
 
         return items;
@@ -384,9 +376,9 @@ const options = {
 
 const editor = new JSONEditor(container, options);
 
-var setUserConfig = function (success, beforesend, post) {
+const postData = (success, beforesend, post) => {
     beforesend();
-    var xhr = ("onload" in new XMLHttpRequest()) ? new XMLHttpRequest() : new XDomainRequest();
+    const xhr = ("onload" in new XMLHttpRequest()) ? new XMLHttpRequest() : new XDomainRequest();
 
     xhr.open('POST', '/?editor', true);
     xhr.setRequestHeader("Content-Type", "application/json");
@@ -394,8 +386,8 @@ var setUserConfig = function (success, beforesend, post) {
     return xhr.send(JSON.stringify(post));
 };
 
-var setUserConfigRevisions = function (revisions) {
-    var elems = [];
+const postDataRevisions = (revisions) => {
+    // let elems = [];
     /*                 for (let index = 0; index < revisions.length; index++) {
                         const rev = revisions[index];
                         // console.log(rev);
@@ -413,25 +405,44 @@ var setUserConfigRevisions = function (revisions) {
 };
 
 
-setUserConfig((d) => {
-    var data = JSON.parse(d.target.responseText);
-    setUserConfigRevisions(data.revisions);
+postData((d) => {
+    const data = JSON.parse(d.target.responseText);
+    postDataRevisions(data.revisions);
     editor.set(data.hosts);
     editor.expandAll();
 }, () => { }, {
     config: true
 });
 
+const postNotification = (d) => {
+    if (d.status)
+    {
+        new bs5.Toast({
+            body: d.message,
+            className: 'border-0 bg-primary',
+        }).show()
+    }
+    else
+    {
+        new bs5.Toast({
+            body: d.message,
+            className: 'border-0 bg-danger',
+        }).show()
+    }
+};
+
 $('#revision-save').click(() => {
-    setUserConfig((d) => {
-        var data = JSON.parse(d.target.responseText);
+    postData((d) => {
+        const data = JSON.parse(d.target.responseText);
+
+        postNotification(data);
 
         if (data.status) {
             $('#revision-save').attr('disabled', '');
             // $('#revision-restore').attr('disabled', '');
 
             buttonSaveTrigger = false;
-            var revCounts = (parseInt($('#revision-counts').text()) + 1);
+            const revCounts = (Number.parseInt($('#revision-counts').text(), 16) + 1);
             $('#revision-counts').text(revCounts);
         }
 
@@ -443,17 +454,19 @@ $('#revision-save').click(() => {
 
 $('#revision-restore').click(() => {
     // console.log(revision.prev);
-    setUserConfig((d) => {
-        var data = JSON.parse(d.target.responseText);
+    postData((d) => {
+        const data = JSON.parse(d.target.responseText);
 
         console.log('restored revision');
         // console.log(data);
+        postNotification(data);
 
-        setUserConfig((d) => {
-            var data = JSON.parse(d.target.responseText);
-            setUserConfigRevisions(data.revisions);
+        postData((d) => {
+            const data = JSON.parse(d.target.responseText);
+            postDataRevisions(data.revisions);
             editor.set(data.hosts);
             editor.expandAll();
+
         }, () => { }, {
             config: true
         });
@@ -465,5 +478,115 @@ $('#revision-restore').click(() => {
 });
 
 $('#version').text(
-    'ver: ' + GLOBAL_CONFIG.version + ', ' + GLOBAL_CONFIG.version_date
+    `ver: ${GLOBAL_CONFIG.version}, ${GLOBAL_CONFIG.version_date}`
 );
+
+for (let i = HOSTS_CONFIG.length - 1; i >= 0; i--) {
+    for (let s = HOSTS_CONFIG[i].site.length - 1; s >= 0; s--) {
+        // console.log(HOSTS_CONFIG[i].site[s]);
+        $(`<option value="${HOSTS_CONFIG[i].site[s]}">${HOSTS_CONFIG[i].site[s]}</option>`).appendTo('#cache-revalidate-site');
+    }
+}
+
+function numberRange(start, end) {
+  return new Array(end - start).fill().map((d, i) => i + start);
+}
+
+const numberRangeHours = numberRange(3, 13);
+for (let i = 0; i < CHROMIUM_CONFIG.cron.schedule.length; i++) {
+    // CHROMIUM_CONFIG.cron.schedule[i]
+    if (CHROMIUM_CONFIG.cron.schedule[i].event === 'autocache') {
+        // console.log(CHROMIUM_CONFIG.cron.schedule[i].time);
+        const cronJobAutocacheSplit = CHROMIUM_CONFIG.cron.schedule[i].time.split(' ');
+        let cronJobAutocacheHour = Number(cronJobAutocacheSplit[2].split('/')[1]);
+        
+        if (!cronJobAutocacheHour) {
+            cronJobAutocacheHour = 0;
+        }
+
+        for (let i = 0; i < numberRangeHours.length; i++) {
+            if (cronJobAutocacheHour === numberRangeHours[i]) {
+                $(`<option selected value="${numberRangeHours[i]}">${numberRangeHours[i]}</option>`).appendTo('#cache-revalidate-hours');
+            } else {
+                $(`<option value="${numberRangeHours[i]}">${numberRangeHours[i]}</option>`).appendTo('#cache-revalidate-hours');
+            }
+        }
+    }
+}
+
+$(document).ready(() => {
+
+    const checkboxCronCacheEnabler = $('#cron-cache-enabled');
+
+    if (CHROMIUM_CONFIG.cron.enabled) {
+        checkboxCronCacheEnabler.prop('checked', true);
+    }
+
+    checkboxCronCacheEnabler.on('change', () => {
+
+        if (checkboxCronCacheEnabler.is(":checked"))
+        {
+            postData((d) => {
+                const data = JSON.parse(d.target.responseText);
+                postNotification(data);
+
+            }, () => {}, {
+                'cron-cache-enabler': true,
+                data: 'enabled'
+            });
+        }
+        else
+        {
+            postData((d) => {
+                const data = JSON.parse(d.target.responseText);
+                postNotification(data);
+            }, () => {}, {
+                'cron-cache-enabler': true,
+                data: 'disabled'
+            });
+        }
+    });
+
+    $('#cache-revalidate-run').click((e) => {
+        postData((d) => {
+            const data = JSON.parse(d.target.responseText);
+            postNotification(data);
+        }, () => {}, {
+            'revalidate-cache': true,
+            data: $('select#cache-revalidate-site').val()
+        });
+
+        e.preventDefault();
+    })
+
+    $('#cache-settings-save').click((e) => {
+        postData((d) => {
+            const data = JSON.parse(d.target.responseText);
+            postNotification(data);
+        }, () => {}, {
+            'cache-settings-save': true,
+            data: {
+                'cache-revalidate-hours': $('select#cache-revalidate-hours').val()
+            }
+
+        });
+
+        e.preventDefault();
+    })
+
+    // console.log(CHROMIUM_STATS.global);
+
+    const lastrun_global = CHROMIUM_STATS.global.lastrun === 0 ? '-' : moment(CHROMIUM_STATS.global.lastrun).fromNow();
+
+    $('#cache-global-lastrun-date').text(lastrun_global);
+    $('#cache-global-links-success').text(CHROMIUM_STATS.global.links.success);
+    $('#cache-global-links-broken').text(CHROMIUM_STATS.global.links.broken);
+    $('#cache-global-links-error').text(CHROMIUM_STATS.global.links.error);
+
+    // console.log(cronJobAutocache[2].split('/')[1]);
+
+});
+
+
+
+

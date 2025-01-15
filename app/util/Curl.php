@@ -15,7 +15,7 @@ class Curl
     /**
      * @var array
      */
-    public static $devices = ['Mobile', 'Tablet', 'Desktop'];
+    // public static $devices = ['Mobile', 'Tablet', 'Desktop'];
 
     /**
      * Handles HTTP error codes and renders an appropriate response.
@@ -23,15 +23,25 @@ class Curl
      * @param  int       $http_code The HTTP status code to handle.
      * @return bool|null Returns true if HTTP status code is 200, false if code is or unhandled, null for all other codes.
      */
-    public static function curlErrorHandler($http_code)
+    public static function curlErrorHandler($http_code, $code = '')
     {
         Config::$lang = (array) Config::$lang;
+
+        if (!empty($code) && isset(Config::$lang[$code]))
+        {
+            $code_message = Config::$lang[$code];
+        }
+        else
+        {
+            $code_message = '';
+        }
 
         switch ($http_code)
         {
             case 404:
                 $result = Config::$runType === 'web' ? [
                     'code'         => 404,
+                    'no_cache'     => true,
                     'error'        => true,
                     'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 404</h1>' . Config::$lang[1] . '</body></html>',
                     'content_type' => 'text/html',
@@ -43,8 +53,9 @@ class Curl
             case 503:
                 $result = Config::$runType === 'web' ? [
                     'code'         => 503,
+                    'no_cache'     => true,
                     'error'        => true,
-                    'body'         => '<html><head><meta http-equiv="refresh" content="3"><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 503</h1>' . Config::$lang[2] . '</body></html>',
+                    'body'         => ErrorHandler::webTemplate(503, Config::$lang[2]),
                     'content_type' => 'text/html',
                 ] : [
                     'body' => 'Ошибка: 503 ' . Config::$lang[2],
@@ -54,8 +65,9 @@ class Curl
             case 502:
                 $result = Config::$runType === 'web' ? [
                     'code'         => 502,
+                    'no_cache'     => true,
                     'error'        => true,
-                    'body'         => '<html><head><meta http-equiv="refresh" content="3"><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 502</h1>' . Config::$lang[0] . '</body></html>',
+                    'body'         => ErrorHandler::webTemplate(502, Config::$lang[0]),
                     'content_type' => 'text/html',
                 ] : [
                     'body' => 'Ошибка: 502 ' . Config::$lang[0],
@@ -65,8 +77,10 @@ class Curl
             case 500:
                 $result = Config::$runType === 'web' ? [
                     'code'         => 500,
+                    'no_cache'     => true,
                     'error'        => true,
-                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 500</h1>' . Config::$lang[3] . '</body></html>',
+                    // 'body'         => ErrorHandler::webTemplate(500, Config::$lang[3]),
+                    'body'         => ErrorHandler::webTemplate(500, $code),
                     'content_type' => 'text/html',
                 ] : [
                     'body' => 'Ошибка: 500 ' . Config::$lang[3],
@@ -84,6 +98,35 @@ class Curl
         Config::render((object) $result);
     }
 
+
+    /**
+     * Gets the headers.
+     *
+     * @param      string  $response_headers  The response headers
+     * @param      array   $result_headers    The result headers
+     *
+     * @return     array   The headers.
+     */
+    public static function getHeaders(
+        string $response_headers,
+        array $result_headers = []
+    )
+    {
+        foreach (explode("\r\n", $response_headers) as $i => $line) {
+            if (!empty($line))
+            {
+                @list ($key, $value) = explode(': ', $line);
+                if (!empty($key) && !empty($value))
+                {
+                    $result_headers[$key] = $value;
+                }
+            }
+        }
+
+        return $result_headers;
+    }
+
+
     /**
      * [get description]
      * @param  [type] $url            [description]
@@ -99,7 +142,7 @@ class Curl
         $userAgent = isset($_SERVER['HTTP_USER_AGENT'])
         ? $_SERVER['HTTP_USER_AGENT']
         : UA::random(['device_type' =>
-            !empty($deviceType) ? [$deviceType] : self::$devices,
+            !empty($deviceType) ? [$deviceType] : Config::DEVICE_DIMENSIONS,
         ]);
 
         if (Config::$config->privoxy->enabled)
@@ -108,8 +151,8 @@ class Curl
         }
 
         // curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 15);
-
         curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_FRESH_CONNECT, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, Config::$config->curl->timeout);
         curl_setopt($curl, CURLOPT_REFERER, (Config::$runType === 'web') ? Config::$domain->project : '');
         curl_setopt($curl, CURLOPT_ENCODING, Config::$config->curl->encoding);
@@ -117,88 +160,65 @@ class Curl
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, []);
+        curl_setopt($curl, CURLOPT_HEADER, true);
 
         $response = curl_exec($curl);
-
-        $info         = curl_getinfo($curl);
+        
+        // extract header
         $content_type = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
-        // get cache results
+        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $header = substr($response, 0, $header_size);
+        $headers = self::getHeaders($header);
+        $body = substr($response, $header_size);
+
         curl_close($curl);
 
         if (self::curlErrorHandler($http_code))
         {
+            // get results
             return (object) [
-                'body'         => $response,
+                'body'         => $body,
                 'status'       => $http_code,
                 'content_type' => $content_type,
+                'headers'      => $headers,
             ];
         }
         else
         {
             return self::curlErrorHandler(502);
         }
-
     }
 
-    /**
-     * [preCachedRequest description]
-     * @return [type] [description]
-     */
-    public static function preCachedRequest(): object
-    {
-        Cache::$microtime = \microtime(true);
-
-        $results = (object) [];
-        // var_dump(Config::$route);
-        if (Config::$config->cache->enabled)
-        {
-            // curl_setopt($curl, CURLOPT_VERBOSE, true);
-            $results = Cache::get(Config::$hash);
-            if (count((array) $results) == 0)
-            {
-                $results = self::rget();
-
-                if (empty($results))
-                {
-                    self::curlErrorHandler(500);
-                }
-                else
-                {
-                    Cache::set(
-                        Modify::byContentType($results),
-                        Config::$hash
-                    );
-                }
-            }
-        }
-        else
-        {
-            $results = self::rget();
-
-            if (empty($results))
-            {
-                self::curlErrorHandler(500);
-            }
-            else
-            {
-                return Modify::byContentType($results);
-            }
-        }
-
-        return $results;
-    }
 
     /**
      * Retrieve resource from server using GET request
      * @return object Response from server
      */
-    public static function rget(): object
+    public static function rget()
     {
         $build_query = count((array) Config::$route->query) > 0 ? '?' . http_build_query((array) Config::$route->query) : '';
+        if (isset(Config::$route->query) && in_array(key(Config::$route->query), Config::URI_QUERY_TYPES))
+        {
+            $url = Cache::getMapFilePath(
+                Config::$route->query->{key(Config::$route->query)}
+            );
 
-        return isset(Config::$route->query) && in_array(key(Config::$route->query), Config::URI_QUERY_TYPES)
-        ? self::get(Encryption::decode(Config::$route->query->{key(Config::$route->query)}))
-        : self::get(Config::$domain->project . Config::$route->path . $build_query);
+            if (!$url)
+            {
+                return self::curlErrorHandler(404);
+            }
+
+            return self::get($url);
+        }
+        else
+        {
+            return self::get(Config::$domain->project . Config::$route->path . $build_query);
+        }
+
+        // $url = Config::$domain->project . Config::$route->path . $build_query;
+        // var_dump($url);
+        // return self::get($url);
     }
 }

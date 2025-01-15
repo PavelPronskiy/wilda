@@ -5,6 +5,7 @@ namespace app\core;
 use app\util\Cache;
 use app\util\Curl;
 use app\util\Editor;
+use app\util\Chromium;
 
 class Router
 {
@@ -14,11 +15,18 @@ class Router
         {
             if (key(Config::$route->query))
             {
+
                 switch (key(Config::$route->query))
                 {
+                    // case 'chromium-settings':
+                        // Chromium::getSettings();
+                        // break;
                     case 'clear':
                     case 'flush':
                         Cache::clear();
+                        break;
+                    case 'clean-cache':
+                        Cache::cleanCacheXhr();
                         break;
                     case 'keys':
                         Cache::keys();
@@ -29,9 +37,9 @@ class Router
                     /*case 'reports':
                     new Reports();
                     break;*/
-                    case 'cleaner':
-                        Cache::webCacheCleaner();
-                        break;
+                    // case 'cleaner':
+                        // Cache::webCacheCleaner();
+                        // break;
                 }
             }
         }
@@ -45,7 +53,7 @@ class Router
         // for gets
         Config::render(
             self::routeGet(
-                Curl::preCachedRequest()
+                Cache::preCachedRequest()
             )
         );
     }

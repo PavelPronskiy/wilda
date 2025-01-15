@@ -1,0 +1,84 @@
+{
+    "threads": 8,
+    "maxRunningInstances": 4,
+    "timezone": "Europe/Moscow",
+    "timeout": 15000,
+    "wait": 2000,
+    "topic": "/chromium/",
+    "executablePath": "/usr/bin/chromium-browser",
+    "args": [
+        "--disable-dev-shm-usage",
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--ignore-certificate-errors",
+        "--allow-running-insecure-content",
+        "--unsafely-treat-insecure-origin-as-secure",
+        "--disable-canvas-aa",
+        "--disable-2d-canvas-clip-aa",
+        "--disable-gl-drawing-for-tests",
+        "--disable-dev-shm-usage",
+        "--no-zygote",
+        "--use-gl=swiftshader",
+        "--hide-scrollbars",
+        "--mute-audio",
+        "--no-first-run",
+        "--disable-infobars",
+        "--disable-breakpad",
+        "--user-data-dir=/home/wilda/.chrome",
+        "--disable-session-crashed-bubble",
+        "--disable-accelerated-2d-canvas",
+        "--noerrdialogs",
+        "--disable-gpu",
+        "--disable-crash-reporter",
+        "--disable-crashpad-forwarding",
+        "--disable-extensions",
+        "--disable-gaia-services",
+        "--disable-logging",
+        "--disable-notifications",
+        "--disable-pepper-3d",
+        "--disable-speech-api",
+        "--disable-webgl",
+        "--disable-features=HttpsUpgrades",
+        "--disable-web-security",
+        "--disable-direct-npapi-requests",
+        "--disable-first-run-ui",
+        "--homepage=about:blank",
+        "--disable-background-networking",
+        "--disable-breakpad",
+        "--disable-renderer-backgrounding",
+        "--disable-hang-monitor",
+        "--disable-background-timer-throttling",
+        "--disable-web-sockets",
+        "--no-default-browser-check",
+        "--disable-save-password-bubble",
+        "--disable-sync"
+    ],
+    "screenshot":
+    {
+        "dir": "reports"
+    },
+    "dimensions":
+    {
+        "desktop":
+        {
+            "deviceScaleFactor": 1,
+            "width": 1920,
+            "height": 1080
+        },
+        "mobile":
+        {
+            "deviceScaleFactor": 1,
+            "width": 360,
+            "height": 800
+        }
+    },
+    "cron": {
+        "enabled": true,
+        "schedule": [
+            {
+                "event": "autocache",
+                "time": "1 */4 * * * *"
+            }
+        ]
+    }
+}

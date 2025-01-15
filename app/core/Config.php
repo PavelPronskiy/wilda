@@ -8,28 +8,23 @@ namespace app\core;
 class Config
 {
     const CONFIG_ACCESS = PATH . '/app/config/access.json';
-
-    const CONFIG_GLOBAL = PATH . '/app/config/global.json';
-
-    const CUSTOM_GLOBAL = PATH . '/.global.json';
-
+    const GLOBAL_CONFIG = PATH . '/app/config/global.json';
+    const GLOBAL_CUSTOM = PATH . '/.global.json';
     const CONFIG_HOSTS = PATH . '/app/config/hosts.json';
-
+    const CHROMIUM_CONFIG = PATH . '/app/config/chromium.json';
+    const CHROMIUM_CUSTOM = PATH . '/.chromium.json';
     const QUERY_PARAM_CSS = '/?css=';
-
     const QUERY_PARAM_FONT = '/?font=';
-
     const QUERY_PARAM_ICO = '/?ico=';
-
     const QUERY_PARAM_IMG = '/?img=';
-
     const QUERY_PARAM_JS = '/?js=';
-
-    const REPORTS_CONFIG = PATH . '/app/config/reports.json';
-
     const URI_QUERY_ADMIN = ['cleaner', 'flush', 'keys'];
-
     const URI_QUERY_TYPES = ['ico', 'img', 'js', 'css', 'font'];
+    const URI_MEDIA_IMAGES_TYPES = [''];
+    // const URI_MEDIA_IMAGES_TYPES = ['image/jpeg', 'image/png', 'image/tiff', 'image/webp', 'image/gif'];
+    const URI_MEDIA_PAGES_TYPES = ['text/html'];
+    // const URI_MEDIA_FONTS_TYPES = ['font/ttf', 'font/woff', 'font/woff2', 'image/webp', 'image/svg+xml', 'image/x-icon'];
+    CONST DEVICE_DIMENSIONS = ['Mobile', 'Tablet', 'Desktop'];
 
     /**
      * @var array
@@ -45,6 +40,9 @@ class Config
      * @var array
      */
     public static $compress = [];
+
+
+    public static $hosts = [];
 
     /**
      * config
@@ -128,12 +126,16 @@ class Config
     /**
      * @var string
      */
-    public static $runType = 'web';
+    public static $runType = '';
 
     /**
      * @var mixed
      */
-    public static $storage = [];
+    // public static $storage = [];
+
+    public static $chromium = [];
+
+    public static $cli;
 
     /**
      * Constructs a new instance.
@@ -192,8 +194,11 @@ class Config
      * [getDomainConfig description]
      * @return [type] [description]
      */
-    public static function getDomainConfig(): object
+    public static function getDomainConfig(string $domain = ''): object
     {
+
+        if (empty($domain))
+            $domain = static::$route->domain;
 
         foreach (static::$config->hosts as $host)
         {
@@ -202,7 +207,7 @@ class Config
                 foreach ($host->site as $site)
                 {
                     $parse_host_site = (object) parse_url($site);
-                    if (static::$route->domain === $parse_host_site->host)
+                    if ($domain === $parse_host_site->host)
                     {
                         $host->site = $site;
 
@@ -213,7 +218,7 @@ class Config
             else
             {
                 $parse_host_site = (object) parse_url($host->site);
-                if (static::$route->domain === $parse_host_site->host)
+                if ($domain === $parse_host_site->host)
                 {
                     return $host;
                 }
@@ -232,20 +237,20 @@ class Config
     public static function getGlobalConfig(): object
     {
         $config_json = [];
-        if (file_exists(static::CONFIG_GLOBAL))
+        if (file_exists(static::GLOBAL_CONFIG))
         {
-            $config_json = json_decode(file_get_contents(static::CONFIG_GLOBAL));
+            $config_json = json_decode(file_get_contents(static::GLOBAL_CONFIG));
             if (json_last_error() > 0)
             {
-                die(json_last_error_msg() . ' ' . static::CONFIG_GLOBAL);
+                die(json_last_error_msg() . ' ' . static::GLOBAL_CONFIG);
             }
         }
         else
         {
-            die('Global config: ' . static::CONFIG_GLOBAL . ' not found');
+            die('Global config: ' . static::GLOBAL_CONFIG . ' not found');
         }
 
-        $config_json->name = static::$name;
+        // $config_json->name = static::$name;
 
         return $config_json;
     }
@@ -253,17 +258,17 @@ class Config
     public static function getCustomGlobalConfig(): object
     {
         $config_json = [];
-        if (file_exists(static::CUSTOM_GLOBAL))
+        if (file_exists(static::GLOBAL_CUSTOM))
         {
-            $config_json = json_decode(file_get_contents(static::CUSTOM_GLOBAL));
+            $config_json = json_decode(file_get_contents(static::GLOBAL_CUSTOM));
             if (json_last_error() > 0)
             {
-                die(json_last_error_msg() . ' ' . static::CUSTOM_GLOBAL);
+                die(json_last_error_msg() . ' ' . static::GLOBAL_CUSTOM);
             }
         }
         else
         {
-            die('Custom global config: ' . static::CUSTOM_GLOBAL . ' not found');
+            die('Custom global config: ' . static::GLOBAL_CUSTOM . ' not found');
         }
 
         return $config_json;
@@ -317,25 +322,52 @@ class Config
         return str_replace(['http://', 'https://'], '', static::$domain->project);
     }
 
+
+    /**
+     * Gets the custom chromium configuration.
+     *
+     * @return     array|object  The custom chromium configuration.
+     */
+    public static function getCustomChromiumConfig(): object
+    {
+        $config_json = [];
+        if (file_exists(static::CHROMIUM_CUSTOM))
+        {
+            $config_json = json_decode(file_get_contents(static::CHROMIUM_CUSTOM));
+            if (json_last_error() > 0)
+            {
+                die(json_last_error_msg() . ' ' . static::CHROMIUM_CUSTOM);
+            }
+        }
+        else
+        {
+            die('Custom global config: ' . static::CHROMIUM_CUSTOM . ' not found');
+        }
+
+        return $config_json;
+    }
+
+
+
     /**
      * Gets the reports configuration.
      *
      * @return array|object The reports configuration.
      */
-    public static function getReportsConfig(): object
+    public static function getChromiumConfig(): object
     {
         $config_json = [];
-        if (file_exists(static::REPORTS_CONFIG))
+        if (file_exists(static::CHROMIUM_CONFIG))
         {
-            $config_json = json_decode(file_get_contents(static::REPORTS_CONFIG));
+            $config_json = json_decode(file_get_contents(static::CHROMIUM_CONFIG));
             if (json_last_error() > 0)
             {
-                die(json_last_error_msg() . ' ' . static::REPORTS_CONFIG);
+                die(json_last_error_msg() . ' ' . static::CHROMIUM_CONFIG);
             }
         }
         else
         {
-            die('Reports config: ' . static::REPORTS_CONFIG . ' not found');
+            die('Reports config: ' . static::CHROMIUM_CONFIG . ' not found');
         }
 
         return $config_json;
@@ -369,6 +401,8 @@ class Config
 
     public static function initialize(): void
     {
+
+        static::$runType  = php_sapi_name() === 'cli' ? 'cli' : 'web';
         static::$lang     = (array) [];
         static::$access   = (array) [];
         static::$reports  = (object) [];
@@ -380,19 +414,32 @@ class Config
         static::$inject   = (object) [];
         static::$compress = (object) [];
         static::$editor   = (object) [];
-        static::$storage  = (object) [];
+        // static::$storage  = (object) [];
+        static::$hosts    = (array) static::getHostsConfig()->hosts;
         static::$config   = (object) [
             ...(array) static::getGlobalConfig(),
             ...(array) static::getCustomGlobalConfig(),
             ...(array) static::getHostsConfig(),
         ];
+        static::$chromium   = (object) [
+            ...(array) static::getChromiumConfig(),
+            ...(array) static::getCustomChromiumConfig(),
+        ];
 
-        if (self::$runType === 'cli')
+        if (php_sapi_name() === 'cli')
         {
             static::$lang = static::$config->translations->cli->{static::$config->lang};
+            // static::$hash_key = static::$config->name . ':' . static::$route->domain . ':' . static::$domain->type;
+
+            // static::$route = (object) [
+                // 'domain' => static::$cli->getArg('site')
+            // ];
+
+            // static::$domain = (object) static::getDomainConfig();
+
         }
 
-        if (self::$runType === 'web')
+        if (php_sapi_name() === 'fpm-fcgi')
         {
             $request_uri = parse_url(
                 preg_replace('{^//}', '/', $_SERVER['REQUEST_URI'])
@@ -449,7 +496,7 @@ class Config
                 \app\util\Curl::curlErrorHandler(500);
             }
 
-            static::$hash_key = static::$name . ':' . static::$route->domain . ':' . static::$domain->type;
+            static::$hash_key = static::$config->name . ':' . static::$route->domain . ':' . static::$domain->type;
 
             // hash cache key
             static::$hash = static::$hash_key . ':' . static::getKeyUserDisplayResolution() . ':' . static::getURIEncryptHash();
@@ -524,6 +571,11 @@ class Config
             if (isset(static::$domain->cache->browser))
             {
                 static::$config->cache->browser = static::$domain->cache->browser;
+            }
+
+            if (isset(static::$domain->cache->autocache))
+            {
+                static::$config->cache->autocache = static::$domain->cache->autocache;
             }
 
             /**
@@ -684,13 +736,13 @@ class Config
             /**
              * set storage type [redis: memory, ssdb: disk]
              */
-            if (isset(static::$domain->storage) && isset(static::$domain->storage->type))
+/*            if (isset(static::$domain->storage) && isset(static::$domain->storage->type))
             {
                 static::$storage->type = static::$domain->storage->type;
             }
             else
             {
-                static::$storage->type = static::$config->storage->type;
+                static::$storage->type = 'memory';
             }
 
             if (isset(static::$domain->storage) && isset(static::$domain->storage->redis))
@@ -710,7 +762,7 @@ class Config
             {
                 static::$storage->ssdb = static::$config->storage->ssdb;
             }
-
+*/
             /**
              * set metrics variables
              */
@@ -779,7 +831,6 @@ class Config
             static::$reports->path = 'tpl/reports';
 
         }
-
     }
 
     /**
@@ -815,9 +866,13 @@ class Config
      *
      * @return void
      */
-    public static function removeProtoUrl($url): string
+    public static function removeProtoUrl($url): mixed
     {
-        return str_replace(['http://', 'https://'], '', $url);
+        $url = str_replace(['http:', 'https:'], '', $url);
+        $url = str_replace('/', '', $url);
+
+        return $url;
+        
     }
 
     /**
@@ -827,11 +882,22 @@ class Config
      */
     public static function render(object $response): void
     {
+        ob_start();
         $ref_array = ['flush', 'clear'];
-        $no_cache  = false;
+
+        $no_cache = (isset($response->no_cache) && $response->no_cache) ? true : false;
 
         if (self::$runType === 'web')
         {
+            // clean-browser-cache
+            if (isset($_COOKIE['clean-browser-cache']))
+            {
+                unset($_COOKIE['clean-browser-cache']); 
+                setcookie('clean-browser-cache', '', -1, '/'); 
+                header("Cache-Control: no-cache, must-revalidate");
+                header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+            }
+
             if (isset($response->error) && isset($response->code))
             {
                 http_response_code($response->code);
@@ -839,39 +905,54 @@ class Config
 
             if (static::$config->cache->browser)
             {
-                if (isset(static::$route->referer))
+/*                if (isset(static::$route->referer))
                 {
                     $ref = parse_url(static::$route->referer);
                     if (isset($ref['query']) && in_array($ref['query'], $ref_array))
                     {
                         $no_cache = true;
                     }
-                }
+                }*/
 
-                if (!$no_cache)
+                // set cache status
+                if (isset($response->cache))
                 {
-                    $etag = md5($response->body);
-                    header('Cache-Control: max-age=' . static::$config->cache->expire);
-                    header('ETag: ' . $etag);
-
-                    if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
-                    {
-                        if ($_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
-                        {
-                            header('HTTP/1.1 304 Not Modified', true, 304);
-                            exit();
-                        }
-                    }
+                    header('W-Cache-Status: ' . $response->cache);
                 }
-                else
+
+                // set browser cache params
+                if ($no_cache)
                 {
                     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                     header('Cache-Control: post-check=0, pre-check=0', false);
                     header('Pragma: no-cache');
                 }
+                else
+                {
+
+                    // only html,js,css pages
+                    if (preg_match('/(text\/html|application\/javascript|text\/css)/', $response->content_type))
+                    {
+                        $etag = md5($response->body);
+
+                        header('Cache-Control: max-age=' . static::$config->cache->expire);
+                        header('ETag: ' . $etag);
+
+                        if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
+                        {
+                            if ($_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
+                            {
+                                header('HTTP/1.1 304 Not Modified', true, 304);
+                                exit();
+                            }
+                        }
+                    }
+                }
             }
 
             header('Content-type: ' . $response->content_type);
+
+            ob_clean();
             die($response->body);
         }
         else
@@ -913,14 +994,36 @@ class Config
     }
 
     /**
-     * Sets the reports configuration.
+     * Sets the chromium configuration.
      *
      * @param <type> $config The configuration
      */
-    public static function setReportsConfig($config): void
+    public static function setChromiumConfig($config): bool
     {
-        file_put_contents(
-            static::REPORTS_CONFIG,
+        return file_put_contents(
+            static::CHROMIUM_CONFIG,
+            (string) json_encode(
+                $config,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            )
+        );
+    }
+
+    public static function setCustomChromiumConfig($config): bool
+    {
+        return file_put_contents(
+            static::CHROMIUM_CUSTOM,
+            (string) json_encode(
+                $config,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            )
+        );
+    }
+
+    public static function setCustomGlobalConfig($config): bool
+    {
+        return file_put_contents(
+            static::GLOBAL_CUSTOM,
             (string) json_encode(
                 $config,
                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
@@ -945,4 +1048,47 @@ class Config
 
         return json_last_error() > 0 ? false : true;
     }
+
+
+
+    /**
+     * Gets all hosts.
+     *
+     * @param      array  $res    The resource
+     *
+     * @return     array  All hosts.
+     */
+    public static function getAllHosts(array $res = [])
+    {
+        foreach (static::$hosts as $project)
+        {
+            foreach ($project->site as $site)
+            {
+                $res[] = $site;
+            }
+        }
+
+        return $res;
+    }
+
+    /**
+     * Функция выводит сообщение вместе с хостом HTTP и завершает выполнение скрипта.
+     *
+     * отображаться при вызове функции.
+     * @param message Параметр сообщения — это строка, представляющая уведомление, которое будет
+     */
+    public static function notice($message): void
+    {
+        if (php_sapi_name() === 'cli')
+        {
+            echo $message . PHP_EOL;
+        }
+
+        if (php_sapi_name() === 'fpm-fcgi')
+        {
+            $host_str = 'Host: ' . $_SERVER['HTTP_HOST'];
+            die('<pre>' . $host_str . ', ' . $message . '</pre>');
+        }
+    }
+
 }

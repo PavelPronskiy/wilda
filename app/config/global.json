@@ -1,6 +1,8 @@
 {
-    "version": "1.0",
-    "version_date": "2023-12-20",
+    "name": "wilda",
+    "version": "1.1",
+    "mode": "dev",
+    "version_date": "2025-01-10",
     "styles": "relative",
     "scripts": "relative",
     "images": "relative",
@@ -9,16 +11,23 @@
     "salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
     "storage":
     {
-        "type": "disk",
+        "media": {
+            "cache": "media/filecache"
+        },
+        "keys": {
+            "pathMap": "map",
+            "chromium": {
+                "summary": "chromium:summary",
+                "running": "chromium:running",
+                "lastrun": "chromium:lastrun",
+                "links": "chromium:links"
+            }
+        },
         "redis":
         {
+            "compression": true,
             "host": "127.0.0.1",
             "port": 6379
-        },
-        "ssdb":
-        {
-            "host": "127.0.0.1",
-            "port": 8888
         }
     },
     "lang": "ru",
@@ -71,7 +80,7 @@
     "privoxy":
     {
         "enabled": true,
-        "host": "10.51.18.1",
+        "host": "5.39.220.187",
         "port": 8118
     },
     "cache":
@@ -79,7 +88,10 @@
         "enabled": true,
         "browser": true,
         "expire": 86400,
-        "stats": true
+        "stats": true,
+        "autocache": true,
+        "cachettl": 6
+
     },
     "curl": {
       "timeout": 15,
@@ -93,7 +105,9 @@
                 "<h2>Невозможно установить соединение.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
                 "<h2>Страница не найдена.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
                 "<h2>Страница недоступна.</h2><strong>Попробуйте зайти позже и перезагрузите страницу</strong>",
-                "<h2>Страница недоступна.</h2><strong>Пустой результат</strong>"
+                "<h2>Страница недоступна.</h2><strong>Пустой результат</strong>",
+                "Сохранено",
+                "Ошибка! Не сохранено"
             ]
         },
         "cli":

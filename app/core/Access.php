@@ -23,8 +23,10 @@ class Access
             isset($_SESSION['PASSWORD'])
         )
         {
-            if (md5($_SESSION['LOGIN'] . $_SESSION['PASSWORD']) === $_SESSION['SIGN'])
+            $hash = md5($_SESSION['LOGIN'] . $_SESSION['PASSWORD']);
+            if ($hash === $_SESSION['SIGN'])
             {
+                setcookie(Config::$config->name, $hash);
                 return true;
             }
         }

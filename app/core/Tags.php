@@ -40,10 +40,10 @@ abstract class Tags
 
     public static function changeDomElements(): void
     {
+        self::changeMetaTags();
         self::changeBaseHref();
         self::changeImgTags();
         self::changeLinkTags();
-        self::changeMetaTags();
         self::removeComments();
         self::injectMetrics();
     }
@@ -302,21 +302,21 @@ abstract class Tags
 
     /**
      * [getRelativePath description]
-     * @param  [type] $content        [description]
+     * @param  [type] $path           [description]
      * @param  [type] $type           [description]
      * @return [type] [description]
      */
     public static function getRelativePath(
-        string $content,
+        string $path,
         string $type
     ): string
     {
         if (Config::$config->{$type} === 'relative')
         {
-            $content = Encryption::encode($content);
+            $path = Cache::getEncyptMapPath($path);
         }
 
-        return $content;
+        return $path;
     }
 
     /**
@@ -403,11 +403,7 @@ abstract class Tags
      */
     public static function preProcessHTML(string $html): string
     {
-        return self::injectHTML(
-            Cache::injectWebCleaner(
-                Cache::injectWebStats($html)
-            )
-        );
+        return self::injectHTML($html);
     }
 
     /**

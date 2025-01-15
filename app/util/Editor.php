@@ -18,20 +18,10 @@ class Editor
     {
         session_start();
         self::route(
-            (array) json_decode(self::decodeInput())
+            (array) json_decode(
+                file_get_contents('php://input')
+            )
         );
-    }
-
-    /**
-     * Эта функция извлекает входные данные из тела запроса в PHP.
-     *
-     * входному потоку осуществляется с помощью оболочки `php://input`, которая позволяет считывать
-     * необработанные данные из тела запроса.
-     * @return Функция `decodeInput()` возвращает содержимое входного потока в виде строки. Доступ к
-     */
-    public static function decodeInput()
-    {
-        return file_get_contents('php://input');
     }
 
     /**
@@ -121,6 +111,7 @@ class Editor
                 }
             }
 
+            // Сохранение изменений в hosts.json
             if (isset($input['save']) && isset($input['data']) && $input['save'])
             {
                 if (Config::validateConfig($input['data']))
@@ -140,6 +131,83 @@ class Editor
                     $result = (object) [
                         'status'  => false,
                         'message' => 'Ошибка синтаксиса! Не сохранено.',
+                    ];
+                }
+
+                Config::render((object) [
+                    'content_type' => 'application/json',
+                    'body'         => json_encode($result),
+                ]);
+            }
+            
+            // Сохранение настроек кеширования
+            if (isset($input['cache-settings-save']) && isset($input['data']) && $input['cache-settings-save'])
+            {
+                $input['data'] = (array) $input['data'];
+                if (Chromium::updateRevalidateHours($input['data']['cache-revalidate-hours']))
+                {
+                    $result = (object) [
+                        'status'  => true,
+                        'message' => Config::$lang[4],
+                    ];
+                }
+                else
+                {
+                    $result = (object) [
+                        'status'  => false,
+                        'message' => Config::$lang[5],
+                    ];
+                }
+
+                Config::render((object) [
+                    'content_type' => 'application/json',
+                    'body'         => json_encode($result),
+                ]);
+            }
+
+            // Отправка ревалидации кеша для определённого сайта
+            if (isset($input['revalidate-cache']) && isset($input['data']) && $input['revalidate-cache'])
+            {
+                if (Chromium::sendRevalidateSite([
+                    $input['data']
+                ]))
+                {
+                    $result = (object) [
+                        'status'  => true,
+                        'message' => Config::$lang[4],
+                    ];
+                }
+                else
+                {
+                    $result = (object) [
+                        'status'  => false,
+                        'message' => Config::$lang[5],
+                    ];
+                }
+
+                Config::render((object) [
+                    'content_type' => 'application/json',
+                    'body'         => json_encode($result),
+                ]);
+            }
+
+            // Включение/отключение автокеша
+            if (isset($input['cron-cache-enabler']) && isset($input['data']) && $input['cron-cache-enabler'])
+            {
+                if (Cache::autoCacheEnabler([
+                    $input['data']
+                ]))
+                {
+                    $result = (object) [
+                        'status'  => true,
+                        'message' => Config::$lang[4],
+                    ];
+                }
+                else
+                {
+                    $result = (object) [
+                        'status'  => false,
+                        'message' => Config::$lang[5],
                     ];
                 }
 
@@ -177,6 +245,11 @@ class Editor
      */
     public static function shortcodes(string $html)
     {
-        return str_replace('{GLOBAL_CONFIG}', 'const GLOBAL_CONFIG=' . json_encode(Config::getGlobalConfig()), (string) $html);
+        $html = str_replace('{HOSTS_CONFIG}', 'const HOSTS_CONFIG=' . json_encode(Config::getHostsConfig()->hosts), (string) $html);
+        $html = str_replace('{GLOBAL_CONFIG}', 'const GLOBAL_CONFIG=' . json_encode(Config::getGlobalConfig()), (string) $html);
+        $html = str_replace('{CHROMIUM_CONFIG}', 'const CHROMIUM_CONFIG=' . json_encode(Config::$chromium), (string) $html);
+        $html = str_replace('{CHROMIUM_STATS}', 'const CHROMIUM_STATS=' . json_encode(Chromium::getStats()), (string) $html);
+
+        return $html;
     }
 }

@@ -21,18 +21,15 @@ class Tilda extends Tags
      */
     public static function changeAHrefLinks(): void
     {
-        $project_name = Config::getProjectName();
-        $site_name    = Config::getSiteName();
-
         foreach (self::$dom->getElementsByTagName('a') as $tag)
         {
-            if (str_contains($tag->getAttribute('href'), $project_name))
+            if (str_contains($tag->getAttribute('href'), Config::getProjectName()))
             {
                 $proto_url = Config::forceProto($tag->getAttribute('href'));
                 $parse_url = parse_url($proto_url);
                 $tag->setAttribute(
                     'href',
-                    str_replace($parse_url['host'], $site_name, $proto_url)
+                    str_replace($parse_url['host'], Config::getSiteName(), $proto_url)
                 );
             }
             elseif ($tag->getAttribute('href') == Config::$domain->project . Config::$route->path)
@@ -84,7 +81,7 @@ class Tilda extends Tags
             switch (Config::$config->images)
             {
                 case 'relative':
-                    preg_match('/static\.tildacdn\.info/', $style->textContent, $matched);
+                    preg_match('/static\.tildacdn\.(info|com)/', $style->textContent, $matched);
                     if (count($matched) > 0)
                     {
                         $style->textContent = preg_replace_callback(
@@ -136,7 +133,7 @@ class Tilda extends Tags
                     /**
                      * tag <script>
                      */
-                    preg_match('/static\.tildacdn\.info/', $script->textContent, $matched);
+                    preg_match('/static\.tildacdn\.(info|com)/', $script->textContent, $matched);
                     if (count($matched) > 0)
                     {
                         $script->textContent = preg_replace_callback(
@@ -179,7 +176,7 @@ class Tilda extends Tags
      */
     public static function css(string $content): string
     {
-        preg_match('/static\.tildacdn\.com/', $content, $matched);
+        preg_match('/static\.tildacdn\.(com|info)/', $content, $matched);
         if (count($matched) > 0)
         {
             $content = preg_replace_callback(
@@ -229,13 +226,12 @@ class Tilda extends Tags
      */
     public static function html(string $html): string
     {
-        $html = self::preProcessHTML($html);
         self::initialize(
-            $html
+            self::preProcessHTML($html)
         );
 
+        parent::changeDomElements();
         self::changeHTMLElements();
-        self::changeDomElements();
         self::changeAHrefLinks();
         self::changeScriptTags();
         self::removeTildaCopy();
