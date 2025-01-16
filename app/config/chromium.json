@@ -23,7 +23,6 @@
         "--disable-canvas-aa",
         "--disable-2d-canvas-clip-aa",
         "--disable-gl-drawing-for-tests",
-        "--disable-dev-shm-usage",
         "--no-zygote",
         "--use-gl=swiftshader",
         "--hide-scrollbars",
@@ -58,7 +57,9 @@
         "--disable-web-sockets",
         "--no-default-browser-check",
         "--disable-save-password-bubble",
-        "--disable-sync"
+        "--disable-sync",
+        "--disable-software-rasterizer",
+        "--disable-features=VizDisplayCompositor"
     ],
     "screenshot":
     {

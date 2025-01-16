@@ -66,7 +66,8 @@ class ChromiumInstance {
 		this.browser = await launch({
 			executablePath: this.config.chromium.executablePath,
 			headless: true,
-			args: browserArgs
+			args: browserArgs,
+			protocolTimeout: this.config.chromium.timeout
 		});
 
 		this.incognito = await this.browser.createIncognitoBrowserContext();
