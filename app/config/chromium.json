@@ -6,7 +6,14 @@
     "wait": 2000,
     "topic": "/chromium/",
     "executablePath": "/usr/bin/chromium-browser",
+    "proxy": {
+        "enabled": false,
+        "host": "5.39.220.187",
+        "port": 8118
+    },
     "args": [
+        "--proxy-server=direct://",
+        "--proxy-bypass-list=*",
         "--disable-dev-shm-usage",
         "--no-sandbox",
         "--disable-setuid-sandbox",

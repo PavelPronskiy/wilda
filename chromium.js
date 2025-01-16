@@ -8,7 +8,12 @@ import { createClient } from 'redis';
 import Sitemapper from 'sitemapper';
 import randomUserAgent from 'random-user-agent';
 const SitemapInstance = new Sitemapper();
+// import { Resolver } from 'node:dns';
+// const DNSResolver = new Resolver();
+// DNSResolver.setServers(['4.4.4.4']);
 import { launch } from 'puppeteer-core';
+import prettyMilliseconds from 'pretty-ms';
+import { performance } from "node:perf_hooks";
 
 class Emitter extends EventEmitter {}
 const Event = new Emitter();
@@ -50,10 +55,18 @@ class ChromiumInstance {
 	 * @return     {Promise}  { description_of_the_return_value }
 	 */
 	async browserRun() {
+
+		const browserArgs = this.config.chromium.proxy.enabled
+			? Object.assign(this.config.chromium.args, [
+			`--proxy-server=http://${this.config.chromium.proxy.host}:${this.config.chromium.proxy.port}`
+		]) : this.config.chromium.args;
+
+		// console.log(browserArgs);
+
 		this.browser = await launch({
 			executablePath: this.config.chromium.executablePath,
 			headless: true,
-			args: this.config.chromium.args
+			args: browserArgs
 		});
 
 		this.incognito = await this.browser.createIncognitoBrowserContext();
@@ -174,7 +187,7 @@ class ChromiumInstance {
 				Event.emit(dec.event, dec);
 
 	        } catch (err) {
-	        	console.log(err);
+	        	console.error(err);
 	        }
 
 		});
@@ -215,6 +228,34 @@ class ChromiumInstance {
 		}
 	}
 
+	async getSitemapUrls(link) {
+		
+		let error = false;
+		let ret = [];
+
+        const links = await SitemapInstance.fetch({
+        	url: `${link}/sitemap.xml`,
+        	timeout: this.config.chromium.timeout
+        }).then((sd) => {
+            return sd.sites;
+        }).catch((err) => {
+        	console.error(err);
+        	error = true;
+        	return [];
+        });
+
+        if (links.length > 0) {
+            ret = links;
+        } else {
+        	ret = [link];
+        }
+
+        if (error) {
+        	ret = [];
+        }
+
+        return ret;
+	}
 
     /**
      * Gets the site urls.
@@ -222,30 +263,18 @@ class ChromiumInstance {
      * @param      {<type>}   site    The site
      * @return     {Promise}  The site urls.
      */
-    async getSiteUrls(link) {
+    /*async getSiteUrls(link) {
     	let ret = [];
         try {
-            const links = await SitemapInstance.fetch(`${link}/sitemap.xml`).then((sd) => {
-                return sd.sites;
-            });
 
-            if (links.length > 0)
-            {
-	            ret = links;
-            }
-            else
-            {
-            	ret = [link];
-            }
-
-            return ret;
+        	return await this.getSitemapUrls(link);
 
         } catch (err) {
         	console.log(err);
         	console.log(`Error fetch ${link}/sitemap.xml`);
             return [link];
         }
-    };
+    };*/
 
 
     /**
@@ -256,16 +285,22 @@ class ChromiumInstance {
      */
     async gotoPage(link) {
 
+
         try {
 
+	    	performance.mark('open_page');
+
+	    	// performance.mark('new_page');
 			// Открываем вкладку
 			const page = await this.incognito.newPage();
+
+	    	// performance.mark('new_page_opened');
 
 			// Устанавливаем user agent
 			await page.setUserAgent(randomUserAgent(link.dimension));
 
 			// Ждём открытия вкладки (баг)
-			await page.waitForTimeout(this.config.chromium.wait);
+			// await page.waitForTimeout(this.config.chromium.wait);
 
 			// Устанавливаем разрешение дисплея 
 	    	await page.setViewport(this.config.chromium.dimensions[link.dimension]);
@@ -278,9 +313,10 @@ class ChromiumInstance {
 	        });
 
 	        const pageResponseStatusCode = pageResponse.status();
+	        // console.log(pageResponse);
 
 			// Ждём загрузки страницы (баг)
-	        await page.waitForTimeout(this.config.chromium.wait);
+	        // await page.waitForTimeout(this.config.chromium.wait);
 
 	        // Закрываем вкладку
 			await page.close();
@@ -290,13 +326,22 @@ class ChromiumInstance {
 			else
 				this.summary.broken++;
 
-			console.log(`Boost url: ${link.url}, dimension: ${link.dimension}, status: ${pageResponseStatusCode}`);
+	    	performance.mark('close_page');
+
+	    	const measureTimePageLoad = performance.measure('page', 'open_page', 'close_page');
+	    	// const measureTimeNewPageOpen = performance.measure('newPage', 'new_page', 'new_page_opened');
+	    	const measurePageLoadDuration = prettyMilliseconds(measureTimePageLoad.duration, {compact: true});
+        	// console.log(measureTimeNewPageOpen.duration);
+			console.log(`Autocache url: ${link.url}, dimension: ${link.dimension}, status: ${pageResponseStatusCode}, runtime: ${measurePageLoadDuration}`);
 
         } catch (err) {
 			this.summary.error++;
 			console.log(`Error url: ${link.url}, dimension: ${link.dimension}`);
         	console.error(err.message);
+        } finally {
+	    	performance.mark('close_page');
         }
+
     }
 
     /**
@@ -313,7 +358,7 @@ class ChromiumInstance {
 	        }
 
         } catch (err) {
-        	console.log(err);
+        	console.error(err);
         }
     };
 
@@ -336,7 +381,8 @@ class ChromiumInstance {
 
 
             const rp = `${this.config.global.name}`;
-			const lastRunDate = moment().format('YYYY-MM-DD HH:mm:ss');
+			// const lastRunDate = moment().format('YYYY-MM-DD HH:mm:ss');
+			const lastRunDate = new Date().toISOString().replace('T', ' ').split('.')[0];
 
 			await this.redis.client.set(
 				`${rp}:${this.config.global.storage.keys.chromium.lastrun}`,
@@ -357,13 +403,13 @@ class ChromiumInstance {
 				);
 
 				// Формируем список ссылок из карты сайта
-				const siteDimUrlsArray = this.prepareDimensionsLinks(
-					await this.getSiteUrls(link)
-				);
+				const sitemapLinks = await this.getSitemapUrls(link);
 
-				if (siteDimUrlsArray.length > 0)
+				if (sitemapLinks.length > 0)
 				{
 					// Загружаем страницы
+					console.log(`Autocache found domain: ${link}, links: ${sitemapLinks.length}`);
+					const siteDimUrlsArray = this.prepareDimensionsLinks(sitemapLinks);
 					await this.gotoPages(siteDimUrlsArray);
 				}
 				else
@@ -410,8 +456,8 @@ class ChromiumInstance {
 				this.summary.error
 			);
 
-		} catch (e) {
-			console.log(e);
+		} catch (err) {
+			console.error(err);
 		}
 	}
 
