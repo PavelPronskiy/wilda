@@ -67,7 +67,8 @@ class ChromiumInstance {
 			executablePath: this.config.chromium.executablePath,
 			headless: true,
 			args: browserArgs,
-			protocolTimeout: this.config.chromium.timeout
+			protocolTimeout: this.config.chromium.timeout,
+			dumpio: true
 		});
 
 		this.incognito = await this.browser.createIncognitoBrowserContext();
