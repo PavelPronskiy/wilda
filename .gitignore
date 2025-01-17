@@ -3,6 +3,7 @@ composer.phar
 /vendor/
 .phpintel
 .global.json
+.chromium.json
 node_modules
 app/config/access.json
 app/config/hosts.json
