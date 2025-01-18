@@ -513,7 +513,7 @@ Event.on('autocache-enabler', async(response) => {});
 Event.on('autocache-update', async(response) => {});
 
 process.title = serverName;
-console.info(`Started server ${serverName}`);
+console.info(`Started ${serverName}`);
 
 const argv = minimist(process.argv.slice(2), {
 	alias: {
