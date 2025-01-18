@@ -135,7 +135,7 @@ class Chromium
      */
     public static function sendRevalidateSite($data) : bool
     {
-        return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
+        return RedisController::$instance->publish(Config::$chromium->redis->topic, json_encode([
             'event' => 'autocache',
             'url' => $data
         ]));
@@ -149,13 +149,13 @@ class Chromium
      *
      * @return     bool    ( description_of_the_return_value )
      */
-    public static function sendAutoCacheEnabler($data) : bool
-    {
-        return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
-            'event' => 'autocache-enabler',
-            'config' => $data
-        ]));
-    }
+    // public static function sendAutoCacheEnabler($data) : bool
+    // {
+    //     return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
+    //         'event' => 'autocache-enabler',
+    //         'config' => $data
+    //     ]));
+    // }
 
 
     /**
@@ -165,13 +165,13 @@ class Chromium
      *
      * @return     bool    ( description_of_the_return_value )
      */
-    public static function sendUpdateAutoCache($data) : bool
-    {
-        return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
-            'event' => 'autocache-update',
-            'config' => $data
-        ]));
-    }
+    // public static function sendUpdateAutoCache($data) : bool
+    // {
+    //     return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
+    //         'event' => 'autocache-update',
+    //         'config' => $data
+    //     ]));
+    // }
 
     /**
      * { function_description }
