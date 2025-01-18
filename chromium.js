@@ -75,7 +75,7 @@ class ChromiumInstance {
 			headless: true,
 			args: browserArgs,
 			protocolTimeout: this.config.chromium.timeout,
-			dumpio: true
+			dumpio: this.config.chromium.dumpio
 		});
 
 		this.incognito = await this.browser.createBrowserContext();

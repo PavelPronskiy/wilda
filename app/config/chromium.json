@@ -4,6 +4,7 @@
     "timezone": "Europe/Moscow",
     "timeout": 15000,
     "wait": 2000,
+    "dumpio": false,
     "executablePath": "/usr/bin/chromium-browser",
     "redis": {
         "retryTime": 1000,
