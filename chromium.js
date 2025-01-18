@@ -1,6 +1,6 @@
 import fs from 'fs';
 // import moment from 'moment';
-import date from 'date-and-time';
+// import date from 'date-and-time';
 import minimist from 'minimist';
 import { EventEmitter } from 'node:events';
 import { createClient } from 'redis';
@@ -78,7 +78,7 @@ class ChromiumInstance {
 			dumpio: true
 		});
 
-		this.incognito = await this.browser.createIncognitoBrowserContext();
+		this.incognito = await this.browser.createBrowserContext();
 
 	};
 
@@ -156,10 +156,10 @@ class ChromiumInstance {
 	 *
 	 * @return     {<type>}  The latest date.
 	 */
-	getLatestDate() {
-		const dt = new Date();
-		return date.format(dt, 'YYYYMMDDHHmmss');
-	}
+	// getLatestDate() {
+	// 	const dt = new Date();
+	// 	return date.format(dt, 'YYYYMMDDHHmmss');
+	// }
 
 	/**
 	 * { function_description }

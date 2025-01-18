@@ -17,8 +17,6 @@
         "port": 8118
     },
     "args": [
-        "--proxy-server=direct://",
-        "--proxy-bypass-list=*",
         "--disable-dev-shm-usage",
         "--no-sandbox",
         "--disable-setuid-sandbox",
