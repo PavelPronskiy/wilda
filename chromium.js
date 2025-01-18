@@ -495,8 +495,7 @@ class ChromiumInstance {
 // moment.locale('ru');
 
 const CI = new ChromiumInstance();
-
-console.log(CI.config.chromium);
+const serverName = `server v${CI.config.global.version} (node ${process.version})`;
 
 Event.on('autocache', async(response) => {
 	await CI.browserRun();
@@ -513,7 +512,8 @@ Event.on('autocache', async(response) => {
 Event.on('autocache-enabler', async(response) => {});
 Event.on('autocache-update', async(response) => {});
 
-process.title = `server v${CI.config.global.version} (node ${process.version})`;
+process.title = serverName;
+console.info(`Started server ${serverName}`);
 
 const argv = minimist(process.argv.slice(2), {
 	alias: {
