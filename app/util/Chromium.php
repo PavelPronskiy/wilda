@@ -44,6 +44,19 @@ class Chromium
     }
 
 
+    public static function getAutoCacheHosts(array $sites = [])
+    {
+        foreach(Config::$hosts as $host)
+            foreach($host->site as $site)
+                $sites[] = $site;
+
+        Config::render((object) [
+            'content_type' => 'application/json',
+            'body' => json_encode($sites),
+        ]);
+    }
+
+
     /**
      * Gets the statistics.
      */
@@ -122,15 +135,42 @@ class Chromium
      */
     public static function sendRevalidateSite($data) : bool
     {
-        // var_dump($data);
-        // self::redisInstance();
         return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
             'event' => 'autocache',
             'url' => $data
         ]));
+    }
 
-        // self::$instance->close();
-        // return $res;
+
+    /**
+     * Sends an automatic cache enabler.
+     *
+     * @param      <type>  $data   The data
+     *
+     * @return     bool    ( description_of_the_return_value )
+     */
+    public static function sendAutoCacheEnabler($data) : bool
+    {
+        return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
+            'event' => 'autocache-enabler',
+            'config' => $data
+        ]));
+    }
+
+
+    /**
+     * Sends an update automatic cache.
+     *
+     * @param      <type>  $data   The data
+     *
+     * @return     bool    ( description_of_the_return_value )
+     */
+    public static function sendUpdateAutoCache($data) : bool
+    {
+        return RedisController::$instance->publish(Config::$chromium->topic, json_encode([
+            'event' => 'autocache-update',
+            'config' => $data
+        ]));
     }
 
     /**
@@ -158,7 +198,10 @@ class Chromium
 
                     $config->cron->schedule[$idx] = $schedule;
 
+
                     $ret = Config::setCustomChromiumConfig($config);
+
+                    // $ret = self::sendUpdateAutoCache($config);
                 }
             }
         }

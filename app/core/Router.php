@@ -15,7 +15,6 @@ class Router
         {
             if (key(Config::$route->query))
             {
-
                 switch (key(Config::$route->query))
                 {
                     // case 'chromium-settings':

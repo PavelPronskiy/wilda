@@ -2,16 +2,17 @@
 
 namespace app\util;
 
+use app\core\Config;
 
 class ErrorHandler extends \Exception {
     protected $severity;
     
-    public function __construct($message, $code, $severity, $filename, $lineno) {
+    public function __construct($message, $code) {
         $this->message = $message;
         $this->code = $code;
-        $this->severity = $severity;
-        $this->file = $filename;
-        $this->line = $lineno;
+        // $this->severity = $severity;
+        // $this->file = $filename;
+        // $this->line = $lineno;
     }
     
     public static function webTemplate(int $code, string $message): string
@@ -21,8 +22,15 @@ class ErrorHandler extends \Exception {
 
     public static function exception($e)
     {
-        var_dump('Exception');
-        // return $this->severity;
+
+        Config::render((object) [
+            'content_type' => 'application/json',
+            'body' => json_encode([
+                "code" => $e->getCode(),
+                "message" => $e->getMessage(),
+
+            ]),
+        ]);
     }
 
     public static function error($e)

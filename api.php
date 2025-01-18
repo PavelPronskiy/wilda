@@ -11,21 +11,25 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/autoload.php';
 
 use \app\core\Config;
+// use \app\util\Encryption as Encryption;
 use \app\util\Cache;
-use \app\core\Router;
+use \app\core\Api;
 use \app\util\ErrorHandler;
 use \app\util\RedisController;
 
 try {
+
 	new Config();
     new RedisController();
-	new Cache();
-	new Router();
+	// new Cache();
+
+	new Api();
+
 } catch (\Error $e)
 {
     ErrorHandler::error($e);
 }
 catch (\Exception $ex)
 {
-    ErrorHandler::exception($e);
+    ErrorHandler::exception($ex);
 }

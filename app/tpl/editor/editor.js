@@ -520,6 +520,8 @@ $(document).ready(() => {
 
     if (CHROMIUM_CONFIG.cron.enabled) {
         checkboxCronCacheEnabler.prop('checked', true);
+    } else {
+        checkboxCronCacheEnabler.prop('checked', false);
     }
 
     checkboxCronCacheEnabler.on('change', () => {
@@ -575,8 +577,12 @@ $(document).ready(() => {
     })
 
     // console.log(CHROMIUM_STATS.global);
+ 
+    // const rtf1 = new Intl.RelativeTimeFormat('en', { style: 'short' });
+    // console.log(rtf1.format(CHROMIUM_STATS.global.lastrun, 'quarter'));
 
-    const lastrun_global = CHROMIUM_STATS.global.lastrun === 0 ? '-' : moment(CHROMIUM_STATS.global.lastrun).fromNow();
+    // const lastrun_global = CHROMIUM_STATS.global.lastrun === 0 ? '-' : moment(CHROMIUM_STATS.global.lastrun).fromNow();
+    const lastrun_global = CHROMIUM_STATS.global.lastrun;
 
     $('#cache-global-lastrun-date').text(lastrun_global);
     $('#cache-global-links-success').text(CHROMIUM_STATS.global.links.success);

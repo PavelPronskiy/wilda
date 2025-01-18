@@ -49,7 +49,13 @@ class Crontab
      */
     public function delAutocacheJob()
     {
-
+        $results = $this->crontabRepository->findJobByRegex('/autocache/');
+        if (count($results) > 0)
+        {
+            $crontabJob = $results[0];
+            $this->crontabRepository->removeJob($crontabJob);
+            $this->crontabRepository->persist();
+        }
     }
 
 

@@ -1,0 +1,11 @@
+{
+    "cron": {
+        "enabled": true,
+        "schedule": [
+            {
+                "event": "autocache",
+                "time": "1 * */4 * * *"
+            }
+        ]
+    }
+}

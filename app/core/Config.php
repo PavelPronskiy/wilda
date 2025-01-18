@@ -476,354 +476,333 @@ class Config
                 static::$route->referer = $_SERVER['HTTP_REFERER'];
             }
 
-            // $device_type   = static::isMobile() ? 'mobile' : 'desktop';
             static::$domain = (object) static::getDomainConfig();
             static::$access = (array) static::getAccessConfig();
-
-            /**
-             * set lang translations
-             * @var [type]
-             */
-            static::$lang = isset(static::$domain->lang)
-            ? (array) static::$config->translations->web->{static::$domain->lang}
-            : (array) static::$config->translations->web->{static::$config->lang};
-
-            /**
-             * if not type defined
-             */
-            if (!isset(static::$domain->type))
+            
+            if (isset(static::$domain->site))
             {
-                \app\util\Curl::curlErrorHandler(500);
-            }
 
-            static::$hash_key = static::$config->name . ':' . static::$route->domain . ':' . static::$domain->type;
+                // $device_type   = static::isMobile() ? 'mobile' : 'desktop';
 
-            // hash cache key
-            static::$hash = static::$hash_key . ':' . static::getKeyUserDisplayResolution() . ':' . static::getURIEncryptHash();
+                /**
+                 * set lang translations
+                 * @var [type]
+                 */
+                static::$lang = isset(static::$domain->lang)
+                ? (array) static::$config->translations->web->{static::$domain->lang}
+                : (array) static::$config->translations->web->{static::$config->lang};
 
-            if (isset(static::$domain->styles))
-            {
-                static::$config->styles = static::$domain->styles;
-            }
+                /**
+                 * if not type defined
+                 */
+                // if (!isset(static::$domain->type))
+                // {
+                    // \app\util\Curl::curlErrorHandler(500);
+                // }
 
-            if (isset(static::$domain->scripts))
-            {
-                static::$config->scripts = static::$domain->scripts;
-            }
+                if (isset(static::$domain->type))
+                {
+                    static::$hash_key = static::$config->name . ':' . static::$route->domain . ':' . static::$domain->type;
+                }
 
-            if (isset(static::$domain->images))
-            {
-                static::$config->images = static::$domain->images;
-            }
+                // hash cache key
+                static::$hash = static::$hash_key . ':' . static::getKeyUserDisplayResolution() . ':' . static::getURIEncryptHash();
 
-            if (
-                is_array(
-                    static::$domain->site
-                ) && in_array(
-                    static::$route->site,
-                    static::$domain->site
+                if (isset(static::$domain->styles))
+                {
+                    static::$config->styles = static::$domain->styles;
+                }
+
+                if (isset(static::$domain->scripts))
+                {
+                    static::$config->scripts = static::$domain->scripts;
+                }
+
+                if (isset(static::$domain->images))
+                {
+                    static::$config->images = static::$domain->images;
+                }
+
+                if (
+                    isset(static::$domain->site) &&
+                    is_array(
+                        static::$domain->site
+                    ) && in_array(
+                        static::$route->site,
+                        static::$domain->site
+                    )
                 )
-            )
-            {
-                static::$config->site = static::$route->site;
-                static::$domain->site = static::$route->site;
-            }
-
-            /**
-             * set privoxy variables
-             */
-            if (isset(static::$domain->privoxy))
-            {
-                if (isset(static::$domain->privoxy->enabled))
                 {
-                    static::$config->privoxy->enabled = static::$domain->privoxy->enabled;
+                    static::$config->site = static::$route->site;
+                    static::$domain->site = static::$route->site;
                 }
 
-                if (isset(static::$domain->privoxy->host))
+                /**
+                 * set privoxy variables
+                 */
+                if (isset(static::$domain->privoxy))
                 {
-                    static::$config->privoxy->host = static::$domain->privoxy->host;
+                    if (isset(static::$domain->privoxy->enabled))
+                    {
+                        static::$config->privoxy->enabled = static::$domain->privoxy->enabled;
+                    }
+
+                    if (isset(static::$domain->privoxy->host))
+                    {
+                        static::$config->privoxy->host = static::$domain->privoxy->host;
+                    }
+
+                    if (isset(static::$domain->privoxy->port))
+                    {
+                        static::$config->privoxy->port = static::$domain->privoxy->port;
+                    }
                 }
 
-                if (isset(static::$domain->privoxy->port))
+                /**
+                 * set cache variables
+                 */
+                if (isset(static::$domain->cache->enabled))
                 {
-                    static::$config->privoxy->port = static::$domain->privoxy->port;
+                    static::$config->cache->enabled = static::$domain->cache->enabled;
                 }
-            }
 
-            /**
-             * set cache variables
-             */
-            if (isset(static::$domain->cache->enabled))
-            {
-                static::$config->cache->enabled = static::$domain->cache->enabled;
-            }
+                if (isset(static::$domain->cache->expire))
+                {
+                    static::$config->cache->expire = static::$domain->cache->expire;
+                }
 
-            if (isset(static::$domain->cache->expire))
-            {
-                static::$config->cache->expire = static::$domain->cache->expire;
-            }
+                if (isset(static::$domain->cache->stats))
+                {
+                    static::$config->cache->stats = static::$domain->cache->stats;
+                }
 
-            if (isset(static::$domain->cache->stats))
-            {
-                static::$config->cache->stats = static::$domain->cache->stats;
-            }
+                if (isset(static::$domain->cache->browser))
+                {
+                    static::$config->cache->browser = static::$domain->cache->browser;
+                }
 
-            if (isset(static::$domain->cache->browser))
-            {
-                static::$config->cache->browser = static::$domain->cache->browser;
-            }
+                if (isset(static::$domain->cache->autocache))
+                {
+                    static::$config->cache->autocache = static::$domain->cache->autocache;
+                }
 
-            if (isset(static::$domain->cache->autocache))
-            {
-                static::$config->cache->autocache = static::$domain->cache->autocache;
-            }
+                /**
+                 * set mail submit variables
+                 */
+                if (isset(static::$domain->mail->send_type))
+                {
+                    static::$mail->send_type = static::$domain->mail->send_type;
+                }
+                else
+                {
+                    static::$mail->send_type = static::$config->mail->send_type;
+                }
 
-            /**
-             * set mail submit variables
-             */
-            if (isset(static::$domain->mail->send_type))
-            {
-                static::$mail->send_type = static::$domain->mail->send_type;
-            }
-            else
-            {
-                static::$mail->send_type = static::$config->mail->send_type;
-            }
+                if (isset(static::$domain->mail->smtp->auth))
+                {
+                    static::$mail->smtp->auth = static::$domain->mail->smtp->auth;
+                }
+                else
+                {
+                    static::$mail->smtp->auth = static::$config->mail->smtp->auth;
+                }
 
-            if (isset(static::$domain->mail->smtp->auth))
-            {
-                static::$mail->smtp->auth = static::$domain->mail->smtp->auth;
-            }
-            else
-            {
-                static::$mail->smtp->auth = static::$config->mail->smtp->auth;
-            }
+                if (isset(static::$domain->mail->smtp->host))
+                {
+                    static::$mail->smtp->host = static::$domain->mail->smtp->host;
+                }
+                else
+                {
+                    static::$mail->smtp->host = static::$config->mail->smtp->host;
+                }
 
-            if (isset(static::$domain->mail->smtp->host))
-            {
-                static::$mail->smtp->host = static::$domain->mail->smtp->host;
-            }
-            else
-            {
-                static::$mail->smtp->host = static::$config->mail->smtp->host;
-            }
+                if (isset(static::$domain->mail->smtp->port))
+                {
+                    static::$mail->smtp->port = static::$domain->mail->smtp->port;
+                }
+                else
+                {
+                    static::$mail->smtp->port = static::$config->mail->smtp->port;
+                }
 
-            if (isset(static::$domain->mail->smtp->port))
-            {
-                static::$mail->smtp->port = static::$domain->mail->smtp->port;
-            }
-            else
-            {
-                static::$mail->smtp->port = static::$config->mail->smtp->port;
-            }
+                if (isset(static::$domain->mail->smtp->username))
+                {
+                    static::$mail->smtp->username = static::$domain->mail->smtp->username;
+                }
+                else
+                {
+                    static::$mail->smtp->username = static::$config->mail->smtp->username;
+                }
 
-            if (isset(static::$domain->mail->smtp->username))
-            {
-                static::$mail->smtp->username = static::$domain->mail->smtp->username;
-            }
-            else
-            {
-                static::$mail->smtp->username = static::$config->mail->smtp->username;
-            }
+                if (isset(static::$domain->mail->smtp->password))
+                {
+                    static::$mail->smtp->password = static::$domain->mail->smtp->password;
+                }
+                else
+                {
+                    static::$mail->smtp->password = static::$config->mail->smtp->password;
+                }
 
-            if (isset(static::$domain->mail->smtp->password))
-            {
-                static::$mail->smtp->password = static::$domain->mail->smtp->password;
-            }
-            else
-            {
-                static::$mail->smtp->password = static::$config->mail->smtp->password;
-            }
+                if (isset(static::$domain->mail->debug))
+                {
+                    static::$mail->debug = static::$domain->mail->debug;
+                }
+                else
+                {
+                    static::$mail->debug = static::$config->mail->debug;
+                }
 
-            if (isset(static::$domain->mail->debug))
-            {
-                static::$mail->debug = static::$domain->mail->debug;
-            }
-            else
-            {
-                static::$mail->debug = static::$config->mail->debug;
-            }
+                if (isset(static::$domain->mail->enabled))
+                {
+                    static::$mail->enabled = static::$domain->mail->enabled;
+                }
+                else
+                {
+                    static::$mail->enabled = static::$config->mail->enabled;
+                }
 
-            if (isset(static::$domain->mail->enabled))
-            {
-                static::$mail->enabled = static::$domain->mail->enabled;
-            }
-            else
-            {
-                static::$mail->enabled = static::$config->mail->enabled;
-            }
+                if (isset(static::$domain->mail->subject))
+                {
+                    static::$mail->subject = static::$domain->mail->subject;
+                }
+                else
+                {
+                    static::$mail->subject = static::$config->mail->subject;
+                }
 
-            if (isset(static::$domain->mail->subject))
-            {
-                static::$mail->subject = static::$domain->mail->subject;
-            }
-            else
-            {
-                static::$mail->subject = static::$config->mail->subject;
-            }
+                if (isset(static::$domain->mail->name))
+                {
+                    static::$mail->name = static::$domain->mail->name;
+                }
+                else
+                {
+                    static::$mail->name = static::$config->mail->name;
+                }
 
-            if (isset(static::$domain->mail->name))
-            {
-                static::$mail->name = static::$domain->mail->name;
-            }
-            else
-            {
-                static::$mail->name = static::$config->mail->name;
-            }
+                if (isset(static::$domain->mail->from))
+                {
+                    static::$mail->from = static::$domain->mail->from;
+                }
+                else
+                {
+                    static::$mail->from = static::$config->mail->from . self::getSiteName();
+                }
 
-            if (isset(static::$domain->mail->from))
-            {
-                static::$mail->from = static::$domain->mail->from;
-            }
-            else
-            {
-                static::$mail->from = static::$config->mail->from . self::getSiteName();
-            }
+                if (isset(static::$domain->mail->to))
+                {
+                    static::$mail->to = static::$domain->mail->to;
+                }
+                else
+                {
+                    static::$mail->to = static::$config->mail->to;
+                }
 
-            if (isset(static::$domain->mail->to))
-            {
-                static::$mail->to = static::$domain->mail->to;
-            }
-            else
-            {
-                static::$mail->to = static::$config->mail->to;
-            }
+                if (isset(static::$domain->mail->success))
+                {
+                    static::$mail->success = static::$domain->mail->success;
+                }
+                else
+                {
+                    static::$mail->success = static::$config->mail->success;
+                }
 
-            if (isset(static::$domain->mail->success))
-            {
-                static::$mail->success = static::$domain->mail->success;
-            }
-            else
-            {
-                static::$mail->success = static::$config->mail->success;
-            }
+                if (isset(static::$domain->mail->error))
+                {
+                    static::$mail->error = static::$domain->mail->error;
+                }
+                else
+                {
+                    static::$mail->error = static::$config->mail->error;
+                }
 
-            if (isset(static::$domain->mail->error))
-            {
-                static::$mail->error = static::$domain->mail->error;
-            }
-            else
-            {
-                static::$mail->error = static::$config->mail->error;
-            }
+                /**
+                 * set favicon variables
+                 */
+                if (isset(static::$domain->favicon->enabled))
+                {
+                    static::$favicon->enabled = static::$domain->favicon->enabled;
+                }
+                else
+                {
+                    static::$favicon->enabled = static::$config->favicon->enabled;
+                }
 
-            /**
-             * set favicon variables
-             */
-            if (isset(static::$domain->favicon->enabled))
-            {
-                static::$favicon->enabled = static::$domain->favicon->enabled;
-            }
-            else
-            {
-                static::$favicon->enabled = static::$config->favicon->enabled;
-            }
+                static::$favicon->path = 'app/favicon';
 
-            static::$favicon->path = 'app/favicon';
+                /**
+                 * set compress variables
+                 */
+                if (isset(static::$domain->compress->enabled))
+                {
+                    static::$compress->enabled = static::$domain->compress->enabled;
+                }
+                else
+                {
+                    static::$compress->enabled = static::$config->compress->enabled;
+                }
 
-            /**
-             * set compress variables
-             */
-            if (isset(static::$domain->compress->enabled))
-            {
-                static::$compress->enabled = static::$domain->compress->enabled;
-            }
-            else
-            {
-                static::$compress->enabled = static::$config->compress->enabled;
-            }
+                /**
+                 * set metrics variables
+                 */
+                if (isset(static::$domain->metrics->enabled))
+                {
+                    static::$metrics->enabled = static::$domain->metrics->enabled;
+                }
+                else
+                {
+                    static::$metrics->enabled = static::$config->metrics->enabled;
+                }
 
-            /**
-             * set storage type [redis: memory, ssdb: disk]
-             */
-/*            if (isset(static::$domain->storage) && isset(static::$domain->storage->type))
-            {
-                static::$storage->type = static::$domain->storage->type;
-            }
-            else
-            {
-                static::$storage->type = 'memory';
-            }
+                static::$metrics->path = APP_PATH . 'tpl/metrics';
 
-            if (isset(static::$domain->storage) && isset(static::$domain->storage->redis))
-            {
-                static::$storage->redis = static::$domain->storage->redis;
-            }
-            else
-            {
-                static::$storage->redis = static::$config->storage->redis;
-            }
+                if (isset(static::$domain->metrics->ga))
+                {
+                    static::$metrics->ga = static::$domain->metrics->ga;
+                }
 
-            if (isset(static::$domain->storage) && isset(static::$domain->storage->ssdb))
-            {
-                static::$storage->ssdb = static::$domain->storage->ssdb;
-            }
-            else
-            {
-                static::$storage->ssdb = static::$config->storage->ssdb;
-            }
-*/
-            /**
-             * set metrics variables
-             */
-            if (isset(static::$domain->metrics->enabled))
-            {
-                static::$metrics->enabled = static::$domain->metrics->enabled;
-            }
-            else
-            {
-                static::$metrics->enabled = static::$config->metrics->enabled;
-            }
+                if (isset(static::$domain->metrics->ya))
+                {
+                    static::$metrics->ya = static::$domain->metrics->ya;
+                }
 
-            static::$metrics->path = APP_PATH . 'tpl/metrics';
+                /**
+                 * set inject variables
+                 */
+                if (isset(static::$domain->inject->enabled))
+                {
+                    static::$inject->enabled = static::$domain->inject->enabled;
+                }
+                else
+                {
+                    static::$inject->enabled = static::$config->inject->enabled;
+                }
 
-            if (isset(static::$domain->metrics->ga))
-            {
-                static::$metrics->ga = static::$domain->metrics->ga;
-            }
+                if (isset(static::$domain->inject->header))
+                {
+                    static::$inject->header = static::$domain->inject->header;
+                }
+                else
+                {
+                    static::$inject->header = static::$config->inject->header;
+                }
 
-            if (isset(static::$domain->metrics->ya))
-            {
-                static::$metrics->ya = static::$domain->metrics->ya;
-            }
+                if (isset(static::$domain->inject->path))
+                {
+                    static::$inject->path = APP_PATH . 'inject';
+                }
+                else
+                {
+                    static::$inject->path = APP_PATH . 'inject';
+                }
 
-            /**
-             * set inject variables
-             */
-            if (isset(static::$domain->inject->enabled))
-            {
-                static::$inject->enabled = static::$domain->inject->enabled;
-            }
-            else
-            {
-                static::$inject->enabled = static::$config->inject->enabled;
-            }
-
-            if (isset(static::$domain->inject->header))
-            {
-                static::$inject->header = static::$domain->inject->header;
-            }
-            else
-            {
-                static::$inject->header = static::$config->inject->header;
-            }
-
-            if (isset(static::$domain->inject->path))
-            {
-                static::$inject->path = APP_PATH . 'inject';
-            }
-            else
-            {
-                static::$inject->path = APP_PATH . 'inject';
-            }
-
-            if (isset(static::$domain->inject->footer))
-            {
-                static::$inject->footer = static::$domain->inject->footer;
-            }
-            else
-            {
-                static::$inject->footer = static::$config->inject->footer;
+                if (isset(static::$domain->inject->footer))
+                {
+                    static::$inject->footer = static::$domain->inject->footer;
+                }
+                else
+                {
+                    static::$inject->footer = static::$config->inject->footer;
+                }
             }
 
             static::$editor->path  = 'tpl/editor';

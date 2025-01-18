@@ -18,7 +18,6 @@
         "masterminds/html5": "^2.8",
         "phpmailer/phpmailer": "^6.9.1",
         "hashids/hashids": "^5.0",
-        "phpfastcache/phpssdb": "^1.1",
         "campo/random-user-agent": "^1.3",
         "tiben/crontab-manager": "^1.4",
         "cheprasov/php-cli-args": "^3.0"

@@ -73,19 +73,33 @@ class Cache
     public static function autoCacheEnabler(array $data): bool
     {
 
-        $config = Config::getCustomGlobalConfig();
+        $crontab = new Crontab();
+        $config = Config::getCustomChromiumConfig();
 
-        if ($data === 'enabled')
+        if ($data[0] === 'enabled')
         {
-            $config->cache->enabled = true;
+            $config->cron->enabled = true;
+
+            foreach($config->cron->schedule as $idx => $schedule)
+            {
+                if ($schedule->event === 'autocache')
+                {
+                    $config_exp = explode(' ', $schedule->time);
+                    $time = explode('/', $config_exp[2]);
+
+                    Chromium::updateRevalidateHours($time[1]);
+                }
+            }
         }
 
-        if ($data === 'disabled')
+        if ($data[0] === 'disabled')
         {
-            $config->cache->enabled = false;
+            $config->cron->enabled = false;
+            $crontab->delAutocacheJob();
         }
 
-        return Config::setCustomGlobalConfig($config);
+        // Chromium::sendAutoCacheEnabler($config);
+        return Config::setCustomChromiumConfig($config);
     }
 
     /**

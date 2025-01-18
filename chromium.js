@@ -1,5 +1,5 @@
 import fs from 'fs';
-import moment from 'moment';
+// import moment from 'moment';
 import date from 'date-and-time';
 import minimist from 'minimist';
 import { EventEmitter } from 'node:events';
@@ -18,8 +18,15 @@ import { performance } from "node:perf_hooks";
 class Emitter extends EventEmitter {}
 const Event = new Emitter();
 const basedir = '/home/wilda/www';
+/*
+const response = await fetch("https://httpbin.io/ip", {
 
+  // optional configs...
 
+})
+*/
+
+// console.log(response);
 /**
  * This class describes a Chromium Instance server.
  *
@@ -91,11 +98,11 @@ class ChromiumInstance {
 	async redisConnect() {
 		const connection = createClient({
 			socket: {
-				host: this.config.global.storage.redis.host
+				host: this.config.chromium.redis.host
 			},
 			enable_offline_queue: false,
 			retry_strategy: (options) => {
-				return Math.min(options.attempt * 100, this.config.global.storage.redis.retryTime);
+				return Math.min(options.attempt * 100, this.config.chromium.redis.retryTime);
 			},
 			connect_timeout: Number.MAX_SAFE_INTEGER
 		});
@@ -162,11 +169,11 @@ class ChromiumInstance {
 	async subscribe() {
 		const connection = createClient({
 			socket: {
-				host: this.config.global.storage.redis.host
+				host: this.config.chromium.redis.host
 			},
 			enable_offline_queue: false,
 			retry_strategy: (options) => {
-				return Math.min(options.attempt * 100, this.config.global.storage.redis.retryTime);
+				return Math.min(options.attempt * 100, this.config.chromium.redis.retryTime);
 			},
 			connect_timeout: Number.MAX_SAFE_INTEGER
 		});
@@ -178,7 +185,7 @@ class ChromiumInstance {
 
 		subscriber.on('error', err => console.error(err));
 		await subscriber.connect();
-		await subscriber.subscribe(this.config.chromium.topic, payload => {
+		await subscriber.subscribe(this.config.chromium.redis.topic, payload => {
 			const dec = this.decode(payload);
 
 			try {
@@ -471,18 +478,25 @@ class ChromiumInstance {
 	 */
 	constructor() {
 		this.config = {
-			global: JSON.parse(fs.readFileSync(`${basedir}/app/config/global.json`)),
-			hosts: JSON.parse(fs.readFileSync(`${basedir}/app/config/hosts.json`)),
-			chromium: JSON.parse(fs.readFileSync(`${basedir}/app/config/chromium.json`))
+			global: Object.assign(
+				JSON.parse(fs.readFileSync(`${basedir}/app/config/global.json`)),
+				JSON.parse(fs.readFileSync(`${basedir}/.global.json`))
+			),
+			// hosts: JSON.parse(fs.readFileSync(`${basedir}/app/config/hosts.json`)),
+			chromium: Object.assign(
+				JSON.parse(fs.readFileSync(`${basedir}/app/config/chromium.json`)),
+				JSON.parse(fs.readFileSync(`${basedir}/.chromium.json`))
+			)
 		}
 	}
 }
 
 
-
-moment.locale('ru');
+// moment.locale('ru');
 
 const CI = new ChromiumInstance();
+
+console.log(CI.config.chromium);
 
 Event.on('autocache', async(response) => {
 	await CI.browserRun();
@@ -495,6 +509,9 @@ Event.on('autocache', async(response) => {
 	await CI.browser.close();
 
 });
+
+Event.on('autocache-enabler', async(response) => {});
+Event.on('autocache-update', async(response) => {});
 
 process.title = `server v${CI.config.global.version} (node ${process.version})`;
 
