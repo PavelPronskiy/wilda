@@ -20,9 +20,9 @@ class Config
     const QUERY_PARAM_JS = '/?js=';
     const URI_QUERY_ADMIN = ['cleaner', 'flush', 'keys'];
     const URI_QUERY_TYPES = ['ico', 'img', 'js', 'css', 'font'];
-    const URI_MEDIA_IMAGES_TYPES = [''];
+    // const URI_MEDIA_IMAGES_TYPES = [''];
     // const URI_MEDIA_IMAGES_TYPES = ['image/jpeg', 'image/png', 'image/tiff', 'image/webp', 'image/gif'];
-    const URI_MEDIA_PAGES_TYPES = ['text/html'];
+    // const URI_MEDIA_PAGES_TYPES = ['text/html'];
     // const URI_MEDIA_FONTS_TYPES = ['font/ttf', 'font/woff', 'font/woff2', 'image/webp', 'image/svg+xml', 'image/x-icon'];
     CONST DEVICE_DIMENSIONS = ['Mobile', 'Tablet', 'Desktop'];
 
@@ -200,7 +200,7 @@ class Config
         if (empty($domain))
             $domain = static::$route->domain;
 
-        foreach (static::$config->hosts as $host)
+        foreach (static::$hosts as $host)
         {
             if (is_array($host->site))
             {
@@ -419,7 +419,7 @@ class Config
         static::$config   = (object) [
             ...(array) static::getGlobalConfig(),
             ...(array) static::getCustomGlobalConfig(),
-            ...(array) static::getHostsConfig(),
+            // ...(array) static::getHostsConfig(),
         ];
         static::$chromium   = (object) [
             ...(array) static::getChromiumConfig(),
@@ -585,6 +585,16 @@ class Config
                 {
                     static::$config->cache->autocache = static::$domain->cache->autocache;
                 }
+
+                if (isset(static::$domain->cache->disk))
+                {
+                    static::$config->cache->disk = static::$domain->cache->disk;
+                }
+
+                /*if (isset(static::$domain->cache->disk->mimeTypes))
+                {
+                    static::$config->cache->disk->mimeTypes = static::$domain->cache->disk->mimeTypes;
+                }*/
 
                 /**
                  * set mail submit variables
@@ -861,29 +871,81 @@ class Config
      */
     public static function render(object $response): void
     {
-        ob_start();
+        // ob_start();
         $ref_array = ['flush', 'clear'];
+        $etag = md5($response->body);
 
         $no_cache = (isset($response->no_cache) && $response->no_cache) ? true : false;
 
-        if (self::$runType === 'web')
+        if (php_sapi_name() === 'fpm-fcgi')
         {
-            // clean-browser-cache
-            if (isset($_COOKIE['clean-browser-cache']))
-            {
-                unset($_COOKIE['clean-browser-cache']); 
-                setcookie('clean-browser-cache', '', -1, '/'); 
-                header("Cache-Control: no-cache, must-revalidate");
-                header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-            }
+            header('Content-type: ' . $response->content_type);
 
             if (isset($response->error) && isset($response->code))
             {
                 http_response_code($response->code);
             }
 
+            // set clean browser cache
+            if (isset($_COOKIE['clean-browser-cache']))
+            {
+                unset($_COOKIE['clean-browser-cache']); 
+                setcookie('clean-browser-cache', '', -1, '/'); 
+                header("Cache-Control: no-cache, must-revalidate");
+                header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+                die($response->body);
+            }
+
+
+            // set browser cache params
+            if ($no_cache)
+            {
+                header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+                header('Cache-Control: post-check=0, pre-check=0', false);
+                header('Pragma: no-cache');
+                header('W-Cache-Status: DISABLED');
+                die($response->body);
+            }
+
+
+            // set cache status
+            if (isset($response->cache))
+            {
+                header('W-Cache-Status: ' . $response->cache);
+                header('W-Size-Bytes: ' . strlen(bin2hex($response->body)));
+                header('W-Hash: ' . Config::$hash);
+
+                if (static::$config->cache->browser)
+                {
+                    header('Cache-Control: max-age=' . static::$config->cache->expire);
+                    header('ETag: ' . $etag);
+                }
+                // file_put_contents('/tmp/' . Config::$hash, $response->body);
+                die($response->body);
+            }
+
+
+            // set cache browser
             if (static::$config->cache->browser)
             {
+                header('Cache-Control: max-age=' . static::$config->cache->expire);
+                header('ETag: ' . $etag);
+
+                if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
+                {
+                    if ($_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
+                    {
+                        header('HTTP/1.1 304 Not Modified', true, 304);
+                        exit();
+                    }
+                }
+
+                die($response->body);
+            }
+            else
+            {
+                die($response->body);
+            }
 /*                if (isset(static::$route->referer))
                 {
                     $ref = parse_url(static::$route->referer);
@@ -892,51 +954,10 @@ class Config
                         $no_cache = true;
                     }
                 }*/
-
-                // set cache status
-                if (isset($response->cache))
-                {
-                    header('W-Cache-Status: ' . $response->cache);
-                }
-
-                // set browser cache params
-                if ($no_cache)
-                {
-                    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-                    header('Cache-Control: post-check=0, pre-check=0', false);
-                    header('Pragma: no-cache');
-                }
-                else
-                {
-
-                    // only html,js,css pages
-                    if (preg_match('/(text\/html|application\/javascript|text\/css)/', $response->content_type))
-                    {
-                        $etag = md5($response->body);
-
-                        header('Cache-Control: max-age=' . static::$config->cache->expire);
-                        header('ETag: ' . $etag);
-
-                        if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
-                        {
-                            if ($_SERVER['HTTP_IF_NONE_MATCH'] == $etag)
-                            {
-                                header('HTTP/1.1 304 Not Modified', true, 304);
-                                exit();
-                            }
-                        }
-                    }
-                }
-            }
-
-            header('Content-type: ' . $response->content_type);
-
-            ob_clean();
-            die($response->body);
         }
         else
         {
-            echo $response->body . PHP_EOL;
+            die($response->body);
         }
     }
 
@@ -1041,9 +1062,16 @@ class Config
     {
         foreach (static::$hosts as $project)
         {
-            foreach ($project->site as $site)
+            if (is_string($project->site))
             {
-                $res[] = $site;
+                $res[] = $project->site;
+            }
+            else
+            {
+                foreach ($project->site as $site)
+                {
+                    $res[] = $site;
+                }
             }
         }
 

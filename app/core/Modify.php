@@ -3,6 +3,7 @@
 namespace app\core;
 
 use app\core\Config;
+use app\util\Cache;
 
 /**
  * This class describes a modify.
@@ -21,6 +22,28 @@ abstract class Modify
         'javascript' => 'application/javascript',
         'html'       => 'text/html',
     ];
+
+
+    /**
+     * { function_description }
+     *
+     * @param      object  $obj    The object
+     *
+     * @return     object  ( description_of_the_return_value )
+     */
+    public static function page(
+        object $obj
+    ) : object
+    {
+        if (preg_match('/text\/html/', $obj->content_type))
+        {
+            $obj->body = Cache::injectWebCleaner(
+                Cache::injectWebStats($obj->body)
+            );
+        }
+
+        return $obj;
+    }
 
     /**
      * [typesModificator description]

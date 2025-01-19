@@ -85,7 +85,8 @@ class Tilda extends Tags
                     if (count($matched) > 0)
                     {
                         $style->textContent = preg_replace_callback(
-                            "/background\-image\: url\(\'(.*)\'\)/",
+                            "/background\-image\:\s?url\(\'(.*)\'\)/",
+                            // "/background\-image\: url\(\'(.*)\'\)/",
                             function ($matches)
                             {
                                 if (isset($matches[1]))
@@ -107,8 +108,10 @@ class Tilda extends Tags
      */
     public static function changeScriptTags(): void
     {
-        foreach (self::$dom->getElementsByTagName('script') as $index => $script)
+        $script_tags = self::$dom->getElementsByTagName('script');
+        foreach ($script_tags as $index => $script)
         {
+
             switch (Config::$config->scripts)
             {
                 case 'relative':
@@ -149,8 +152,14 @@ class Tilda extends Tags
                             $script->textContent
                         );
                     }
-
                     break;
+            }
+
+            // remove tilda tracker
+            preg_match('/window\.mainTracker.*/', $script->textContent, $matched);
+            if (count($matched) > 0)
+            {
+                $script->parentNode->removeChild($script);
             }
         }
     }
@@ -348,6 +357,7 @@ class Tilda extends Tags
      */
     public static function sitemap(string $content): string
     {
+        // var_dump($content);
         return str_replace(
             self::$proto[0],
             self::$proto[1],

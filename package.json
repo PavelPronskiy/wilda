@@ -1,14 +1,12 @@
 {
   "name": "wilda",
-  "version": "1.1",
+  "version": "1.2",
   "type": "module",
   "private": true,
   "dependencies": {
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.10.5",
     "bs5-toast": "^1.0.0",
-    "crontab": "^1.4.2",
-    "date-and-time": "^3.6.0",
     "fs": "^0.0.1-security",
     "jsoneditor": "^10.1.2",
     "minimist": "^1.2.8",

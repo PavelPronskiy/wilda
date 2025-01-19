@@ -1,14 +1,13 @@
 {
     "name": "wilda",
-    "version": "1.1",
+    "version": "1.2",
     "mode": "dev",
-    "version_date": "2025-01-10",
+    "version_date": "2025-01-20",
     "styles": "relative",
     "scripts": "relative",
     "images": "relative",
     "fonts": "relative",
     "icons": "relative",
-    "salt": "wzvvHBWVYQLnX5jFqDmGWPf6om1Hsx8g",
     "storage":
     {
         "media": {
@@ -85,6 +84,9 @@
     },
     "cache":
     {
+        "disk": {
+            "mimeTypes": []
+        },
         "enabled": true,
         "browser": true,
         "expire": 86400,

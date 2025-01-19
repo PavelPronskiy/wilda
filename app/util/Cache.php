@@ -273,7 +273,6 @@ class Cache
             }
         }
 
-
         if ($granted)
         {
             // $inject_html = file_get_contents(PATH . '/tpl/cleaner/cleaner.html');
@@ -349,80 +348,27 @@ class Cache
      */
     public static function storageKeys(string $key)
     {
-/*        return RedisController::$instance->keys(
-            static::storageType($key)
-        );
-*/
         return RedisController::$instance->keys($key);
     }
 
-    /**
-     * @param  $key
-     * @return mixed
-     */
-/*    public static function storageType(string $key)
-    {
-        switch (Config::$storage->type)
-        {
-            case 'disk':
-                return [$key, '', 1000];
-
-            case 'memory':
-                return $key;
-        }
-    }*/
-
-    /**
-     * Функция очищает веб-кеш, устанавливая новое пустое значение со сроком действия и отображая
-     * HTML-страницу с перенаправлением на домашнюю страницу.
-     *
-     * страницу через 2 секунды. Страница также содержит хеш-значение и сообщение о том, что пользователь
-     * перенаправляется на домашнюю страницу.
-     * @return HTML-страница с метатегом обновления, который перенаправляет пользователя на домашнюю
-     */
-/*    public static function webCacheCleaner()
-    {
-*//*        $hash = Config::$config->name . ':' . Encryption::encode(Config::$config->salt);
-
-        RedisController::$instance->set(
-            (string) $hash,
-            ''
-        );
-
-        RedisController::$instance->expire(
-            (string) $hash,
-            (int) Config::$config->cache->expire * 60
-        );
-*/
-        /*Config::render((object) [
-            'body'         => '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="2; url=\'/?clear\'" /><script>function setCookie(name,value,days) { var expires = ""; if (days) { var date = new Date(); date.setTime(date.getTime() + (days*24*60*60*1000)); expires = "; expires=" + date.toUTCString(); } document.cookie = name + "=" + (value || "")  + expires + "; path=/"; }; setCookie("' . Config::$config->name . '", "' . $hash . '",' . Config::$config->cache->expire . ');</script></head><body><h4>Перенаправление на главную...</h4><p>Hash: ' . $hash . '</p></body></html>',
-            'content_type' => 'text/html; charset=UTF-8',
-        ]);*/
-/*        Config::render((object) [
-            'body'         => '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="2; url=\'/?clear\'" /><script>function setCookie(name,value,days) { var expires = ""; if (days) { var date = new Date(); date.setTime(date.getTime() + (days*24*60*60*1000)); expires = "; expires=" + date.toUTCString(); } document.cookie = name + "=" + (value || "")  + expires + "; path=/"; }; setCookie("' . Config::$config->name . '", "' . $hash . '",' . Config::$config->cache->expire . ');</script></head><body><h4>Перенаправление на главную...</h4><p>Hash: ' . $hash . '</p></body></html>',
-            'content_type' => 'text/html; charset=UTF-8',
-        ]);
-    }
-*/
 
     /**
      * Sets the media file.
      *
      * @param      string  $hash   The hash
      */
-    public static function setMediaFile(
+    public static function setDiskMediaFile(
         object $obj,
         string $hash
     ) : void
     {
-        $obj->body = base64_encode($obj->body);
-
         file_put_contents(
-            PATH . '/' .
-            Config::$config->storage->media->cache .
-            '/' .
-            $hash,
-            json_encode($obj)
+            PATH . '/' . Config::$config->storage->media->cache . '/' . $hash,
+            json_encode((object) [
+                'body' => base64_encode($obj->body),
+                'content_type' => $obj->content_type,
+                'headers'      => $obj->headers,
+            ])
         );
     }
 
@@ -432,10 +378,14 @@ class Cache
      *
      * @param      string  $hash   The hash
      */
-    public static function getMediaFile(
+    public static function getDiskMediaFile(
         string $hash
     )
     {
+        // var_dump(PATH . '/' .
+        //     Config::$config->storage->media->cache .
+        //     '/' .
+        //     $hash);
         return file_get_contents(
             PATH . '/' .
             Config::$config->storage->media->cache .
@@ -454,7 +404,7 @@ class Cache
     {
         $hash = Encryption::encode($path);
 
-        if (self::getMapFilePath($hash, $path) === false)
+        if (!self::getMapFilePath($hash, $path))
         {
             self::setMapFilePath($hash, $path);
         }
@@ -534,7 +484,6 @@ class Cache
     }
 
 
-
     /**
      * Sets the map file path.
      *
@@ -556,8 +505,6 @@ class Cache
     }
 
 
-
-
     /**
      * Gets the specified hash.
      *
@@ -566,30 +513,26 @@ class Cache
      */
     public static function getCachedPage(string $hash): object
     {
-        $filecache = PATH . '/' .
-            Config::$config->storage->media->cache .
-            '/' .
-            $hash;
+        $filecache = PATH . '/' . Config::$config->storage->media->cache . '/' . $hash;
 
-        // var_dump($filecache);
-        // die();
         if (file_exists($filecache))
         {
-            // return Curl::curlErrorHandler(503);
-            $res = self::getMediaFile($hash);
+            $res = self::getDiskMediaFile($hash);
+            // $obj       = json_decode($res);
+            // $obj->body = base64_decode($obj->body);
+            // file_put_contents('/tmp/1', serialize($res));
         }
         else
         {
-            // if (Config::$config->storage->redis->compression)
-
             $res = RedisController::$instance->get($hash);
         }
 
-        if ($res)
+        if (!empty($res))
         {
             $obj       = json_decode($res);
             $obj->body = base64_decode($obj->body);
             $obj->cache = 'HIT';
+            // $obj->if_disk_use = $if_disk_use;
         }
         else
         {
@@ -600,6 +543,32 @@ class Cache
     }
 
 
+    /**
+     * Sets the memory media file.
+     *
+     * @param      object  $obj    The object
+     * @param      string  $hash   The hash
+     */
+    public static function setMemoryMediaFile(
+        object $obj,
+        string $hash
+    ) : void
+    {
+
+        RedisController::$instance->set(
+            (string) $hash,
+            (string) json_encode([
+                'body'         => base64_encode($obj->body),
+                'content_type' => $obj->content_type,
+                'headers'      => $obj->headers,
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
+
+        RedisController::$instance->expire(
+            (string) $hash,
+            (int) Config::$config->cache->expire
+        );
+    }
 
     /**
      * Эта функция устанавливает значение кэша с заданным хешем и сроком действия на основе свойств
@@ -615,46 +584,15 @@ class Cache
     ): void
     {
 
-        if (in_array($obj->content_type, Config::URI_MEDIA_IMAGES_TYPES))
+        if (in_array($obj->content_type, Config::$config->cache->disk->mimeTypes))
         {
-            self::setMediaFile($obj, $hash);
+            self::setDiskMediaFile($obj, $hash);
         }
         else
         {
-            // if (Config::$config->storage->redis->compression)
-            // RedisController::setCompression(Config::$config->storage->redis->compression);
-
-            RedisController::$instance->set(
-                (string) $hash,
-                (string) json_encode([
-                    'body'         => base64_encode($obj->body),
-                    'content_type' => $obj->content_type,
-                    'headers'      => $obj->headers,
-                ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-            );
-
-            RedisController::$instance->expire(
-                (string) $hash,
-                (int) Config::$config->cache->expire
-            );
+            self::setMemoryMediaFile($obj, $hash);
         }
-
-        $obj = (object) [];
     }
-
-
-    /**
-     * { function_description }
-     */
-/*    public static function redisInstance(): void
-    {
-        RedisController::$instance = new \Redis();
-        RedisController::$instance->connect(Config::$config->storage->redis->host, Config::$config->storage->redis->port);
-    }*/
-
-    /**
-     * { function_description }
-     */
 
 
     /**
@@ -687,13 +625,6 @@ class Cache
                     );
                 }
             }
-
-            if (preg_match('/text\/html/', $obj->content_type))
-            {
-                $obj->body = self::injectWebCleaner(
-                    self::injectWebStats($obj->body)
-                );
-            }
         }
         else
         {
@@ -710,6 +641,8 @@ class Cache
             }
         }
 
+
+        $obj = Modify::page($obj);
 
         return $obj;
     }
