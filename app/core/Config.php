@@ -382,6 +382,21 @@ class Config
         return str_replace(['http://', 'https://'], '', static::$domain->site);
     }
 
+
+    /**
+     * { function_description }
+     *
+     * @param      string  $url    The url
+     *
+     * @return     string  ( description_of_the_return_value )
+     */
+    public static function cleanQueryParams(
+        string $url
+    ): string
+    {
+        return strtok($url, '?');
+    }
+
     /**
      * [getURIEncryptHash description]
      * @return [type] [description]
@@ -396,7 +411,7 @@ class Config
             }
         }
 
-        return 'html' . ':' . static::$route->url;
+        return 'html' . ':' . static::cleanQueryParams(static::$route->url);
     }
 
     public static function initialize(): void
