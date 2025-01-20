@@ -238,6 +238,7 @@ abstract class Tags
 
                     if (!empty($content))
                     {
+                        // var_dump($content);
                         $meta->setAttribute('content', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($content), 'images'));
                     }
 

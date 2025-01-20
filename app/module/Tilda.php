@@ -228,6 +228,71 @@ class Tilda extends Tags
                 }
             }
         }
+
+        foreach ($xpath->query("//meta") as $item)
+        {
+            $itemprop = $item->getAttribute('itemprop');
+            $content = $item->getAttribute('content');
+
+            if ($itemprop === 'image')
+            {
+                preg_match('/static\.tildacdn\.(com|info)/', $content, $matched);
+                if (count($matched) > 0)
+                {
+                    $content = Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($content), 'images');
+                    $item->setAttribute('content', $content);
+                }
+            }
+        }
+
+
+        foreach ($xpath->query("//div[@data-field-imgs-value]") as $item)
+        {
+            $json = $item->getAttribute('data-field-imgs-value');
+            preg_match('/static\.tildacdn\.(com|info)/', $json, $matched);
+            if (count($matched) > 0)
+            {
+                $json_dec = json_decode($json, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    foreach($json_dec as $key => $dec)
+                    {
+                        if (isset($dec['li_img']))
+                        {
+                            $json_dec[$key]['li_img'] = Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($dec['li_img']), 'images');
+
+                        }
+                    }
+                }
+
+                $item->setAttribute('data-field-imgs-value', json_encode($json_dec));
+            }
+        }
+
+        foreach ($xpath->query("//div[@data-img-zoom-url]") as $item)
+        {
+            $data_img_zoom_url = $item->getAttribute('data-img-zoom-url');
+            $item->setAttribute('data-img-zoom-url', Config::QUERY_PARAM_IMG . self::getRelativePath($data_img_zoom_url, 'images'));
+
+            $data_img_style_background = $item->getAttribute('style');
+
+            preg_match('/static\.tildacdn\.(com|info)/', $data_img_style_background, $matched);
+            if (count($matched) > 0)
+            {
+                $data_img_style_background = preg_replace_callback(
+                    "/url\(([\s])?([\"|\'])?(.*?)([\"|\'])?([\s])?\)/i",
+                    function ($matches)
+                    {
+                        if (isset($matches[3]))
+                        {
+                            return "url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[3]), 'images') . "')";
+                        }
+                    },
+                    $data_img_style_background
+                );
+
+                $item->setAttribute('style', $data_img_style_background);
+            }
+        }
     }
 
     /**
