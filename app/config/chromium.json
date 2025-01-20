@@ -5,6 +5,7 @@
     "timeout": 15000,
     "wait": 2000,
     "dumpio": false,
+    "waitUntil": "networkidle0",
     "executablePath": "/usr/bin/chromium-browser",
     "redis": {
         "retryTime": 1000,

@@ -318,7 +318,7 @@ class ChromiumInstance {
 
 	    	// Переходим по ссылке
 	        const pageResponse = await page.goto(link.url, {
-	        	waitUntil: 'domcontentloaded'
+	        	waitUntil: this.config.chromium.waitUntil
 	        });
 
 	        const pageResponseStatusCode = pageResponse.status();
