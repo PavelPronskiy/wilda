@@ -509,6 +509,8 @@ const serverName = `server v${CI.config.global.version} (node ${process.version}
 Event.on('autocache', async(response) => {
 	await CI.browserRun();
 
+	console.info(`Received new job ${response.event}, count sites: ${response.url.length}`);
+
     for (const link of response.url)
     {
 		await CI.crawler(link);
