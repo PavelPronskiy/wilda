@@ -8,7 +8,7 @@
     "waitUntil": "networkidle0",
     "executablePath": "/usr/bin/chromium-browser",
     "redis": {
-        "retryTime": 1000,
+        "retry": 2000,
         "topic": "/chromium/",
         "host": "127.0.0.1",
         "port": 6379

@@ -98,16 +98,32 @@ class ChromiumInstance {
 	async redisConnect() {
 		const connection = createClient({
 			socket: {
-				host: this.config.chromium.redis.host
+				host: this.config.chromium.redis.host,
+				port: this.config.chromium.redis.port,
+				connectTimeout: 5000,
+				reconnectStrategy: retries => {
+					// Generate a random jitter between 0 – 200 ms:
+					const jitter = Math.floor(Math.random() * 200);
+					// Delay is an exponential back off, (times^2) * 50 ms, with a maximum value of 2000 ms:
+					const delay = Math.min(Math.pow(2, retries) * 50, this.config.chromium.redis.retry);
+					return delay + jitter;
+				}
 			},
-			enable_offline_queue: false,
-			retry_strategy: (options) => {
-				return Math.min(options.attempt * 100, this.config.chromium.redis.retryTime);
-			},
-			connect_timeout: Number.MAX_SAFE_INTEGER
+			disableOfflineQueue: true,
 		});
 
-		await connection.connect();
+		try {
+			await connection.connect();
+		} catch(err) {
+			console.error(err);
+			process.exit();
+		}
+
+		connection.on('error', (err) => {
+			console.error(err);
+			process.exit();
+		});
+
 
 		return connection;
 	}
@@ -152,39 +168,26 @@ class ChromiumInstance {
 
 
 	/**
-	 * Gets the latest date.
-	 *
-	 * @return     {<type>}  The latest date.
-	 */
-	// getLatestDate() {
-	// 	const dt = new Date();
-	// 	return date.format(dt, 'YYYYMMDDHHmmss');
-	// }
-
-	/**
 	 * { function_description }
 	 *
 	 * @return     {Promise}  { description_of_the_return_value }
 	 */
 	async subscribe() {
-		const connection = createClient({
-			socket: {
-				host: this.config.chromium.redis.host
-			},
-			enable_offline_queue: false,
-			retry_strategy: (options) => {
-				return Math.min(options.attempt * 100, this.config.chromium.redis.retryTime);
-			},
-			connect_timeout: Number.MAX_SAFE_INTEGER
-		});
+		const connection = await this.redisConnect();
 		const subscriber = connection.duplicate();
 
-		await connection.connect();
+		try {
+			await subscriber.connect();
+		} catch(err) {
+			console.error(err);
+			process.exit();
+		}
 
-		// console.log(`Started chromium subscriber. Version: ${this.config.chromium.version}`);
+		subscriber.on('error', (err) => {
+			console.error(err);
+			process.exit();
+		});
 
-		subscriber.on('error', err => console.error(err));
-		await subscriber.connect();
 		await subscriber.subscribe(this.config.chromium.redis.topic, payload => {
 			const dec = this.decode(payload);
 
@@ -197,6 +200,7 @@ class ChromiumInstance {
 
 	        } catch (err) {
 	        	console.error(err);
+				process.exit();
 	        }
 
 		});
@@ -226,7 +230,7 @@ class ChromiumInstance {
 	 *
 	 * @return     {Promise}  { description_of_the_return_value }
 	 */
-	async waitForAvailable(time = 5000)
+/*	async waitForAvailable(time = 5000)
 	{
 		const promise = (time) => {
 			return new Promise(resolve => setTimeout(resolve, time));
@@ -235,8 +239,15 @@ class ChromiumInstance {
 		while (this.running.counter > this.config.chromium.maxRunningInstances) {
 			await promise(time);
 		}
-	}
+	}*/
 
+
+	/**
+	 * Gets the sitemap urls.
+	 *
+	 * @param      {<type>}   link    The link
+	 * @return     {Promise}  The sitemap urls.
+	 */
 	async getSitemapUrls(link) {
 		
 		let error = false;
@@ -265,25 +276,6 @@ class ChromiumInstance {
 
         return ret;
 	}
-
-    /**
-     * Gets the site urls.
-     *
-     * @param      {<type>}   site    The site
-     * @return     {Promise}  The site urls.
-     */
-    /*async getSiteUrls(link) {
-    	let ret = [];
-        try {
-
-        	return await this.getSitemapUrls(link);
-
-        } catch (err) {
-        	console.log(err);
-        	console.log(`Error fetch ${link}/sitemap.xml`);
-            return [link];
-        }
-    };*/
 
 
     /**
