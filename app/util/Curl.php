@@ -4,6 +4,7 @@ namespace app\util;
 
 use app\core\Config;
 use app\core\Modify;
+use app\core\Router;
 use app\util\Encryption;
 use \Campo\UserAgent as UA;
 
@@ -110,7 +111,7 @@ class Curl
     public static function getHeaders(
         string $response_headers,
         array $result_headers = []
-    )
+    ) : object
     {
         foreach (explode("\r\n", $response_headers) as $i => $line) {
             if (!empty($line))
@@ -123,7 +124,10 @@ class Curl
             }
         }
 
-        return $result_headers;
+        if (isset($result_headers) > 0)
+            return (object) $result_headers;
+        else
+            return (object) [];
     }
 
 
@@ -193,10 +197,48 @@ class Curl
 
 
     /**
+     * { function_description }
+     *
+     * @return     <type>  ( description_of_the_return_value )
+     */
+    public static function rget()
+    {
+        if (isset(Config::$route->query) && in_array(key(Config::$route->query), Config::URI_QUERY_TYPES))
+        {
+            $url = Cache::getMapFilePath(Config::$route->query->{key(Config::$route->query)});
+
+            if (!$url)
+            {
+                return self::curlErrorHandler(404);
+            }
+
+            return self::get($url);
+        }
+
+        $seoType = Router::seoTypes();
+        if (isset($seoType['hash']))
+        {
+            $url = Cache::getMapFilePath($seoType['hash']);
+
+            if (!$url)
+            {
+                return self::curlErrorHandler(404);
+            }
+
+            return self::get($url);
+        }
+
+
+        $build_query = count((array) Config::$route->query) > 0 ? '?' . http_build_query((array) Config::$route->query) : '';
+        return self::get(Config::$domain->project . Config::$route->path . $build_query);
+    }
+
+
+    /**
      * Retrieve resource from server using GET request
      * @return object Response from server
      */
-    public static function rget()
+/*    public static function rget()
     {
         $build_query = count((array) Config::$route->query) > 0 ? '?' . http_build_query((array) Config::$route->query) : '';
         if (isset(Config::$route->query) && in_array(key(Config::$route->query), Config::URI_QUERY_TYPES))
@@ -220,5 +262,5 @@ class Curl
         // $url = Config::$domain->project . Config::$route->path . $build_query;
         // var_dump($url);
         // return self::get($url);
-    }
+    }*/
 }

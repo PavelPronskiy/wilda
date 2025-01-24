@@ -8,6 +8,9 @@
     "images": "relative",
     "fonts": "relative",
     "icons": "relative",
+    "seo": {
+        "enabled": true
+    },
     "storage":
     {
         "media": {

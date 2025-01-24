@@ -4,6 +4,7 @@ namespace app\module;
 
 use app\core\Config;
 use app\core\Tags;
+use app\core\Router;
 
 /**
  * Tilda Controller
@@ -81,17 +82,18 @@ class Tilda extends Tags
             switch (Config::$config->images)
             {
                 case 'relative':
+                    // if (str_contains('static.tildacdn', $style->textContent))
                     preg_match('/static\.tildacdn\.(info|com)/', $style->textContent, $matched);
                     if (count($matched) > 0)
                     {
                         $style->textContent = preg_replace_callback(
                             "/background\-image\:\s?url\(\'(.*)\'\)/",
-                            // "/background\-image\: url\(\'(.*)\'\)/",
                             function ($matches)
                             {
                                 if (isset($matches[1]))
                                 {
-                                    return "background-image: url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[1]), 'images') . "')";
+                                    // return "background-image: url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[1]), 'images') . "')";
+                                    return "background-image: url('" . Router::setRouteUrl($matches[1], 'images') . "')";
                                 }
                             },
                             $style->textContent
@@ -125,17 +127,20 @@ class Tilda extends Tags
 
                     if (!empty($src))
                     {
-                        $script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+                        // $script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+                        $script->setAttribute('src', Router::setRouteUrl($src, 'scripts'));
                     }
 
                     if (!empty($data_url))
                     {
-                        $script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
+                        // $script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
+                        $script->setAttribute('data-url', Router::setRouteUrl($data_url, 'scripts'));
                     }
 
                     /**
                      * tag <script>
                      */
+                    // if (str_contains('static.tildacdn', $script->textContent))
                     preg_match('/static\.tildacdn\.(info|com)/', $script->textContent, $matched);
                     if (count($matched) > 0)
                     {
@@ -145,7 +150,8 @@ class Tilda extends Tags
                             {
                                 if (isset($matches[1]))
                                 {
-                                    return "s.src = '" . Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($matches[1]), 'scripts') . "'";
+                                    // return "s.src = '" . Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($matches[1]), 'scripts') . "'";
+                                    return "s.src = '" . Router::setRouteUrl($matches[1], 'scripts') . "'";
                                 }
 
                             },
@@ -156,6 +162,7 @@ class Tilda extends Tags
             }
 
             // remove tilda tracker
+            // if (str_contains('window.mainTracker', $script->textContent))
             preg_match('/window\.mainTracker.*/', $script->textContent, $matched);
             if (count($matched) > 0)
             {
@@ -185,6 +192,7 @@ class Tilda extends Tags
      */
     public static function css(string $content): string
     {
+        // if (str_contains('static.tildacdn', $content))
         preg_match('/static\.tildacdn\.(com|info)/', $content, $matched);
         if (count($matched) > 0)
         {
@@ -194,16 +202,13 @@ class Tilda extends Tags
                 {
                     if (isset($matches[3]))
                     {
-                        // var_dump($matches[3]);
-                        return "url('" . Config::QUERY_PARAM_FONT . self::getRelativePath(self::parseURL($matches[3]), 'fonts') . "')";
+                        // return "url('" . Config::QUERY_PARAM_FONT . self::getRelativePath(self::parseURL($matches[3]), 'fonts') . "')";
+                        return "url('" . Router::setRouteUrl($matches[3], 'fonts') . "')";
                     }
                 },
                 $content
             );
-            // var_dump($matched);
         }
-
-        // $content = str_replace('', '', $content);
 
         return $content;
     }
@@ -236,11 +241,13 @@ class Tilda extends Tags
 
             if ($itemprop === 'image')
             {
+                // if (str_contains('static.tildacdn', $content))
                 preg_match('/static\.tildacdn\.(com|info)/', $content, $matched);
                 if (count($matched) > 0)
                 {
-                    $content = Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($content), 'images');
-                    $item->setAttribute('content', $content);
+                    // $content = Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($content), 'images');
+                    // $item->setAttribute('content', $content);
+                    $item->setAttribute('content', Router::setRouteUrl($content, 'images'));
                 }
             }
         }
@@ -248,17 +255,19 @@ class Tilda extends Tags
 
         foreach ($xpath->query("//div[@data-field-imgs-value]") as $item)
         {
-            $json = $item->getAttribute('data-field-imgs-value');
-            preg_match('/static\.tildacdn\.(com|info)/', $json, $matched);
+            $json_str = $item->getAttribute('data-field-imgs-value');
+            // if (str_contains('static.tildacdn', $json_str))
+            preg_match('/static\.tildacdn\.(com|info)/', $json_str, $matched);
             if (count($matched) > 0)
             {
-                $json_dec = json_decode($json, true);
+                $json_dec = json_decode($json_str, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
                     foreach($json_dec as $key => $dec)
                     {
                         if (isset($dec['li_img']))
                         {
-                            $json_dec[$key]['li_img'] = Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($dec['li_img']), 'images');
+                            // $json_dec[$key]['li_img'] = Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($dec['li_img']), 'images');
+                            $json_dec[$key]['li_img'] = Router::setRouteUrl($dec['li_img'], 'images');
 
                         }
                     }
@@ -271,10 +280,12 @@ class Tilda extends Tags
         foreach ($xpath->query("//div[@data-img-zoom-url]") as $item)
         {
             $data_img_zoom_url = $item->getAttribute('data-img-zoom-url');
-            $item->setAttribute('data-img-zoom-url', Config::QUERY_PARAM_IMG . self::getRelativePath($data_img_zoom_url, 'images'));
+            // $item->setAttribute('data-img-zoom-url', Config::QUERY_PARAM_IMG . self::getRelativePath($data_img_zoom_url, 'images'));
+            $item->setAttribute('data-img-zoom-url', Router::setRouteUrl($data_img_zoom_url, 'images'));
 
             $data_img_style_background = $item->getAttribute('style');
 
+            // if (str_contains('static.tildacdn', $data_img_style_background))
             preg_match('/static\.tildacdn\.(com|info)/', $data_img_style_background, $matched);
             if (count($matched) > 0)
             {
@@ -284,7 +295,8 @@ class Tilda extends Tags
                     {
                         if (isset($matches[3]))
                         {
-                            return "url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[3]), 'images') . "')";
+                            // return "url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[3]), 'images') . "')";
+                            return "url('" . Router::setRouteUrl($matches[3], 'images') . "')";
                         }
                     },
                     $data_img_style_background

@@ -35,10 +35,12 @@ abstract class Modify
         object $obj
     ) : object
     {
-        if (preg_match('/text\/html/', $obj->content_type))
+        // if (preg_match('/text\/html/', $obj->content_type))
+        if (str_contains($obj->content_type, 'text/html'))
         {
             $obj->body = Cache::injectWebCleaner(
-                Cache::injectWebStats($obj->body)
+                Cache::injectCacheStats($obj->body),
+                $obj->headers
             );
         }
 

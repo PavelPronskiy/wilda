@@ -66,13 +66,15 @@ abstract class Tags
                     $src = $img->getAttribute('src');
                     if (!empty($src))
                     {
-                        $img->setAttribute('src', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($src), 'images'));
+                        // $img->setAttribute('src', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($src), 'images'));
+                        $img->setAttribute('src', Router::setRouteUrl($src, 'images'));
                     }
 
                     $src = $img->getAttribute('data-original');
                     if (!empty($src))
                     {
-                        $img->setAttribute('data-original', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($src), 'images'));
+                        // $img->setAttribute('data-original', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($src), 'images'));
+                        $img->setAttribute('data-original', Router::setRouteUrl($src, 'images'));
                     }
 
                     break;
@@ -90,7 +92,8 @@ abstract class Tags
                     $src = $img->getAttribute('xlink:href');
                     if (!empty($src))
                     {
-                        $img->setAttribute('xlink:href', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($src), 'images'));
+                        // $img->setAttribute('xlink:href', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($src), 'images'));
+                        $img->setAttribute('xlink:href', Router::setRouteUrl($src, 'images'));
                     }
 
                     break;
@@ -108,13 +111,15 @@ abstract class Tags
                     $data = $div->getAttribute('data-original');
                     if (!empty($data))
                     {
-                        $div->setAttribute('data-original', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($data), 'images'));
+                        // $div->setAttribute('data-original', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($data), 'images'));
+                        $div->setAttribute('data-original', Router::setRouteUrl($data, 'images'));
                     }
 
                     $data = $div->getAttribute('data-content-cover-bg');
                     if (!empty($data))
                     {
-                        $div->setAttribute('data-content-cover-bg', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($data), 'images'));
+                        // $div->setAttribute('data-content-cover-bg', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($data), 'images'));
+                        $div->setAttribute('data-content-cover-bg', Router::setRouteUrl($data, 'images'));
                     }
 
                     $style = $div->getAttribute('style');
@@ -126,7 +131,8 @@ abstract class Tags
                             {
                                 if (isset($matches[1]))
                                 {
-                                    return "background-image: url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[1]), 'images') . "')";
+                                    // return "background-image: url('" . Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($matches[1]), 'images') . "')";
+                                    return "background-image: url('" . Router::setRouteUrl($matches[1], 'images') . "')";
                                 }
                             },
                             $style
@@ -151,13 +157,15 @@ abstract class Tags
             $attr = $node->getAttribute('data-url');
             if (!empty($attr))
             {
-                $node->setAttribute('data-url', Config::QUERY_PARAM_CSS . self::getRelativePath(self::parseURL($attr), 'styles'));
+                // $node->setAttribute('data-url', Config::QUERY_PARAM_CSS . self::getRelativePath(self::parseURL($attr), 'styles'));
+                $node->setAttribute('data-url', Router::setRouteUrl($attr, 'styles'));
             }
 
             $attr = $node->getAttribute('data-href');
             if (!empty($attr))
             {
-                $node->setAttribute('data-href', Config::QUERY_PARAM_CSS . self::getRelativePath(self::parseURL($attr), 'styles'));
+                // $node->setAttribute('data-href', Config::QUERY_PARAM_CSS . self::getRelativePath(self::parseURL($attr), 'styles'));
+                $node->setAttribute('data-href', Router::setRouteUrl($attr, 'styles'));
             }
 
             if (preg_match_all('@url\(\"?//[^/]+[^.]+\.[^.]+?\)@i', $node->nodeValue, $match))
@@ -171,7 +179,8 @@ abstract class Tags
                         $str       = str_replace('url(', '', $str);
                         $str       = str_replace(')', '', $str);
                         $str       = str_replace('"', '', $str);
-                        $nodeValue = str_replace($str, Config::QUERY_PARAM_FONT . self::getRelativePath('https:' . $str, 'fonts'), $nodeValue);
+                        // $nodeValue = str_replace($str, Config::QUERY_PARAM_FONT . Router::getRelativePath('https:' . $str, 'fonts'), $nodeValue);
+                        $nodeValue = str_replace($str, Router::setRouteUrl('https:' . $str, 'fonts'), $nodeValue);
                     }
 
                     $node->nodeValue = '';
@@ -188,7 +197,8 @@ abstract class Tags
                 case 'preload':
                     if (!empty($src))
                     {
-                        $link->setAttribute('href', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+                        // $link->setAttribute('href', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+                        $link->setAttribute('href', Router::setRouteUrl($src, 'scripts'));
                     }
 
                     break;
@@ -202,7 +212,8 @@ abstract class Tags
                 case 'apple-touch-icon':
                     if (!empty($src))
                     {
-                        $link->setAttribute('href', Config::QUERY_PARAM_ICO . self::getRelativePath(self::parseURL($src), 'icons'));
+                        // $link->setAttribute('href', Config::QUERY_PARAM_ICO . self::getRelativePath(self::parseURL($src), 'icons'));
+                        $link->setAttribute('href', Router::setRouteUrl($src, 'icons'));
                     }
 
                     break;
@@ -215,7 +226,8 @@ abstract class Tags
                     {
                         if (!empty($src))
                         {
-                            $link->setAttribute('href', Config::QUERY_PARAM_CSS . self::getRelativePath(self::parseURL($src), 'styles'));
+                            // $link->setAttribute('href', Config::QUERY_PARAM_CSS . self::getRelativePath(self::parseURL($src), 'styles'));
+                            $link->setAttribute('href', Router::setRouteUrl($src, 'styles'));
                         }
                     }
                     break;
@@ -238,8 +250,8 @@ abstract class Tags
 
                     if (!empty($content))
                     {
-                        // var_dump($content);
-                        $meta->setAttribute('content', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($content), 'images'));
+                        // $meta->setAttribute('content', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($content), 'images'));
+                        $meta->setAttribute('href', Router::setRouteUrl($content, 'images'));
                     }
 
                     break;
@@ -265,7 +277,9 @@ abstract class Tags
                     $content = $meta->getAttribute('content');
                     if (!empty($content))
                     {
-                        $meta->setAttribute('content', Config::QUERY_PARAM_IMG . self::getRelativePath($content, 'images'));
+                        // $meta->setAttribute('content', Config::QUERY_PARAM_IMG . self::getRelativePath($content, 'images'));
+                        $meta->setAttribute('href', Router::setRouteUrl($content, 'images'));
+
                     }
 
                     break;
@@ -301,24 +315,6 @@ abstract class Tags
         return $nodes;
     }
 
-    /**
-     * [getRelativePath description]
-     * @param  [type] $path           [description]
-     * @param  [type] $type           [description]
-     * @return [type] [description]
-     */
-    public static function getRelativePath(
-        string $path,
-        string $type
-    ): string
-    {
-        if (Config::$config->{$type} === 'relative')
-        {
-            $path = Cache::getEncyptMapPath($path);
-        }
-
-        return $path;
-    }
 
     /**
      * @param string $html
@@ -380,18 +376,12 @@ abstract class Tags
         }
     }
 
+
     /**
-     * [parseURL description]
-     * @param  [type] $src            [description]
-     * @return [type] [description]
+     * Posts a process html.
+     *
+     * @return     string  ( description_of_the_return_value )
      */
-    public static function parseURL($src): string
-    {
-        $url = parse_url($src);
-
-        return isset($url['host']) ? $src : Config::$domain->project . $src;
-    }
-
     public static function postProcessHTML(): string
     {
         return self::compressHTML(

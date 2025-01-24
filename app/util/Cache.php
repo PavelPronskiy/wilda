@@ -256,7 +256,8 @@ class Cache
      * @return string строка, которая представляет собой либо исходный HTML-код, переданный в качестве
      */
     public static function injectWebCleaner(
-        string $html,
+        string $body,
+        object $headers,
         bool $granted = false
     ): string
     {
@@ -275,11 +276,10 @@ class Cache
 
         if ($granted)
         {
-            // $inject_html = file_get_contents(PATH . '/tpl/cleaner/cleaner.html');
-            return str_replace('</body>','<!-- WILDA CLEANER --><script src="/app/tpl/cleaner/cleaner.js"></script><wilda-cleaner></wilda-cleaner><!-- WILDA CLEANER --></body>', (string) $html);
+            return str_replace('</body>','<!-- WILDA CLEANER --><script>const WILDA_PAGE_HEADER = ' . json_encode($headers) . ';</script><script src="/app/tpl/cleaner/cleaner.js"></script><wilda-cleaner></wilda-cleaner><!-- WILDA CLEANER --></body>', (string) $body);
         }
 
-        return (string) $html;
+        return (string) $body;
     }
 
 
@@ -292,7 +292,7 @@ class Cache
      * @param  html   Код        HTML, который необходимо изменить путем внедрения веб-статистики.
      * @return string строка, которая представляет собой либо исходный HTML-код, переданный в качестве
      */
-    public static function injectWebStats(string $html): string
+    public static function injectCacheStats(string $html): string
     {
         if (Config::$config->cache->stats)
         {
@@ -382,10 +382,6 @@ class Cache
         string $hash
     )
     {
-        // var_dump(PATH . '/' .
-        //     Config::$config->storage->media->cache .
-        //     '/' .
-        //     $hash);
         return file_get_contents(
             PATH . '/' .
             Config::$config->storage->media->cache .
@@ -612,7 +608,7 @@ class Cache
             {
                 $obj = Curl::rget();
                 $obj->cache = 'MISS';
-                
+
                 if (empty($obj))
                 {
                     Curl::curlErrorHandler(500);
@@ -625,6 +621,7 @@ class Cache
                     );
                 }
             }
+
         }
         else
         {
@@ -640,7 +637,6 @@ class Cache
                 return Modify::byContentType($obj);
             }
         }
-
 
         $obj = Modify::page($obj);
 

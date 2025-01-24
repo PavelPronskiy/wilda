@@ -22,20 +22,20 @@ class ErrorHandler extends \Exception {
 
     public static function exception($e)
     {
-
         Config::render((object) [
-            'content_type' => 'application/json',
-            'body' => json_encode([
-                "code" => $e->getCode(),
-                "message" => $e->getMessage(),
-
-            ]),
+            'content_type' => 'text/html',
+            'body' => self::webTemplate(500, $e->getMessage()),
         ]);
     }
 
     public static function error($e)
     {
-        var_dump($e);
-        // return $this->severity;
+        Config::render((object) [
+            'content_type' => 'application/json',
+            'body' => json_encode([
+                "code" => $e->getCode(),
+                "message" => $e->getMessage(),
+            ]),
+        ]);
     }
 }

@@ -316,7 +316,7 @@ class ChromiumInstance {
 			await page.evaluate(async () => {
 			  // Scroll down to bottom of page to activate lazy loading images
 				document.body.scrollIntoView(false);
-
+				
 				// Wait for all remaining lazy loading images to load
 				await Promise.all(Array.from(document.getElementsByTagName('img'), image => {
 					if (image.complete) {

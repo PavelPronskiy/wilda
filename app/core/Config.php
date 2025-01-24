@@ -13,11 +13,28 @@ class Config
     const CONFIG_HOSTS = PATH . '/app/config/hosts.json';
     const CHROMIUM_CONFIG = PATH . '/app/config/chromium.json';
     const CHROMIUM_CUSTOM = PATH . '/.chromium.json';
-    const QUERY_PARAM_CSS = '/?css=';
-    const QUERY_PARAM_FONT = '/?font=';
-    const QUERY_PARAM_ICO = '/?ico=';
-    const QUERY_PARAM_IMG = '/?img=';
-    const QUERY_PARAM_JS = '/?js=';
+    // const QUERY_PARAM_CSS = '/?css=';
+    // const QUERY_PARAM_FONT = '/?font=';
+    // const QUERY_PARAM_ICO = '/?ico=';
+    // const QUERY_PARAM_IMG = '/?img=';
+    // const QUERY_PARAM_JS = '/?js=';
+
+    const QUERY_PARAM_TYPES = [
+        'scripts' => '/?js=',
+        'styles' => '/?css=',
+        'icons' => '/?ico=',
+        'images' => '/?img=',
+        'fonts' => '/?font=',
+    ];
+
+    const SEO_PARAM_TYPES = [
+        'scripts' => '/js/',
+        'styles' => '/css/',
+        'icons' => '/ico/',
+        'images' => '/img/',
+        'fonts' => '/font/',
+    ];
+
     const URI_QUERY_ADMIN = ['cleaner', 'flush', 'keys'];
     const URI_QUERY_TYPES = ['ico', 'img', 'js', 'css', 'font'];
     // const URI_MEDIA_IMAGES_TYPES = [''];
@@ -136,6 +153,8 @@ class Config
     public static $chromium = [];
 
     public static $cli;
+
+    public static $seo;
 
     /**
      * Constructs a new instance.
@@ -403,11 +422,17 @@ class Config
      */
     public static function getURIEncryptHash(): string
     {
+        $seoType = Router::seoTypes();
+        if (count($seoType) > 0)
+        {
+            return $seoType['type'] . ':' . $seoType['hash'];
+        }
+
         foreach (self::URI_QUERY_TYPES as $type)
         {
             if (isset(static::$route->query->{$type}))
             {
-                return $type . ':' . static::$route->query->{$type} . '';
+                return $type . ':' . static::$route->query->{$type};
             }
         }
 
@@ -429,6 +454,7 @@ class Config
         static::$inject   = (object) [];
         static::$compress = (object) [];
         static::$editor   = (object) [];
+        static::$seo      = (object) [];
         // static::$storage  = (object) [];
         static::$hosts    = (array) static::getHostsConfig()->hosts;
         static::$config   = (object) [
@@ -444,14 +470,6 @@ class Config
         if (php_sapi_name() === 'cli')
         {
             static::$lang = static::$config->translations->cli->{static::$config->lang};
-            // static::$hash_key = static::$config->name . ':' . static::$route->domain . ':' . static::$domain->type;
-
-            // static::$route = (object) [
-                // 'domain' => static::$cli->getArg('site')
-            // ];
-
-            // static::$domain = (object) static::getDomainConfig();
-
         }
 
         if (php_sapi_name() === 'fpm-fcgi')
@@ -497,7 +515,16 @@ class Config
             if (isset(static::$domain->site))
             {
 
-                // $device_type   = static::isMobile() ? 'mobile' : 'desktop';
+                if (isset(static::$config->seo))
+                {
+                    static::$seo = static::$config->seo;
+                }
+
+                if (isset(static::$domain->seo))
+                {
+                    static::$seo = static::$domain->seo;
+                }
+
 
                 /**
                  * set lang translations
@@ -1110,6 +1137,17 @@ class Config
         {
             $host_str = 'Host: ' . $_SERVER['HTTP_HOST'];
             die('<pre>' . $host_str . ', ' . $message . '</pre>');
+        }
+    }
+
+    public static function var_dump(array|object|string $message): void
+    {
+        if (php_sapi_name() === 'fpm-fcgi')
+        {
+            Config::render((object) [
+                'content_type' => 'text/html',
+                'body' => '<html><head></head><body><pre>' . json_encode($message, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</pre></body></html>',
+            ]);
         }
     }
 

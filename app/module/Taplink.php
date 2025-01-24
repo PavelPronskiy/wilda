@@ -4,6 +4,7 @@ namespace app\module;
 
 use app\core\Config;
 use app\core\Tags;
+use app\core\Router;
 
 /**
  * Wix Controller
@@ -87,12 +88,14 @@ class Taplink extends Tags
 
                     if (!empty($src))
                     {
-                        $script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+                        // $script->setAttribute('src', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($src), 'scripts'));
+                        $script->setAttribute('src', Router::setRouteUrl($src, 'scripts'));
                     }
 
                     if (!empty($data_url))
                     {
-                        $script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
+                        // $script->setAttribute('data-url', Config::QUERY_PARAM_JS . self::getRelativePath(self::parseURL($data_url), 'scripts'));
+                        $script->setAttribute('data-url', Router::setRouteUrl($data_url, 'scripts'));
                     }
 
                     break;
