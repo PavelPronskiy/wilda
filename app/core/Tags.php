@@ -251,7 +251,7 @@ abstract class Tags
                     if (!empty($content))
                     {
                         // $meta->setAttribute('content', Config::QUERY_PARAM_IMG . self::getRelativePath(self::parseURL($content), 'images'));
-                        $meta->setAttribute('href', Router::setRouteUrl($content, 'images'));
+                        $meta->setAttribute('content', Router::setRouteUrl($content, 'images'));
                     }
 
                     break;
@@ -278,7 +278,8 @@ abstract class Tags
                     if (!empty($content))
                     {
                         // $meta->setAttribute('content', Config::QUERY_PARAM_IMG . self::getRelativePath($content, 'images'));
-                        $meta->setAttribute('href', Router::setRouteUrl($content, 'images'));
+                        // var_dump(Router::parseURL($content));
+                        $meta->setAttribute('content', Router::setRouteUrl($content, 'images'));
 
                     }
 
