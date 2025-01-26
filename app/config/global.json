@@ -8,8 +8,12 @@
     "images": "relative",
     "fonts": "relative",
     "icons": "relative",
-    "seo": {
+    "debug": {
         "enabled": true
+    },
+    "seo": {
+        "enabled": true,
+        "ext": true
     },
     "storage":
     {
@@ -88,7 +92,14 @@
     "cache":
     {
         "disk": {
-            "mimeTypes": []
+            "mimeTypes": [
+                "image/png",
+                "image/jpeg",
+                "application/font-woff",
+                "font/woff2",
+                "application/octet-stream",
+                "image/x-icon"
+            ]
         },
         "enabled": true,
         "browser": true,

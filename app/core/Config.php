@@ -156,6 +156,8 @@ class Config
 
     public static $seo;
 
+    public static $debug;
+
     /**
      * Constructs a new instance.
      */
@@ -523,6 +525,17 @@ class Config
                 if (isset(static::$domain->seo))
                 {
                     static::$seo = static::$domain->seo;
+                }
+
+
+                if (isset(static::$config->debug))
+                {
+                    static::$debug = static::$config->debug;
+                }
+
+                if (isset(static::$domain->debug))
+                {
+                    static::$debug = static::$domain->debug;
                 }
 
 
@@ -954,8 +967,12 @@ class Config
             if (isset($response->cache))
             {
                 header('W-Cache-Status: ' . $response->cache);
-                header('W-Size-Bytes: ' . strlen(bin2hex($response->body)));
-                header('W-Hash: ' . Config::$hash);
+
+                if (static::$debug->enabled)
+                {
+                    header('W-Size-Bytes: ' . strlen(bin2hex($response->body)));
+                    header('W-Hash: ' . Config::$hash);
+                }
 
                 if (static::$config->cache->browser)
                 {

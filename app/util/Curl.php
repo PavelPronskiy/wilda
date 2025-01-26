@@ -216,7 +216,7 @@ class Curl
         }
 
         $seoType = Router::seoTypes();
-        if (isset($seoType['hash']))
+        if (Config::$seo->enabled && isset($seoType['hash']))
         {
             $url = Cache::getMapFilePath($seoType['hash']);
 

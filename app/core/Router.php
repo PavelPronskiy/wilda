@@ -61,7 +61,7 @@ class Router
         {
             $type = [
                 'type' => $url_path_arr[0],
-                'hash' => $url_path_arr[1],
+                'hash' => pathinfo($url_path_arr[1], PATHINFO_FILENAME),
             ];
         }
 
@@ -109,21 +109,42 @@ class Router
      * @return     string  ( description_of_the_return_value )
      */
     public static function setRouteUrl(
-        string $src,
-        string $type
+        string $url,
+        string $type,
+        string $ext = ''
     ): string
     {
-
         if (Config::$seo->enabled)
         {
             $seo_param_type = Config::SEO_PARAM_TYPES[$type];
+
+            if (Config::$seo->ext)
+            {
+                $ext = self::parse_ext($url);
+            }
         }
         else
         {
             $seo_param_type = Config::QUERY_PARAM_TYPES[$type];
         }
 
-        return $seo_param_type . self::getRelativePath(self::parseURL($src), $type);
+        return $seo_param_type . self::getRelativePath(self::parseURL($url), $type) . $ext;
+    }
+
+
+    /**
+     * { function_description }
+     *
+     * @param      <type>  $url    The url
+     *
+     * @return     <type>  ( description_of_the_return_value )
+     */
+    public static function parse_ext(string $url) : string
+    {
+        $parse = parse_url($url);
+        $ext = pathinfo($parse['path'], PATHINFO_EXTENSION);
+
+        return !empty($ext) ? '.' . $ext : '';
     }
 
 
@@ -132,7 +153,7 @@ class Router
      *
      * @return     <type>  The path.
      */
-    public static function getPath()
+    public static function getPath() : array
     {
         return array_values(array_filter(explode('/', Config::$route->path)));
     }
@@ -142,7 +163,7 @@ class Router
      * @param  [type] $content        [description]
      * @return [type] [description]
      */
-    private static function routeGet($content)
+    private static function routeGet(object $content): object
     {
         switch (Config::$route->path)
         {
