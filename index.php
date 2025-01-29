@@ -19,7 +19,7 @@ try {
 {
     \app\util\ErrorHandler::error($e);
 }
-catch (\Exception $ex)
+catch (\Exception $e)
 {
     \app\util\ErrorHandler::exception($e);
 }

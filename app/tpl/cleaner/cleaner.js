@@ -29,6 +29,9 @@ function timeAgo(input) {
 function xhrGet(url, success) {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url);
+    xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, max-age=0');
+    xhr.setRequestHeader('Expires', 'Thu, 1 Jan 1970 00:00:00 GMT');
+    xhr.setRequestHeader('Pragma', 'no-cache');
     xhr.responseType = "json";
     xhr.onload = success;
     xhr.send();
@@ -101,7 +104,7 @@ class wildaCleaner extends HTMLElement {
 
                     let date = new Date(Date.now() + 86400e3);
                     date = date.toUTCString();
-                    document.cookie = `clean-browser-cache=true; expires=${date}`;
+                    document.cookie = `revalidate-browser-cache-xhr=true; expires=${date}`;
 
                     setTimeout(() => {
                         window.location.href = `${window.location.href}`;

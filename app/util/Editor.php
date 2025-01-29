@@ -148,14 +148,14 @@ class Editor
                 {
                     $result = (object) [
                         'status'  => true,
-                        'message' => Config::$lang[4],
+                        'message' => Config::getLangTranslationMessage(1004),
                     ];
                 }
                 else
                 {
                     $result = (object) [
                         'status'  => false,
-                        'message' => Config::$lang[5],
+                        'message' => Config::getLangTranslationMessage(1005),
                     ];
                 }
 
@@ -174,14 +174,14 @@ class Editor
                 {
                     $result = (object) [
                         'status'  => true,
-                        'message' => Config::$lang[4],
+                        'message' => Config::getLangTranslationMessage(1004),
                     ];
                 }
                 else
                 {
                     $result = (object) [
                         'status'  => false,
-                        'message' => Config::$lang[5],
+                        'message' => Config::getLangTranslationMessage(1005),
                     ];
                 }
 
@@ -200,14 +200,14 @@ class Editor
                 {
                     $result = (object) [
                         'status'  => true,
-                        'message' => Config::$lang[4],
+                        'message' => Config::getLangTranslationMessage(1004),
                     ];
                 }
                 else
                 {
                     $result = (object) [
                         'status'  => false,
-                        'message' => Config::$lang[5],
+                        'message' => Config::getLangTranslationMessage(1005),
                     ];
                 }
 

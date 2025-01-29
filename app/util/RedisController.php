@@ -41,7 +41,7 @@ class RedisController {
         }
         catch (\Exception $e)
         {
-            die(__LINE__ . ' ' . $e->getMessage());
+            \app\util\ErrorHandler::exception($e);
         }
     }
 }

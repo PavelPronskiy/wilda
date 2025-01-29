@@ -48,8 +48,9 @@ class Cache
         $countAllCachedFiles = self::cleanAllCachedFiles();
 
         Config::render((object) [
-            'body'         => '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="2; url=\'' . Config::$domain->site . '\'" /></head><body><h4>Перенаправление на главную...</h4><p>Очищено элементов: ' . $countAllCachedFiles . '</p></body></html>',
+            'no_cache' => true,
             'content_type' => 'text/html; charset=UTF-8',
+            'body' => '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="2; url=\'' . Config::$domain->site . '\'" /><script>var date = new Date(Date.now() + 86400e3); date = date.toUTCString();document.cookie = `revalidate-browser-cache=true; expires=${date}`;</script></head><body><h4>Перенаправление на главную...</h4><p>Очищено элементов: ' . $countAllCachedFiles . '</p></body></html>',
         ]);
     }
 
@@ -236,6 +237,7 @@ class Cache
         $countAllCachedFiles = self::cleanAllCachedFiles();
         return Config::render((object) [
             'content_type' => 'application/json',
+            'no_cache'     => true,
             'body'         => json_encode(
                 [
                     'status'  => true,
@@ -611,7 +613,8 @@ class Cache
 
                 if (empty($obj))
                 {
-                    Curl::curlErrorHandler(500);
+                    throw new ErrorHandler('', 500);
+                    // Curl::curlErrorHandler(500);
                 }
                 else
                 {
@@ -630,7 +633,8 @@ class Cache
 
             if (empty($obj))
             {
-                Curl::curlErrorHandler(500);
+                // Curl::curlErrorHandler(500);
+                throw new ErrorHandler('', 500);
             }
             else
             {

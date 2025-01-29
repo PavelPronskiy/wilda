@@ -418,14 +418,14 @@ const postNotification = (d) => {
     if (d.status)
     {
         new bs5.Toast({
-            body: d.message,
+            body: d.message.title,
             className: 'border-0 bg-primary',
         }).show()
     }
     else
     {
         new bs5.Toast({
-            body: d.message,
+            body: d.message.title,
             className: 'border-0 bg-danger',
         }).show()
     }

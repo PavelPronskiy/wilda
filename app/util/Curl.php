@@ -24,80 +24,58 @@ class Curl
      * @param  int       $http_code The HTTP status code to handle.
      * @return bool|null Returns true if HTTP status code is 200, false if code is or unhandled, null for all other codes.
      */
-    public static function curlErrorHandler($http_code, $code = '')
-    {
-        Config::$lang = (array) Config::$lang;
+    // public static function curlErrorHandler($http_code, $code = '')
+    // {
+        // Config::$lang = (array) Config::$lang;
 
-        if (!empty($code) && isset(Config::$lang[$code]))
-        {
-            $code_message = Config::$lang[$code];
-        }
-        else
-        {
-            $code_message = '';
-        }
+        // if (!empty($code) && isset(Config::$lang[$code]))
+        // {
+        //     $code_message = Config::$lang[$code];
+        // }
+        // else
+        // {
+        //     $code_message = '';
+        // }
 
-        switch ($http_code)
-        {
-            case 404:
-                $result = Config::$runType === 'web' ? [
-                    'code'         => 404,
-                    'no_cache'     => true,
-                    'error'        => true,
-                    'body'         => '<html><head><meta name="robots" content="noindex,nofollow"></head><body><h1>Ошибка: 404</h1>' . Config::$lang[1] . '</body></html>',
-                    'content_type' => 'text/html',
-                ] : [
-                    'body' => 'Ошибка: 404 ' . Config::$lang[1],
-                ];
-                break;
+    //     $result = [
+    //         'no_cache'     => true,
+    //         'error'        => true,
+    //         'content_type' => 'text/html',
+    //     ];
 
-            case 503:
-                $result = Config::$runType === 'web' ? [
-                    'code'         => 503,
-                    'no_cache'     => true,
-                    'error'        => true,
-                    'body'         => ErrorHandler::webTemplate(503, Config::$lang[2]),
-                    'content_type' => 'text/html',
-                ] : [
-                    'body' => 'Ошибка: 503 ' . Config::$lang[2],
-                ];
-                break;
 
-            case 502:
-                $result = Config::$runType === 'web' ? [
-                    'code'         => 502,
-                    'no_cache'     => true,
-                    'error'        => true,
-                    'body'         => ErrorHandler::webTemplate(502, Config::$lang[0]),
-                    'content_type' => 'text/html',
-                ] : [
-                    'body' => 'Ошибка: 502 ' . Config::$lang[0],
-                ];
-                break;
+    //     switch ($http_code)
+    //     {
+    //         case 404:
+    //             $result['code'] = 404;
+    //             $result['body'] = ErrorHandler::webTemplatePageMessage(404, Config::getLangTranslationMessage(1001));
+    //             break;
 
-            case 500:
-                $result = Config::$runType === 'web' ? [
-                    'code'         => 500,
-                    'no_cache'     => true,
-                    'error'        => true,
-                    // 'body'         => ErrorHandler::webTemplate(500, Config::$lang[3]),
-                    'body'         => ErrorHandler::webTemplate(500, $code),
-                    'content_type' => 'text/html',
-                ] : [
-                    'body' => 'Ошибка: 500 ' . Config::$lang[3],
-                ];
-                break;
+    //         case 503:
+    //             $result['code'] = 503;
+    //             $result['body'] = ErrorHandler::webTemplateReloader(503, Config::getLangTranslationMessage(1002));
+    //             break;
 
-            case 200:
-                return true;
+    //         case 502:
+    //             $result['code'] = 502;
+    //             $result['body'] = ErrorHandler::webTemplateReloader(502, Config::getLangTranslationMessage(1000));
+    //             break;
 
-            case 0:
-            default:
-                return false;
-        }
+    //         case 500:
+    //             $result['code'] = 500;
+    //             $result['body'] = ErrorHandler::webTemplateReloader(500, Config::getLangTranslationMessage(1000));
+    //             break;
 
-        Config::render((object) $result);
-    }
+    //         case 200:
+    //             return true;
+
+    //         case 0:
+    //         default:
+    //             return false;
+    //     }
+
+    //     Config::render((object) $result);
+    // }
 
 
     /**
@@ -137,7 +115,7 @@ class Curl
      * @return [type] [description]
      */
     public static function get(
-        string $url,
+        string|object $url,
         string $deviceType = ''
     )
     {
@@ -158,7 +136,8 @@ class Curl
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_FRESH_CONNECT, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, Config::$config->curl->timeout);
-        curl_setopt($curl, CURLOPT_REFERER, (Config::$runType === 'web') ? Config::$domain->project : '');
+        curl_setopt($curl, CURLOPT_REFERER, Config::$domain->project);
+        // curl_setopt($curl, CURLOPT_REFERER, (Config::$runType === 'web') ? Config::$domain->project : '');
         curl_setopt($curl, CURLOPT_ENCODING, Config::$config->curl->encoding);
         curl_setopt($curl, CURLOPT_USERAGENT, $userAgent);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -179,7 +158,7 @@ class Curl
 
         curl_close($curl);
 
-        if (self::curlErrorHandler($http_code))
+        if ($http_code === 200)
         {
             // get results
             return (object) [
@@ -191,7 +170,8 @@ class Curl
         }
         else
         {
-            return self::curlErrorHandler(502);
+            throw new ErrorHandler('', $http_code);
+            // return self::curlErrorHandler(502);
         }
     }
 
@@ -209,7 +189,8 @@ class Curl
 
             if (!$url)
             {
-                return self::curlErrorHandler(404);
+                throw new ErrorHandler('', 404);
+                // return self::curlErrorHandler(404);
             }
 
             return self::get($url);
@@ -222,7 +203,8 @@ class Curl
 
             if (!$url)
             {
-                return self::curlErrorHandler(404);
+                throw new ErrorHandler('', 404);
+                // return self::curlErrorHandler(404);
             }
 
             return self::get($url);

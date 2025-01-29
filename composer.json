@@ -18,6 +18,7 @@
         "masterminds/html5": "^2.8",
         "phpmailer/phpmailer": "^6.9.1",
         "tiben/crontab-manager": "^1.4",
-        "cheprasov/php-cli-args": "^3.0"
+        "cheprasov/php-cli-args": "^3.0",
+        "campo/random-user-agent": "^1.3"
     }
 }

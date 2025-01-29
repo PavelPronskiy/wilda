@@ -5,12 +5,25 @@ namespace app\core;
 use app\util\Cache;
 // use app\util\Curl;
 use app\util\Editor;
+use app\util\ErrorHandler;
 // use app\util\Chromium;
 
 class Router
 {
     public function __construct()
     {
+
+        if (empty(Config::$hash))
+        {
+            throw new ErrorHandler('', 4004);
+        }
+
+        if (isset(Config::$config->canonical))
+        {
+            Config::setCanonicalDomainRedirect();
+        }
+
+
         if (isset(Config::$route->query))
         {
             if (key(Config::$route->query))
@@ -20,6 +33,7 @@ class Router
                     // case 'chromium-settings':
                         // Chromium::getSettings();
                         // break;
+                    case 'cleaner':
                     case 'clear':
                     case 'flush':
                         Cache::clear();
@@ -27,9 +41,9 @@ class Router
                     case 'clean-cache':
                         Cache::cleanCacheXhr();
                         break;
-                    case 'keys':
-                        Cache::keys();
-                        break;
+                    // case 'keys':
+                        // Cache::keys();
+                        // break;
                     case 'editor':
                         new Editor();
                         break;
@@ -57,7 +71,11 @@ class Router
     {
         $url_path_arr = self::getPath();
 
-        if (isset($url_path_arr[0]) && in_array($url_path_arr[0], Config::URI_QUERY_TYPES))
+        if (
+            isset($url_path_arr[0]) &&
+            isset($url_path_arr[1]) &&
+            in_array($url_path_arr[0], Config::URI_QUERY_TYPES)
+        )
         {
             $type = [
                 'type' => $url_path_arr[0],

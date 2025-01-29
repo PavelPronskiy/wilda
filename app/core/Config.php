@@ -13,11 +13,7 @@ class Config
     const CONFIG_HOSTS = PATH . '/app/config/hosts.json';
     const CHROMIUM_CONFIG = PATH . '/app/config/chromium.json';
     const CHROMIUM_CUSTOM = PATH . '/.chromium.json';
-    // const QUERY_PARAM_CSS = '/?css=';
-    // const QUERY_PARAM_FONT = '/?font=';
-    // const QUERY_PARAM_ICO = '/?ico=';
-    // const QUERY_PARAM_IMG = '/?img=';
-    // const QUERY_PARAM_JS = '/?js=';
+    const LANG_CONFIG = PATH . '/app/config/lang.json';
 
     const QUERY_PARAM_TYPES = [
         'scripts' => '/?js=',
@@ -34,6 +30,7 @@ class Config
         'images' => '/img/',
         'fonts' => '/font/',
     ];
+
 
     const URI_QUERY_ADMIN = ['cleaner', 'flush', 'keys'];
     const URI_QUERY_TYPES = ['ico', 'img', 'js', 'css', 'font'];
@@ -108,7 +105,9 @@ class Config
     /**
      * @var array
      */
-    public static $lang = [];
+    public static $lang;
+
+    public static $translation = [];
 
     /**
      * @var array
@@ -128,7 +127,7 @@ class Config
     /**
      * @var mixed
      */
-    public static $reports;
+    // public static $reports;
 
     /**
      * @var mixed
@@ -247,6 +246,24 @@ class Config
         }
 
         return (object) [];
+    }
+
+
+    /**
+     * Sets the canonical domain redirect.
+     */
+    public static function setCanonicalDomainRedirect(): void
+    {
+        foreach(static::getHostsConfig()->hosts as $host)
+        {
+            if (in_array(static::$route->site, $host->site))
+            {
+                if (static::$route->site !== $host->site[0])
+                {
+                    header('Location: ' . $host->site[0] . static::$route->path, true, 301);
+                }
+            }
+        }
     }
 
     /**
@@ -388,10 +405,36 @@ class Config
         }
         else
         {
-            die('Reports config: ' . static::CHROMIUM_CONFIG . ' not found');
+            die('Chromium config: ' . static::CHROMIUM_CONFIG . ' not found');
         }
 
         return $config_json;
+    }
+
+    public static function getLangTranslations(): array
+    {
+        $config_json = [];
+        if (file_exists(static::LANG_CONFIG))
+        {
+            $config_json = json_decode(file_get_contents(static::LANG_CONFIG), true);
+            if (json_last_error() > 0)
+            {
+                die(json_last_error_msg() . ' ' . static::LANG_CONFIG);
+            }
+        }
+        else
+        {
+            die('Reports config: ' . static::LANG_CONFIG . ' not found');
+        }
+
+        // var_dump($config_json);
+
+        return $config_json;
+    }
+
+    public static function getLangTranslationMessage(int $code): array
+    {
+        return isset(static::$translation[static::$lang][$code]) ? static::$translation[static::$lang][$code] : [];
     }
 
     /**
@@ -445,9 +488,9 @@ class Config
     {
 
         static::$runType  = php_sapi_name() === 'cli' ? 'cli' : 'web';
-        static::$lang     = (array) [];
+        static::$translation     = static::getLangTranslations();
         static::$access   = (array) [];
-        static::$reports  = (object) [];
+        // static::$reports  = (object) [];
         static::$mail     = (object) [];
         static::$mail->smtp     = (object) [];
         static::$auth     = (object) [];
@@ -469,10 +512,14 @@ class Config
             ...(array) static::getCustomChromiumConfig(),
         ];
 
-        if (php_sapi_name() === 'cli')
-        {
-            static::$lang = static::$config->translations->cli->{static::$config->lang};
-        }
+        static::$lang = static::$config->lang;
+
+
+        // var_dump(static::getGlobalConfig());
+        // if (php_sapi_name() === 'cli')
+        // {
+            // static::$lang = static::$config->translations->cli->{static::$config->lang};
+        // }
 
         if (php_sapi_name() === 'fpm-fcgi')
         {
@@ -543,9 +590,18 @@ class Config
                  * set lang translations
                  * @var [type]
                  */
-                static::$lang = isset(static::$domain->lang)
-                ? (array) static::$config->translations->web->{static::$domain->lang}
-                : (array) static::$config->translations->web->{static::$config->lang};
+                if (isset(static::$domain->lang))
+                {
+                    static::$lang = static::$domain->lang;
+                }
+                else
+                {
+                    static::$lang = static::$config->lang;
+                }
+
+                // static::$lang = isset(static::$domain->lang)
+                // ? (array) static::$config->translations->web->{static::$domain->lang}
+                // : (array) static::$config->translations->web->{static::$config->lang};
 
                 /**
                  * if not type defined
@@ -611,6 +667,11 @@ class Config
                     {
                         static::$config->privoxy->port = static::$domain->privoxy->port;
                     }
+                }
+
+                if (isset(static::$domain->canonical))
+                {
+                    static::$config->canonical = static::$domain->canonical;
                 }
 
                 /**
@@ -872,7 +933,7 @@ class Config
 
             static::$editor->path  = 'tpl/editor';
             static::$auth->path    = 'tpl/auth';
-            static::$reports->path = 'tpl/reports';
+            // static::$reports->path = 'tpl/reports';
 
         }
     }
@@ -927,13 +988,14 @@ class Config
     public static function render(object $response): void
     {
         // ob_start();
-        $ref_array = ['flush', 'clear'];
+        $query_cleaner = ['clear', 'cleaner', 'flush'];
         $etag = md5($response->body);
 
         $no_cache = (isset($response->no_cache) && $response->no_cache) ? true : false;
 
         if (php_sapi_name() === 'fpm-fcgi')
         {
+
             header('Content-type: ' . $response->content_type);
 
             if (isset($response->error) && isset($response->code))
@@ -941,13 +1003,30 @@ class Config
                 http_response_code($response->code);
             }
 
-            // set clean browser cache
-            if (isset($_COOKIE['clean-browser-cache']))
+            // revalidate browser cache for query cleaner
+            // revalidate browser cache for xhr
+            if (
+                (isset($_COOKIE['revalidate-browser-cache']) &&
+                !in_array(key(static::$route->query), $query_cleaner)) // ||
+                // isset($_COOKIE['revalidate-browser-cache-xhr'])
+            )
             {
-                unset($_COOKIE['clean-browser-cache']); 
-                setcookie('clean-browser-cache', '', -1, '/'); 
+                unset($_COOKIE['revalidate-browser-cache']);
+                setcookie('revalidate-browser-cache', '', -1, '/');
                 header("Cache-Control: no-cache, must-revalidate");
-                header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+                header('W-Render: revalidate-browser-cache');
+                die($response->body);
+            }
+
+            if (
+                isset($_COOKIE['revalidate-browser-cache-xhr'])
+            )
+            {
+                unset($_COOKIE['revalidate-browser-cache-xhr']);
+                setcookie('revalidate-browser-cache-xhr', '', -1, '/');
+
+                header("Cache-Control: no-cache, must-revalidate");
+                header('W-Render: revalidate-browser-cache-xhr');
                 die($response->body);
             }
 
@@ -959,6 +1038,8 @@ class Config
                 header('Cache-Control: post-check=0, pre-check=0', false);
                 header('Pragma: no-cache');
                 header('W-Cache-Status: DISABLED');
+                header('W-Render: nocache');
+
                 die($response->body);
             }
 
@@ -979,7 +1060,9 @@ class Config
                     header('Cache-Control: max-age=' . static::$config->cache->expire);
                     header('ETag: ' . $etag);
                 }
-                // file_put_contents('/tmp/' . Config::$hash, $response->body);
+
+                header('W-Render: cache');
+
                 die($response->body);
             }
 
@@ -989,6 +1072,7 @@ class Config
             {
                 header('Cache-Control: max-age=' . static::$config->cache->expire);
                 header('ETag: ' . $etag);
+                header('W-Render: browser-cache-enabled');
 
                 if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
                 {
@@ -1003,6 +1087,7 @@ class Config
             }
             else
             {
+                header('W-Render: browser-cache-disabled');
                 die($response->body);
             }
 /*                if (isset(static::$route->referer))
@@ -1013,10 +1098,10 @@ class Config
                         $no_cache = true;
                     }
                 }*/
-        }
-        else
-        {
-            die($response->body);
+        // }
+        // else
+        // {
+        //     die($response->body);
         }
     }
 
