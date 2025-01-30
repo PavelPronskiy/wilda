@@ -174,14 +174,14 @@ class Editor
                 {
                     $result = (object) [
                         'status'  => true,
-                        'message' => Config::getLangTranslationMessage(1004),
+                        'message' => Config::getLangTranslationMessage(1007),
                     ];
                 }
                 else
                 {
                     $result = (object) [
                         'status'  => false,
-                        'message' => Config::getLangTranslationMessage(1005),
+                        'message' => Config::getLangTranslationMessage(1008),
                     ];
                 }
 

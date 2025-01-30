@@ -98,8 +98,7 @@
                 "image/jpeg",
                 "application/font-woff",
                 "font/woff2",
-                "application/octet-stream",
-                "image/x-icon"
+                "application/octet-stream"
             ]
         },
         "enabled": true,

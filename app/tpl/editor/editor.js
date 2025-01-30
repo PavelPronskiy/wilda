@@ -483,8 +483,17 @@ $('#version').text(
 
 for (let i = HOSTS_CONFIG.length - 1; i >= 0; i--) {
     for (let s = HOSTS_CONFIG[i].site.length - 1; s >= 0; s--) {
-        // console.log(HOSTS_CONFIG[i].site[s]);
-        $(`<option value="${HOSTS_CONFIG[i].site[s]}">${HOSTS_CONFIG[i].site[s]}</option>`).appendTo('#cache-revalidate-site');
+
+        if (HOSTS_CONFIG[i].site[s] === window.location.origin)
+        {
+            // console.log(HOSTS_CONFIG[i].site[s] + ' ' + window.location.origin);
+            $(`<option selected value="${HOSTS_CONFIG[i].site[s]}">${HOSTS_CONFIG[i].site[s]}</option>`).appendTo('#cache-revalidate-site');
+        }
+        else
+        {
+            $(`<option value="${HOSTS_CONFIG[i].site[s]}">${HOSTS_CONFIG[i].site[s]}</option>`).appendTo('#cache-revalidate-site');
+
+        }
     }
 }
 
@@ -494,9 +503,7 @@ function numberRange(start, end) {
 
 const numberRangeHours = numberRange(3, 13);
 for (let i = 0; i < CHROMIUM_CONFIG.cron.schedule.length; i++) {
-    // CHROMIUM_CONFIG.cron.schedule[i]
     if (CHROMIUM_CONFIG.cron.schedule[i].event === 'autocache') {
-        // console.log(CHROMIUM_CONFIG.cron.schedule[i].time);
         const cronJobAutocacheSplit = CHROMIUM_CONFIG.cron.schedule[i].time.split(' ');
         let cronJobAutocacheHour = Number(cronJobAutocacheSplit[2].split('/')[1]);
         
@@ -582,7 +589,7 @@ $(document).ready(() => {
     // console.log(rtf1.format(CHROMIUM_STATS.global.lastrun, 'quarter'));
 
     // const lastrun_global = CHROMIUM_STATS.global.lastrun === 0 ? '-' : moment(CHROMIUM_STATS.global.lastrun).fromNow();
-    const lastrun_global = CHROMIUM_STATS.global.lastrun;
+    const lastrun_global = CHROMIUM_STATS.global.lastrun ? CHROMIUM_STATS.global.lastrun : 'никогда';
 
     $('#cache-global-lastrun-date').text(lastrun_global);
     $('#cache-global-links-success').text(CHROMIUM_STATS.global.links.success);

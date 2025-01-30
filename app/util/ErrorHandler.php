@@ -51,15 +51,19 @@ class ErrorHandler extends \Exception {
     ): string
     {
         $message = Config::getLangTranslationMessage($code);
-        $b64_trace = base64_encode($trace);
+
+        if (!isset($_COOKIE[Config::$config->name]))
+        {
+            $trace = base64_encode($trace);
+        }
 
         if (isset($message['title']) && isset($message['text']))
         {
-            return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message['title'] . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $message['text'] . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $b64_trace . '</pre></div></body></html>';
+            return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message['title'] . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $message['text'] . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $trace . '</pre></div></body></html>';
         }
         else
         {
-            return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $code_message . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $code_message . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $b64_trace . '</pre></div></body></html>';
+            return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $code_message . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $code_message . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $trace . '</pre></div></body></html>';
         }
     }
 
