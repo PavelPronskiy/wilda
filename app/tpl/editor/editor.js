@@ -233,8 +233,8 @@ const options = {
             value: GLOBAL_CONFIG.favicon
         },
         {
-            text: 'Кэширование',
-            title: 'Добавить кэширование',
+            text: 'Кеширование',
+            title: 'Добавить кеширование',
             className: 'jsoneditor-type-object',
             field: 'cache',
             value: GLOBAL_CONFIG.cache
@@ -252,15 +252,6 @@ const options = {
             className: 'jsoneditor-type-object',
             field: 'privoxy',
             value: GLOBAL_CONFIG.privoxy
-        },
-        {
-            text: 'Сторейдж',
-            title: 'Изменить тип сторейдж',
-            className: 'jsoneditor-type-object',
-            field: 'storage',
-            value: {
-                "type": "disk"
-            }
         }
     ],
     onChange: () => {
