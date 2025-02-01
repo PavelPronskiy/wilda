@@ -574,20 +574,12 @@ $(document).ready(() => {
         e.preventDefault();
     })
 
-    // console.log(CHROMIUM_STATS.global);
- 
-    // const rtf1 = new Intl.RelativeTimeFormat('en', { style: 'short' });
-    // console.log(rtf1.format(CHROMIUM_STATS.global.lastrun, 'quarter'));
-
-    // const lastrun_global = CHROMIUM_STATS.global.lastrun === 0 ? '-' : moment(CHROMIUM_STATS.global.lastrun).fromNow();
     const lastrun_global = CHROMIUM_STATS.global.lastrun ? CHROMIUM_STATS.global.lastrun : 'никогда';
 
     $('#cache-global-lastrun-date').text(lastrun_global);
     $('#cache-global-links-success').text(CHROMIUM_STATS.global.links.success);
     $('#cache-global-links-broken').text(CHROMIUM_STATS.global.links.broken);
     $('#cache-global-links-error').text(CHROMIUM_STATS.global.links.error);
-
-    // console.log(cronJobAutocache[2].split('/')[1]);
 
 });
 

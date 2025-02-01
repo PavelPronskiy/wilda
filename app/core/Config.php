@@ -11,6 +11,7 @@ class Config
     const GLOBAL_CONFIG = PATH . '/app/config/global.json';
     const GLOBAL_CUSTOM = PATH . '/.global.json';
     const CONFIG_HOSTS = PATH . '/app/config/hosts.json';
+    const HOSTS_CUSTOM = PATH . '/.hosts.json';
     const CHROMIUM_CONFIG = PATH . '/app/config/chromium.json';
     const CHROMIUM_CUSTOM = PATH . '/.chromium.json';
     const LANG_CONFIG = PATH . '/app/config/lang.json';
@@ -340,6 +341,32 @@ class Config
 
         return $config_json;
     }
+
+/*    public static function getCustomHostsConfig(): object
+    {
+        $config_json = (object) [];
+
+        if (file_exists(static::HOSTS_CUSTOM))
+        {
+            $config_json->hosts = json_decode(file_get_contents(static::HOSTS_CUSTOM));
+            if (json_last_error() > 0)
+            {
+                die(json_last_error_msg() . ' ' . static::HOSTS_CUSTOM);
+            }
+        }
+        else
+        {
+            $config_json = [
+                (object) [
+                    'hosts' => [],
+                ],
+            ];
+
+            static::setHostsConfig($config_json);
+        }
+
+        return $config_json;
+    }*/
 
     /**
      * [isMobile description]

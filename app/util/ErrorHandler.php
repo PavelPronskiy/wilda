@@ -59,7 +59,16 @@ class ErrorHandler extends \Exception {
 
         if (isset($message['title']) && isset($message['text']))
         {
-            return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message['title'] . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $message['text'] . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $trace . '</pre></div></body></html>';
+
+            if ($code === 404)
+            {
+                return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message['title'] . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $message['text'] . '.</strong></div></body></html>';
+            }
+            else
+            {
+
+                return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message['title'] . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $message['text'] . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $trace . '</pre></div></body></html>';
+            }
         }
         else
         {
