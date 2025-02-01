@@ -50,30 +50,30 @@ class ErrorHandler extends \Exception {
         string $trace = ''
     ): string
     {
-        $message = Config::getLangTranslationMessage($code);
+        $langTranslatedMessage = Config::getLangTranslationMessage($code);
+        $code = '<h1>Ошибка: ' . $code . '</h1>';
 
         if (!isset($_COOKIE[Config::$config->name]))
         {
-            $trace = base64_encode($trace);
-        }
-
-        if (isset($message['title']) && isset($message['text']))
-        {
-
-            if ($code === 404)
-            {
-                return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message['title'] . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $message['text'] . '.</strong></div></body></html>';
-            }
-            else
-            {
-
-                return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message['title'] . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $message['text'] . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $trace . '</pre></div></body></html>';
-            }
+            $trace = '';
         }
         else
         {
-            return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $code_message . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div><h1>Ошибка: ' . $code . '</h1><strong>' . $code_message . '.</strong></div><div class="fieldset-wrap"><pre class="fieldset">' . $trace . '</pre></div></body></html>';
+            $trace = '<div class="fieldset-wrap"><pre class="fieldset">' . $trace . '</pre></div>';
         }
+
+        if (isset($langTranslatedMessage['title']) && isset($langTranslatedMessage['text']))
+        {
+            $message_title = $langTranslatedMessage['title'];
+            $message_text = $langTranslatedMessage['text'];
+        }
+        else
+        {
+            $message_title = '';
+            $message_text = $code_message;
+        }
+
+        return '<html><head><meta name="robots" content="noindex,nofollow"><title>' . $message_title . '</title><style>.fieldset {word-wrap: break-word;white-space: pre-wrap;border:1px solid black;padding:10px;background-color:#ccc;width:70%}</style></head><body><div>' . $code . '<strong>' . $message_text . '.</strong></div>' . $trace . '</body></html>';
     }
 
     /**
